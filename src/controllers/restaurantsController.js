@@ -33,7 +33,6 @@ const restaurantsController = {
     },
 
     // Get restaurant sorted by their income
-// Get restaurant sorted by their income
 getRestaurantsIncome: async (req, res, db) => {
     try {
         const { startDate, endDate, restaurantIds } = req.query;
@@ -63,6 +62,8 @@ getRestaurantsIncome: async (req, res, db) => {
         if (restaurantIds) {
             matchQuery.storeId = { $in: restaurantIds.split(',').map(id => id.trim()) }; // Convert to array
         }
+
+        console.log("restaurantIds: ", matchQuery.storeId)
 
         // Fetching the income summary from the Bill collection
         const summary = await db.collection('bills').aggregate([
@@ -110,16 +111,20 @@ getRestaurantsIncome: async (req, res, db) => {
         // Format totalIncome, totalGMP, and averageBillValue as currency in Lao Kip (LAK)
         const formattedSummary = summary.map(item => ({
             ...item,
-            totalIncome: new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK' }).format(item.totalIncome),
+            totalIncomeFormat: new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK' }).format(item.totalIncome),
+            totalIncome: item.totalIncome, // Keep as number
             totalBills: item.totalBills,
-            averageBillValue: new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK' }).format(item.averageBillValue) // Format averageBillValue
+            averageBillValue: parseFloat((item.averageBillValue).toFixed(3)), // Format to 3 decimal places
+            averageBillValueFormat: new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK' }).format(parseFloat((item.averageBillValue).toFixed(3))) // Format averageBillValue
         }));
 
         res.status(200).json({
             count: formattedSummary.length,
-            totalGMP: new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK' }).format(totalGMP), // GMP formatted as currency
+            totalGMP: totalGMP, // Keep as number
+            totalGMPFormat: new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK' }).format(totalGMP), // GMP formatted as currency
             totalBills: totalBillsCount, // Total number of bills
-            averageBillValue: new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK' }).format(averageBillValue), // Average Bill Value formatted as currency
+            averageBillValue: parseFloat(averageBillValue.toFixed(3)), // Keep as number
+            averageBillValueFormat: new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK' }).format(parseFloat(averageBillValue.toFixed(3))), // Average Bill Value formatted as currency
             restaurants: formattedSummary
         });
     } catch (error) {
@@ -127,9 +132,6 @@ getRestaurantsIncome: async (req, res, db) => {
         res.status(500).json({ error: 'An error occurred while fetching restaurant income.' });
     }
 }
-
-
-
 
 };
 
