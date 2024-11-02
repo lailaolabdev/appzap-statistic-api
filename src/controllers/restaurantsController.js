@@ -43,10 +43,19 @@ const restaurantsController = {
                 isCheckout: true
             };
 
-            if (startDate && endDate) {
+            if (startDate) {
                 matchQuery.createdAt = {
                     $gte: new Date(startDate),
-                    $lte: new Date(endDate)
+                };
+            }
+    
+            if (endDate) {
+                // Set the endDate to the last millisecond of that day
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999); // Set to end of day
+                matchQuery.createdAt = {
+                    ...matchQuery.createdAt,
+                    $lte: end
                 };
             }
 
