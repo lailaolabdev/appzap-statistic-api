@@ -1,5 +1,3 @@
-// src/controllers/restaurantsController.js
-
 const restaurantsController = {
     getRestaurants: async (req, res, db) => {
         try {
@@ -19,9 +17,12 @@ const restaurantsController = {
 
             // Fetching filtered restaurants
             const restaurants = await db.collection('stores').find(query).toArray();
+            const totalRestaurants = restaurants.length; // Get the total count of filtered restaurants
+
             console.log({ restaurants });
 
-            res.status(200).json(restaurants);
+            // Return both the list of restaurants and the count
+            res.status(200).json({ total: totalRestaurants, restaurants });
         } catch (error) {
             console.error("Error fetching restaurants:", error);
             res.status(500).json({ error: 'An error occurred while fetching restaurants.' });
