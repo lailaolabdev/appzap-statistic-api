@@ -33,77 +33,103 @@ const restaurantsController = {
     },
 
     // Get restaurant sorted by their income
-    getRestaurantsIncome: async (req, res, db) => {
-        try {
-            const { startDate, endDate, restaurantIds } = req.query;
+// Get restaurant sorted by their income
+getRestaurantsIncome: async (req, res, db) => {
+    try {
+        const { startDate, endDate, restaurantIds } = req.query;
 
-            // Prepare the match query
-            const matchQuery = {
-                status: 'CHECKOUT',
-                isCheckout: true
+        // Prepare the match query
+        const matchQuery = {
+            status: 'CHECKOUT',
+            isCheckout: true
+        };
+
+        if (startDate) {
+            matchQuery.createdAt = {
+                $gte: new Date(startDate),
             };
-
-            if (startDate) {
-                matchQuery.createdAt = {
-                    $gte: new Date(startDate),
-                };
-            }
-    
-            if (endDate) {
-                // Set the endDate to the last millisecond of that day
-                const end = new Date(endDate);
-                end.setHours(23, 59, 59, 999); // Set to end of day
-                matchQuery.createdAt = {
-                    ...matchQuery.createdAt,
-                    $lte: end
-                };
-            }
-
-            if (restaurantIds) {
-                matchQuery.storeId = { $in: restaurantIds.split(',').map(id => id.trim()) }; // Convert to array
-            }
-
-            // Fetching the income summary from the Bill collection
-            const summary = await db.collection('bills').aggregate([
-                { $match: matchQuery },
-                {
-                    $lookup: {
-                        from: 'stores', // the collection name in MongoDB
-                        localField: 'storeId',
-                        foreignField: '_id',
-                        as: 'storeDetails'
-                    }
-                },
-                { $unwind: '$storeDetails' },
-                { 
-                    $group: {
-                        _id: '$storeId', // Group by storeId
-                        totalIncome: { $sum: '$billAmount' },
-                        storeName: { $first: '$storeDetails.name' } // Include the store name
-                    }
-                },
-                { $sort: { totalIncome: -1 } } // Sort by totalIncome in descending order
-            ]).toArray();
-
-            // Calculate GMP (Gross Money Processing)
-            const totalGMP = summary.reduce((acc, item) => acc + item.totalIncome, 0);
-
-            // Format totalIncome as currency in Lao Kip (LAK)
-            const formattedSummary = summary.map(item => ({
-                ...item,
-                totalIncome: new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK' }).format(item.totalIncome)
-            }));
-
-            res.status(200).json({
-                count: formattedSummary.length,
-                totalGMP: new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK' }).format(totalGMP), // GMP formatted as currency
-                restaurants: formattedSummary
-            });
-        } catch (error) {
-            console.error("Error fetching restaurant income:", error);
-            res.status(500).json({ error: 'An error occurred while fetching restaurant income.' });
         }
+
+        if (endDate) {
+            // Set the endDate to the last millisecond of that day
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999); // Set to end of day
+            matchQuery.createdAt = {
+                ...matchQuery.createdAt,
+                $lte: end
+            };
+        }
+
+        if (restaurantIds) {
+            matchQuery.storeId = { $in: restaurantIds.split(',').map(id => id.trim()) }; // Convert to array
+        }
+
+        // Fetching the income summary from the Bill collection
+        const summary = await db.collection('bills').aggregate([
+            { $match: matchQuery },
+            {
+                $lookup: {
+                    from: 'stores', // the collection name in MongoDB
+                    localField: 'storeId',
+                    foreignField: '_id',
+                    as: 'storeDetails'
+                }
+            },
+            { $unwind: '$storeDetails' },
+            { 
+                $group: {
+                    _id: '$storeId', // Group by storeId
+                    totalIncome: { $sum: '$billAmount' },
+                    totalBills: { $sum: 1 }, // Count the number of bills
+                    storeName: { $first: '$storeDetails.name' }, // Include the store name
+                }
+            },
+            {
+                $project: {
+                    storeId: '$_id',
+                    totalIncome: 1,
+                    totalBills: 1,
+                    storeName: 1,
+                    averageBillValue: {
+                        $cond: { 
+                            if: { $gt: ['$totalBills', 0] },
+                            then: { $divide: ['$totalIncome', '$totalBills'] }, // Calculate average
+                            else: 0 // Avoid division by zero
+                        }
+                    }
+                }
+            },
+            { $sort: { totalIncome: -1 } } // Sort by totalIncome in descending order
+        ]).toArray();
+
+        // Calculate total GMP and averageBillValue across all restaurants
+        const totalGMP = summary.reduce((acc, item) => acc + item.totalIncome, 0);
+        const totalBillsCount = summary.reduce((acc, item) => acc + item.totalBills, 0);
+        const averageBillValue = totalBillsCount > 0 ? totalGMP / totalBillsCount : 0; // Avoid division by zero
+
+        // Format totalIncome, totalGMP, and averageBillValue as currency in Lao Kip (LAK)
+        const formattedSummary = summary.map(item => ({
+            ...item,
+            totalIncome: new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK' }).format(item.totalIncome),
+            totalBills: item.totalBills,
+            averageBillValue: new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK' }).format(item.averageBillValue) // Format averageBillValue
+        }));
+
+        res.status(200).json({
+            count: formattedSummary.length,
+            totalGMP: new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK' }).format(totalGMP), // GMP formatted as currency
+            totalBills: totalBillsCount, // Total number of bills
+            averageBillValue: new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK' }).format(averageBillValue), // Average Bill Value formatted as currency
+            restaurants: formattedSummary
+        });
+    } catch (error) {
+        console.error("Error fetching restaurant income:", error);
+        res.status(500).json({ error: 'An error occurred while fetching restaurant income.' });
     }
+}
+
+
+
 
 };
 
