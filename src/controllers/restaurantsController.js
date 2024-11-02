@@ -76,6 +76,9 @@ const restaurantsController = {
                 { $sort: { totalIncome: -1 } } // Sort by totalIncome in descending order
             ]).toArray();
 
+            // Calculate GMP (Gross Money Processing)
+            const totalGMP = summary.reduce((acc, item) => acc + item.totalIncome, 0);
+
             // Format totalIncome as currency in Lao Kip (LAK)
             const formattedSummary = summary.map(item => ({
                 ...item,
@@ -84,6 +87,7 @@ const restaurantsController = {
 
             res.status(200).json({
                 count: formattedSummary.length,
+                totalGMP: new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK' }).format(totalGMP), // GMP formatted as currency
                 restaurants: formattedSummary
             });
         } catch (error) {
@@ -91,6 +95,7 @@ const restaurantsController = {
             res.status(500).json({ error: 'An error occurred while fetching restaurant income.' });
         }
     }
+
 };
 
 module.exports = restaurantsController;

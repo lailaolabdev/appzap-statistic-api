@@ -2,7 +2,7 @@
 http://localhost:3000/api/v1/statistics
 
 # 2. Query restaurant with params
-http://localhost:3000/api/v1/restaurants?status=PAID&hasPOS=true
+http://localhost:3000/api/v1/restaurants?status=PAID&hasPOS=true&paymentStatus=PAID
 
 
 # 3. Query restaurants sorted by their income
