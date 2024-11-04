@@ -1,6 +1,11 @@
+const { ObjectId } = require('mongodb');
+
 const getBestSellingMenus = async (req, res, db) => {
     try {
-        const { startDate, endDate, restaurantIds } = req.query;
+        const { startDate, endDate, restaurantIds, menuLimit = 5 } = req.query; // Default to 5 if limit is not provided
+
+        // Parse the menuLimit to an integer
+        const topLimit = parseInt(menuLimit, 10);
 
         // Prepare the match query
         const matchQuery = {
@@ -19,7 +24,9 @@ const getBestSellingMenus = async (req, res, db) => {
         }
 
         if (restaurantIds) {
-            matchQuery.storeId = { $in: restaurantIds.split(',').map(id => id.trim()) };
+            matchQuery.storeId = { 
+                $in: restaurantIds.split(',').map(id => new ObjectId(id.trim())) // Convert each ID to ObjectId
+            };
         }
 
         const summary = await db.collection('orders').aggregate([
@@ -68,7 +75,7 @@ const getBestSellingMenus = async (req, res, db) => {
                             {
                                 $sortArray: { input: '$menus', sortBy: { totalQuantity: -1 } }
                             },
-                            5 // Limit to top 5 best-selling items per restaurant
+                            topLimit // Use the query param as the limit
                         ]
                     }
                 }
