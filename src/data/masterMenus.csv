@@ -1,222 +1,223 @@
-categoryIndex,name,name_en,name_th,name_cn,name_kr,name_jp,name_vi,keywords,standardPrice,imageUrl,recommendedRestaurantTypes
-0,ກາເຟຮ້ອນ,Hot Coffee,กาแฟร้อน,热咖啡,핫 커피,ホットコーヒー,Cà phê nóng,"coffee,hot,ກາເຟ",15000,,RCAT-CAFE|RCAT-COFFEESHOP|RCAT-RESTAURANT|RCAT-HOTEL
-0,ກາເຟເຢັນ,Iced Coffee,กาแฟเย็น,冰咖啡,아이스 커피,アイスコーヒー,Cà phê đá,"coffee,iced,cold",18000,,RCAT-CAFE|RCAT-COFFEESHOP|RCAT-RESTAURANT
-0,ອາເມຣິກາໂນ,Americano,อเมริกาโน่,美式咖啡,아메리카노,アメリカーノ,Americano,"americano,black coffee",20000,,RCAT-CAFE|RCAT-COFFEESHOP
-0,ອາເມຣິກາໂນເຢັນ,Iced Americano,อเมริกาโน่เย็น,冰美式咖啡,아이스 아메리카노,アイスアメリカーノ,Americano đá,"americano,iced",22000,,RCAT-CAFE|RCAT-COFFEESHOP
-0,ລາເຕ້,Latte,ลาเต้,拿铁,라떼,ラテ,Latte,"latte,milk coffee",25000,,RCAT-CAFE|RCAT-COFFEESHOP|RCAT-HOTEL
-0,ລາເຕ້ເຢັນ,Iced Latte,ลาเต้เย็น,冰拿铁,아이스 라떼,アイスラテ,Latte đá,"latte,iced",28000,,RCAT-CAFE|RCAT-COFFEESHOP
-0,ຄາປູຊິໂນ,Cappuccino,คาปูชิโน่,卡布奇诺,카푸치노,カプチーノ,Cappuccino,"cappuccino,foam",25000,,RCAT-CAFE|RCAT-COFFEESHOP|RCAT-HOTEL
-0,ຄາປູຊິໂນເຢັນ,Iced Cappuccino,คาปูชิโน่เย็น,冰卡布奇诺,아이스 카푸치노,アイスカプチーノ,Cappuccino đá,"cappuccino,iced",28000,,RCAT-CAFE|RCAT-COFFEESHOP
-0,ໂມຄ່າ,Mocha,มอคค่า,摩卡,모카,モカ,Mocha,"mocha,chocolate coffee",28000,,RCAT-CAFE|RCAT-COFFEESHOP
-0,ໂມຄ່າເຢັນ,Iced Mocha,มอคค่าเย็น,冰摩卡,아이스 모카,アイスモカ,Mocha đá,"mocha,iced",30000,,RCAT-CAFE|RCAT-COFFEESHOP
-0,ເອສເປຣສໂຊ,Espresso,เอสเปรสโซ่,浓缩咖啡,에스프레소,エスプレッソ,Espresso,"espresso,shot",15000,,RCAT-CAFE|RCAT-COFFEESHOP|RCAT-HOTEL
-0,ເອສເປຣສໂຊຄູ່,Double Espresso,ดับเบิ้ลเอสเปรสโซ่,双份浓缩,더블 에스프레소,ダブルエスプレッソ,Espresso đúp,"espresso,double",20000,,RCAT-CAFE|RCAT-COFFEESHOP
-0,ແມັກຄິອາໂຕ,Macchiato,แมคคิอาโต้,玛奇朵,마끼아또,マキアート,Macchiato,"macchiato,espresso",22000,,RCAT-CAFE|RCAT-COFFEESHOP
-0,ຄາລາເມວ ແມັກຄິອາໂຕ,Caramel Macchiato,คาราเมลแมคคิอาโต้,焦糖玛奇朵,카라멜 마끼아또,キャラメルマキアート,Caramel Macchiato,"caramel,macchiato",30000,,RCAT-CAFE|RCAT-COFFEESHOP
-0,ແຟຣບເປ,Frappe,แฟรปเป้,星冰乐,프라페,フラペチーノ,Frappé,"frappe,blended",30000,,RCAT-CAFE|RCAT-COFFEESHOP
-0,ກາເຟນົມຂົ້ນຫວານ,Coffee with Condensed Milk,กาแฟนมข้นหวาน,炼乳咖啡,연유 커피,練乳コーヒー,Cà phê sữa đặc,"condensed milk,sweet",20000,,RCAT-CAFE|RCAT-VIETNAMESEFOOD|RCAT-RESTAURANT
-0,ກາເຟໂອວັນຕິນ,Ovaltine Coffee,กาแฟโอวัลติน,阿华田咖啡,오발틴 커피,オバルチンコーヒー,Cà phê Ovaltine,"ovaltine,malt",22000,,RCAT-CAFE|RCAT-RESTAURANT
-0,ກາເຟດຳ,Black Coffee,กาแฟดำ,黑咖啡,블랙 커피,ブラックコーヒー,Cà phê đen,"black,no milk",12000,,RCAT-CAFE|RCAT-VIETNAMESEFOOD|RCAT-RESTAURANT
-1,ຊາຮ້ອນ,Hot Tea,ชาร้อน,热茶,핫 티,ホットティー,Trà nóng,"tea,hot,ຊາ",12000,,RCAT-CAFE|RCAT-RESTAURANT|RCAT-CHINESEFOOD
-1,ຊາເຢັນ,Iced Tea,ชาเย็น,冰茶,아이스 티,アイスティー,Trà đá,"tea,iced,cold",15000,,RCAT-CAFE|RCAT-RESTAURANT|RCAT-BEERGARDEN
-1,ຊາຂຽວ,Green Tea,ชาเขียว,绿茶,녹차,緑茶,Trà xanh,"green tea,matcha",18000,,RCAT-CAFE|RCAT-JAPANESEFOOD|RCAT-BUBBLETEA
-1,ຊາຂຽວເຢັນ,Iced Green Tea,ชาเขียวเย็น,冰绿茶,아이스 녹차,アイス緑茶,Trà xanh đá,"green tea,iced",20000,,RCAT-CAFE|RCAT-BUBBLETEA
-1,ຊານົມ,Milk Tea,ชานม,奶茶,밀크티,ミルクティー,Trà sữa,"milk tea,ຊານົມ",20000,,RCAT-BUBBLETEA|RCAT-CAFE|RCAT-RESTAURANT
-1,ຊານົມເຢັນ,Iced Milk Tea,ชานมเย็น,冰奶茶,아이스 밀크티,アイスミルクティー,Trà sữa đá,"milk tea,iced",22000,,RCAT-BUBBLETEA|RCAT-CAFE
-1,ຊານົມໄທ,Thai Milk Tea,ชาไทย,泰式奶茶,타이 밀크티,タイミルクティー,Trà sữa Thái,"thai tea,orange",22000,,RCAT-BUBBLETEA|RCAT-THAIFOOD|RCAT-CAFE
-1,ຊານົມໄຂ່ມຸກ,Bubble Milk Tea,ชานมไข่มุก,珍珠奶茶,버블티,タピオカミルクティー,Trà sữa trân châu,"bubble tea,boba,pearl",25000,,RCAT-BUBBLETEA|RCAT-CAFE
-1,ຊາມະນາວ,Lemon Tea,ชามะนาว,柠檬茶,레몬티,レモンティー,Trà chanh,"lemon tea,citrus",18000,,RCAT-CAFE|RCAT-RESTAURANT
-1,ຊາດອກໄມ້,Flower Tea,ชาดอกไม้,花茶,꽃차,フラワーティー,Trà hoa,"flower tea,herbal",20000,,RCAT-CAFE|RCAT-CHINESEFOOD
-1,ຊາຂິງ,Ginger Tea,ชาขิง,姜茶,생강차,ジンジャーティー,Trà gừng,"ginger tea,ຂິງ",15000,,RCAT-CAFE|RCAT-RESTAURANT
-1,ມັດຊະ ລາເຕ້,Matcha Latte,มัทฉะลาเต้,抹茶拿铁,말차 라떼,抹茶ラテ,Matcha Latte,"matcha,latte,green tea",28000,,RCAT-CAFE|RCAT-JAPANESEFOOD
-2,ສະມູດຕີ້ໝາກກ້ວຍ,Banana Smoothie,สมูทตี้กล้วย,香蕉冰沙,바나나 스무디,バナナスムージー,Sinh tố chuối,"banana,smoothie,blend",25000,,RCAT-CAFE|RCAT-DESSERT
-2,ສະມູດຕີ້ໝາກມ່ວງ,Mango Smoothie,สมูทตี้มะม่วง,芒果冰沙,망고 스무디,マンゴースムージー,Sinh tố xoài,"mango,smoothie",28000,,RCAT-CAFE|RCAT-DESSERT
-2,ສະມູດຕີ້ໝາກສະຕໍເບີຣີ,Strawberry Smoothie,สมูทตี้สตรอเบอร์รี่,草莓冰沙,딸기 스무디,イチゴスムージー,Sinh tố dâu,"strawberry,smoothie",28000,,RCAT-CAFE|RCAT-DESSERT
-2,ສະມູດຕີ້ໝາກໄມ້ລວມ,Mixed Fruit Smoothie,สมูทตี้ผลไม้รวม,综合水果冰沙,믹스 과일 스무디,ミックスフルーツスムージー,Sinh tố trái cây thập cẩm,"mixed fruit,smoothie",30000,,RCAT-CAFE|RCAT-DESSERT
-2,ເຊກນົມ,Milk Shake,มิลค์เชค,奶昔,밀크쉐이크,ミルクシェイク,Sữa lắc,"milkshake,shake",25000,,RCAT-CAFE|RCAT-FASTFOOD
-2,ເຊກຊອກໂກແລັດ,Chocolate Shake,ช็อกโกแลตเชค,巧克力奶昔,초코 쉐이크,チョコレートシェイク,Sữa lắc socola,"chocolate,shake",28000,,RCAT-CAFE|RCAT-FASTFOOD
-2,ເຊກວານິລາ,Vanilla Shake,วานิลลาเชค,香草奶昔,바닐라 쉐이크,バニラシェイク,Sữa lắc vani,"vanilla,shake",28000,,RCAT-CAFE|RCAT-FASTFOOD
-2,ໂຢເກີດສະມູດຕີ້,Yogurt Smoothie,โยเกิร์ตสมูทตี้,酸奶冰沙,요거트 스무디,ヨーグルトスムージー,Sinh tố sữa chua,"yogurt,smoothie",28000,,RCAT-CAFE|RCAT-DESSERT
-3,ນ້ຳສົ້ມຄັ້ນ,Fresh Orange Juice,น้ำส้มคั้น,鲜榨橙汁,생오렌지 주스,フレッシュオレンジジュース,Nước cam tươi,"orange,fresh,juice",20000,,RCAT-CAFE|RCAT-RESTAURANT|RCAT-HOTEL
-3,ນ້ຳໝາກນາວ,Lime Juice,น้ำมะนาว,柠檬汁,라임 주스,ライムジュース,Nước chanh,"lime,lemon,juice",15000,,RCAT-CAFE|RCAT-RESTAURANT|RCAT-BEERGARDEN
-3,ນ້ຳໝາກພ້າວ,Coconut Water,น้ำมะพร้าว,椰子水,코코넛 워터,ココナッツウォーター,Nước dừa,"coconut,fresh",20000,,RCAT-CAFE|RCAT-RESTAURANT|RCAT-BEERGARDEN
-3,ນ້ຳໝາກໂມ,Watermelon Juice,น้ำแตงโม,西瓜汁,수박 주스,スイカジュース,Nước dưa hấu,"watermelon,juice",18000,,RCAT-CAFE|RCAT-RESTAURANT
-3,ນ້ຳສັບປະລົດ,Pineapple Juice,น้ำสับปะรด,菠萝汁,파인애플 주스,パイナップルジュース,Nước dứa,"pineapple,juice",18000,,RCAT-CAFE|RCAT-RESTAURANT
-3,ນ້ຳແອັບເປິ້ນ,Apple Juice,น้ำแอปเปิ้ล,苹果汁,사과 주스,アップルジュース,Nước táo,"apple,juice",20000,,RCAT-CAFE|RCAT-RESTAURANT
-3,ນ້ຳມັງກອນ,Dragon Fruit Juice,น้ำแก้วมังกร,火龙果汁,용과 주스,ドラゴンフルーツジュース,Nước thanh long,"dragon fruit,juice",22000,,RCAT-CAFE|RCAT-RESTAURANT
-3,ນ້ຳໝາກກ້ຽງ,Passion Fruit Juice,น้ำเสาวรส,百香果汁,패션후르츠 주스,パッションフルーツジュース,Nước chanh dây,"passion fruit,juice",22000,,RCAT-CAFE|RCAT-RESTAURANT
-4,ໂຄກ,Coca-Cola,โค้ก,可口可乐,코카콜라,コカ・コーラ,Coca-Cola,"coke,coca cola",10000,,RCAT-RESTAURANT|RCAT-FASTFOOD|RCAT-BEERGARDEN
-4,ສະໄປຣ,Sprite,สไปรท์,雪碧,스프라이트,スプライト,Sprite,"sprite,lemon lime",10000,,RCAT-RESTAURANT|RCAT-FASTFOOD|RCAT-BEERGARDEN
-4,ແຟນຕ້າ,Fanta,แฟนต้า,芬达,환타,ファンタ,Fanta,"fanta,orange",10000,,RCAT-RESTAURANT|RCAT-FASTFOOD
-4,ເປັບຊີ,Pepsi,เป๊ปซี่,百事可乐,펩시,ペプシ,Pepsi,"pepsi,cola",10000,,RCAT-RESTAURANT|RCAT-FASTFOOD
-4,ນ້ຳແຮ່,Mineral Water,น้ำแร่,矿泉水,생수,ミネラルウォーター,Nước khoáng,"water,mineral",8000,,RCAT-RESTAURANT|RCAT-HOTEL|RCAT-CAFE
-4,ນ້ຳໂຊດາ,Soda Water,น้ำโซดา,苏打水,소다수,ソーダ水,Nước soda,"soda,sparkling",10000,,RCAT-BAR|RCAT-RESTAURANT
-4,ເຣດບູລ,Red Bull,เรดบูล,红牛,레드불,レッドブル,Red Bull,"red bull,energy",15000,,RCAT-RESTAURANT|RCAT-NIGHTCLUB|RCAT-BAR
-4,ເອັມ150,M-150,เอ็ม150,M-150,엠150,M-150,M-150,"energy drink,m150",10000,,RCAT-RESTAURANT|RCAT-BEERGARDEN
-5,ເບຍລາວ,Beerlao,เบียร์ลาว,老挝啤酒,비어라오,ビアラオ,Bia Lào,"beerlao,lao beer,ເບຍລາວ",15000,,RCAT-BEERGARDEN|RCAT-BEERHOUSE|RCAT-RESTAURANT|RCAT-LAOFOOD|RCAT-KARAOKE
-5,ເບຍລາວດຳ,Beerlao Dark,เบียร์ลาวดำ,老挝黑啤,비어라오 다크,ビアラオダーク,Bia Lào đen,"beerlao dark,dark beer",18000,,RCAT-BEERGARDEN|RCAT-BEERHOUSE|RCAT-BAR
-5,ເບຍລາວຂາວ,Beerlao White,เบียร์ลาวขาว,老挝白啤,비어라오 화이트,ビアラオホワイト,Bia Lào trắng,"beerlao white",18000,,RCAT-BEERGARDEN|RCAT-BEERHOUSE|RCAT-BAR
-5,ເບຍລາວໂກລ,Beerlao Gold,เบียร์ลาวโกลด์,老挝金啤,비어라오 골드,ビアラオゴールド,Bia Lào vàng,"beerlao gold,premium",20000,,RCAT-BEERGARDEN|RCAT-BEERHOUSE|RCAT-BAR|RCAT-HOTEL
-5,ໄຮເນເກັນ,Heineken,ไฮเนเก้น,喜力,하이네켄,ハイネケン,Heineken,"heineken,imported",25000,,RCAT-BEERGARDEN|RCAT-BAR|RCAT-NIGHTCLUB|RCAT-HOTEL
-5,ໄທເກີ,Tiger,ไทเกอร์,虎牌,타이거,タイガー,Tiger,"tiger,singapore",20000,,RCAT-BEERGARDEN|RCAT-BAR|RCAT-RESTAURANT
-5,ສິງ,Singha,สิงห์,胜狮,싱하,シンハー,Singha,"singha,thai beer",20000,,RCAT-BEERGARDEN|RCAT-BAR|RCAT-THAIFOOD
-5,ຊ້າງ,Chang,ช้าง,象牌,창,チャーン,Chang,"chang,thai beer,elephant",18000,,RCAT-BEERGARDEN|RCAT-BAR|RCAT-THAIFOOD
-5,ລີໂອ,Leo,ลีโอ,利奥,레오,レオ,Leo,"leo,thai beer",18000,,RCAT-BEERGARDEN|RCAT-RESTAURANT|RCAT-THAIFOOD
-5,ອາຊາຮີ,Asahi,อาซาฮี,朝日,아사히,アサヒ,Asahi,"asahi,japanese beer",25000,,RCAT-BEERGARDEN|RCAT-BAR|RCAT-JAPANESEFOOD
-5,ຊັບໂປໂຣ,Sapporo,ซัปโปโร,三宝乐,삿포로,サッポロ,Sapporo,"sapporo,japanese",25000,,RCAT-BEERGARDEN|RCAT-BAR|RCAT-JAPANESEFOOD
-5,ກິຣິນ,Kirin,คิริน,麒麟,기린,キリン,Kirin,"kirin,japanese",25000,,RCAT-BEERGARDEN|RCAT-BAR|RCAT-JAPANESEFOOD
-5,ໂຄໂຣນາ,Corona,โคโรน่า,科罗娜,코로나,コロナ,Corona,"corona,mexican",30000,,RCAT-BAR|RCAT-BEERGARDEN|RCAT-NIGHTCLUB
-5,ບັດໄວເຊີ,Budweiser,บัดไวเซอร์,百威,버드와이저,バドワイザー,Budweiser,"budweiser,american",25000,,RCAT-BAR|RCAT-BEERGARDEN|RCAT-NIGHTCLUB
-5,ສະເຕລາ ອາຕົວ,Stella Artois,สเตลล่าอาร์ทัวส์,时代,스텔라 아르투아,ステラ・アルトワ,Stella Artois,"stella,belgian",30000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
-5,ຮູການ,Hoegaarden,ฮูการ์เด้น,福佳,호가든,ヒューガルデン,Hoegaarden,"hoegaarden,wheat beer",30000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
-5,ຄາລສເບີກ,Carlsberg,คาร์ลสเบิร์ก,嘉士伯,칼스버그,カールスバーグ,Carlsberg,"carlsberg,danish",22000,,RCAT-BEERGARDEN|RCAT-BAR
-5,ແອັບສະເຕລ,Amstel,แอมสเตล,阿姆斯特丹,암스텔,アムステル,Amstel,"amstel,dutch",22000,,RCAT-BAR|RCAT-BEERGARDEN
-5,ກິນເນສ,Guinness,กินเนสส์,健力士,기네스,ギネス,Guinness,"guinness,stout",35000,,RCAT-BAR|RCAT-HOTEL
-5,ເບຍສົດ (ນ້ອຍ),Draft Beer (Small),เบียร์สด (เล็ก),生啤 (小),생맥주 (소),生ビール (小),Bia tươi (nhỏ),"draft beer,small",20000,,RCAT-BEERGARDEN|RCAT-BEERHOUSE|RCAT-BAR
-5,ເບຍສົດ (ໃຫຍ່),Draft Beer (Large),เบียร์สด (ใหญ่),生啤 (大),생맥주 (대),生ビール (大),Bia tươi (lớn),"draft beer,large",35000,,RCAT-BEERGARDEN|RCAT-BEERHOUSE|RCAT-BAR
-5,ເບຍຖັງ,Beer Tower,เบียร์ทาวเวอร์,啤酒塔,맥주 타워,ビールタワー,Tháp bia,"beer tower,pitcher",150000,,RCAT-BEERGARDEN|RCAT-BEERHOUSE|RCAT-BAR|RCAT-NIGHTCLUB
-6,ຈອນນີ ວອກເກີ (ແດງ),Johnnie Walker (Red Label),จอห์นนี่ วอล์คเกอร์ (แดง),尊尼获加红牌,조니워커 (레드),ジョニーウォーカー (レッド),Johnnie Walker (Đỏ),"johnnie walker,red label,whiskey",25000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-KARAOKE|RCAT-BEERGARDEN
-6,ຈອນນີ ວອກເກີ (ດຳ),Johnnie Walker (Black Label),จอห์นนี่ วอล์คเกอร์ (ดำ),尊尼获加黑牌,조니워커 (블랙),ジョニーウォーカー (ブラック),Johnnie Walker (Đen),"johnnie walker,black label",35000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-KARAOKE|RCAT-HOTEL
-6,ຈອນນີ ວອກເກີ (ຄຳ),Johnnie Walker (Gold Label),จอห์นนี่ วอล์คเกอร์ (ทอง),尊尼获加金牌,조니워커 (골드),ジョニーウォーカー (ゴールド),Johnnie Walker (Vàng),"johnnie walker,gold label",50000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
-6,ຈອນນີ ວອກເກີ (ຟ້າ),Johnnie Walker (Blue Label),จอห์นนี่ วอล์คเกอร์ (น้ำเงิน),尊尼获加蓝牌,조니워커 (블루),ジョニーウォーカー (ブルー),Johnnie Walker (Xanh),"johnnie walker,blue label",150000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
-6,ຊີວັສ ຣີໂກລ (12ປີ),Chivas Regal (12 Year),ชีวาส รีกัล (12 ปี),芝华士 (12年),시바스 리갈 (12년),シーバス リーガル (12年),Chivas Regal (12 năm),"chivas regal,12 year,whiskey",35000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-KARAOKE
-6,ຊີວັສ ຣີໂກລ (18ປີ),Chivas Regal (18 Year),ชีวาส รีกัล (18 ปี),芝华士 (18年),시바스 리갈 (18년),シーバス リーガル (18年),Chivas Regal (18 năm),"chivas regal,18 year",60000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
-6,ແຈັກ ແດນນຽລ,Jack Daniel's,แจ็ค แดเนียลส์,杰克丹尼,잭 다니엘스,ジャック ダニエル,Jack Daniel's,"jack daniels,tennessee whiskey",30000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-KARAOKE
-6,ຈິມ ບີມ,Jim Beam,จิม บีม,占边,짐 빔,ジム ビーム,Jim Beam,"jim beam,bourbon",25000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-BEERGARDEN
-6,ບາເລນທາຍ,Ballantine's,บาเลนไทน์,百龄坛,발렌타인,バランタイン,Ballantine's,"ballantines,scotch",25000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-KARAOKE
-6,ເຮັນເນຊີ VS,Hennessy VS,เฮนเนสซี่ วีเอส,轩尼诗VS,헤네시 VS,ヘネシー VS,Hennessy VS,"hennessy,cognac,vs",40000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-KARAOKE
-6,ເຮັນເນຊີ VSOP,Hennessy VSOP,เฮนเนสซี่ วีเอสโอพี,轩尼诗VSOP,헤네시 VSOP,ヘネシー VSOP,Hennessy VSOP,"hennessy,vsop,cognac",60000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
-6,ເຮັນເນຊີ XO,Hennessy XO,เฮนเนสซี่ เอ็กซ์โอ,轩尼诗XO,헤네시 XO,ヘネシー XO,Hennessy XO,"hennessy,xo,cognac",200000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
-6,ເຫຼົ້າຂາວລາວ,Lao-Lao (Rice Whiskey),เหล้าขาวลาว,老挝米酒,라오라오,ラオラオ,Rượu gạo Lào,"lao lao,rice whiskey,ເຫຼົ້າຂາວ",10000,,RCAT-BEERGARDEN|RCAT-LAOFOOD|RCAT-RESTAURANT
-6,ສະມິໂນຟ (ວອດກາ),Smirnoff (Vodka),สเมียร์นอฟ (วอดก้า),斯米诺伏特加,스미노프 (보드카),スミノフ (ウォッカ),Smirnoff (Vodka),"smirnoff,vodka",25000,,RCAT-BAR|RCAT-NIGHTCLUB
-6,ແອັບໂຊລຸດ (ວອດກາ),Absolut (Vodka),แอบโซลูท (วอดก้า),绝对伏特加,앱솔루트 (보드카),アブソルート (ウォッカ),Absolut (Vodka),"absolut,vodka,swedish",30000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-HOTEL
-6,ເກຣ ກູສ (ວອດກາ),Grey Goose (Vodka),เกรย์กูส (วอดก้า),灰雁伏特加,그레이구스 (보드카),グレイグース (ウォッカ),Grey Goose (Vodka),"grey goose,vodka,french",45000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
-6,ບາກາດີ (ຣັມ),Bacardi (Rum),บาคาร์ดี (รัม),百加得朗姆酒,바카디 (럼),バカルディ (ラム),Bacardi (Rum),"bacardi,rum,white rum",25000,,RCAT-BAR|RCAT-NIGHTCLUB
-6,ກັບຕັນ ມໍແກນ (ຣັມ),Captain Morgan (Rum),กัปตันมอร์แกน (รัม),摩根船长朗姆酒,캡틴 모건 (럼),キャプテンモルガン (ラム),Captain Morgan (Rum),"captain morgan,rum,spiced",28000,,RCAT-BAR|RCAT-NIGHTCLUB
-6,ໂຮເຊ ເກີໂວ (ເຕກີລາ),Jose Cuervo (Tequila),โฮเซ่ เกร์โว (เตกีล่า),豪帅龙舌兰,호세 쿠에르보 (데킬라),ホセ・クエルボ (テキーラ),Jose Cuervo (Tequila),"jose cuervo,tequila",30000,,RCAT-BAR|RCAT-NIGHTCLUB
-6,ເປຕຣ໋ອນ (ເຕກີລາ),Patron (Tequila),แพทรอน (เตกีล่า),培恩龙舌兰,패트론 (데킬라),パトロン (テキーラ),Patron (Tequila),"patron,tequila,premium",50000,,RCAT-BAR|RCAT-HOTEL
-6,ບອມເບ (ຈິນ),Bombay Sapphire (Gin),บอมเบย์ (จิน),孟买蓝宝石金酒,봄베이 (진),ボンベイ (ジン),Bombay Sapphire (Gin),"bombay,gin,sapphire",30000,,RCAT-BAR|RCAT-HOTEL
-6,ກໍດອນ (ຈິນ),Gordon's (Gin),กอร์ดอนส์ (จิน),哥顿金酒,고든스 (진),ゴードン (ジン),Gordon's (Gin),"gordons,gin",25000,,RCAT-BAR|RCAT-NIGHTCLUB
-6,ເຢເກີໄມສເຕີ,Jagermeister,เยเกอร์ไมสเตอร์,野格,예거마이스터,イエーガーマイスター,Jagermeister,"jagermeister,herbal",30000,,RCAT-BAR|RCAT-NIGHTCLUB
-7,ໄວນ໌ແດງ (ແກ້ວ),Red Wine (Glass),ไวน์แดง (แก้ว),红酒 (杯),레드와인 (잔),赤ワイン (グラス),Rượu vang đỏ (ly),"red wine,glass",35000,,RCAT-BAR|RCAT-FINEDINING|RCAT-HOTEL|RCAT-WESTERNFOOD
-7,ໄວນ໌ແດງ (ຂວດ),Red Wine (Bottle),ไวน์แดง (ขวด),红酒 (瓶),레드와인 (병),赤ワイン (ボトル),Rượu vang đỏ (chai),"red wine,bottle",250000,,RCAT-BAR|RCAT-FINEDINING|RCAT-HOTEL
-7,ໄວນ໌ຂາວ (ແກ້ວ),White Wine (Glass),ไวน์ขาว (แก้ว),白酒 (杯),화이트와인 (잔),白ワイン (グラス),Rượu vang trắng (ly),"white wine,glass",35000,,RCAT-BAR|RCAT-FINEDINING|RCAT-HOTEL|RCAT-SEAFOOD
-7,ໄວນ໌ຂາວ (ຂວດ),White Wine (Bottle),ไวน์ขาว (ขวด),白酒 (瓶),화이트와인 (병),白ワイン (ボトル),Rượu vang trắng (chai),"white wine,bottle",250000,,RCAT-BAR|RCAT-FINEDINING|RCAT-HOTEL
-7,ໄວນ໌ໂຣເຊ (ແກ້ວ),Rosé Wine (Glass),ไวน์โรเซ่ (แก้ว),玫瑰酒 (杯),로제와인 (잔),ロゼワイン (グラス),Rượu vang hồng (ly),"rose wine,pink",35000,,RCAT-BAR|RCAT-FINEDINING|RCAT-HOTEL
-7,ໄວນ໌ໂຣເຊ (ຂວດ),Rosé Wine (Bottle),ไวน์โรเซ่ (ขวด),玫瑰酒 (瓶),로제와인 (병),ロゼワイン (ボトル),Rượu vang hồng (chai),"rose wine,bottle",250000,,RCAT-BAR|RCAT-FINEDINING|RCAT-HOTEL
-7,ແຊມເປນ,Champagne,แชมเปญ,香槟,샴페인,シャンパン,Champagne,"champagne,sparkling",80000,,RCAT-FINEDINING|RCAT-HOTEL|RCAT-NIGHTCLUB
-7,ສະປາກລິ້ງໄວນ໌,Sparkling Wine,ไวน์สปาร์คกลิ้ง,起泡酒,스파클링와인,スパークリングワイン,Rượu vang sủi,"sparkling wine,prosecco",60000,,RCAT-BAR|RCAT-FINEDINING|RCAT-HOTEL
-8,ໂມຈິໂຕ,Mojito,โมฮิโต้,莫吉托,모히토,モヒート,Mojito,"mojito,rum,mint",45000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-BEERGARDEN
-8,ມາກາຣິຕາ,Margarita,มาร์การิต้า,玛格丽特,마가리타,マルガリータ,Margarita,"margarita,tequila,lime",45000,,RCAT-BAR|RCAT-NIGHTCLUB
-8,ລອງ ໄອແລນ ໄອສ ທີ,Long Island Iced Tea,ลองไอส์แลนด์ไอซ์ที,长岛冰茶,롱 아일랜드 아이스티,ロングアイランドアイスティー,Trà đá Long Island,"long island,mixed",50000,,RCAT-BAR|RCAT-NIGHTCLUB
-8,ໄວສກີ ຊາວ,Whiskey Sour,วิสกี้ซาวร์,威士忌酸酒,위스키 사워,ウイスキーサワー,Whiskey Sour,"whiskey sour,lemon",40000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-HOTEL
-8,ຄອສໂມໂປລິຕັນ,Cosmopolitan,คอสโมโพลิแทน,大都会,코스모폴리탄,コスモポリタン,Cosmopolitan,"cosmopolitan,vodka",45000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-HOTEL
-8,ຣັມແອນໂຄກ,Rum and Coke,รัมแอนด์โค้ก,朗姆可乐,럼 앤 코크,ラム＆コーク,Rum và Coca,"rum coke,cuba libre",35000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-BEERGARDEN
-8,ຈິນໂທນິກ,Gin and Tonic,จิน แอนด์ โทนิก,金汤力,진 토닉,ジン・トニック,Gin Tonic,"gin tonic,g&t",35000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-HOTEL
-8,ວອດກາໂທນິກ,Vodka Tonic,วอดก้าโทนิก,伏特加汤力,보드카 토닉,ウォッカトニック,Vodka Tonic,"vodka tonic",35000,,RCAT-BAR|RCAT-NIGHTCLUB
-8,ສະກຣູໄດເວີ,Screwdriver,สกรูไดร์เวอร์,螺丝刀,스크루 드라이버,スクリュードライバー,Screwdriver,"screwdriver,vodka orange",35000,,RCAT-BAR|RCAT-NIGHTCLUB
-8,ເຕກີລາ ຊັນໄຣສ໌,Tequila Sunrise,เตกีล่าซันไรส์,龙舌兰日出,데킬라 선라이즈,テキーラサンライズ,Tequila Sunrise,"tequila sunrise,orange",40000,,RCAT-BAR|RCAT-NIGHTCLUB
-8,ບລັດດີ ແມຣີ,Bloody Mary,บลัดดี้แมรี่,血腥玛丽,블러디 메리,ブラッディマリー,Bloody Mary,"bloody mary,vodka tomato",40000,,RCAT-BAR|RCAT-HOTEL
-8,ປິນາ ໂຄລາດາ,Pina Colada,พีน่า โคลาด้า,椰林飘香,피나 콜라다,ピニャ・コラーダ,Pina Colada,"pina colada,rum coconut",45000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-BEERGARDEN
-8,ມາຕິນີ,Martini,มาตินี่,马提尼,마티니,マティーニ,Martini,"martini,gin,vermouth",45000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
-8,ອາເມເຣດໂຕ ຊາວ,Amaretto Sour,อมาเรตโต้ซาวร์,杏仁利口酒酸酒,아마레또 사워,アマレットサワー,Amaretto Sour,"amaretto sour,almond",40000,,RCAT-BAR|RCAT-NIGHTCLUB
-8,ຊ໋ອດ B-52,B-52,บี52,B-52,B-52,B-52,B-52,"b52,shot,layered",40000,,RCAT-BAR|RCAT-NIGHTCLUB
-8,ເຢລີ ຊ໋ອດ,Jelly Shot,เยลลี่ช็อต,果冻酒,젤리 샷,ゼリーショット,Thạch rượu,"jelly shot,party",20000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-KARAOKE
-9,ເຂົ້າຜັດ,Fried Rice,ข้าวผัด,炒饭,볶음밥,チャーハン,Cơm chiên,"fried rice,ເຂົ້າຜັດ,ข้าวผัด",25000,,RCAT-RESTAURANT|RCAT-MADETOORDER|RCAT-THAIFOOD|RCAT-CHINESEFOOD
-9,ເຂົ້າຜັດໄກ່,Chicken Fried Rice,ข้าวผัดไก่,鸡肉炒饭,치킨 볶음밥,チキンチャーハン,Cơm chiên gà,"fried rice,chicken",30000,,RCAT-RESTAURANT|RCAT-MADETOORDER|RCAT-FAMILYREST
-9,ເຂົ້າຜັດໝູ,Pork Fried Rice,ข้าวผัดหมู,猪肉炒饭,돼지고기 볶음밥,ポークチャーハン,Cơm chiên heo,"fried rice,pork",30000,,RCAT-RESTAURANT|RCAT-MADETOORDER
-9,ເຂົ້າຜັດກຸ້ງ,Shrimp Fried Rice,ข้าวผัดกุ้ง,虾仁炒饭,새우 볶음밥,エビチャーハン,Cơm chiên tôm,"fried rice,shrimp",35000,,RCAT-RESTAURANT|RCAT-SEAFOOD|RCAT-CHINESEFOOD
-9,ເຂົ້າຜັດປູ,Crab Fried Rice,ข้าวผัดปู,蟹肉炒饭,게살 볶음밥,カニチャーハン,Cơm chiên cua,"fried rice,crab",40000,,RCAT-RESTAURANT|RCAT-SEAFOOD|RCAT-CHINESEFOOD
-9,ເຂົ້າຜັດທະເລ,Seafood Fried Rice,ข้าวผัดทะเล,海鲜炒饭,해물 볶음밥,シーフードチャーハン,Cơm chiên hải sản,"fried rice,seafood",40000,,RCAT-RESTAURANT|RCAT-SEAFOOD
-9,ເຂົ້າຜັດອາເມລິກັນ,American Fried Rice,ข้าวผัดอเมริกัน,美式炒饭,아메리칸 볶음밥,アメリカンチャーハン,Cơm chiên kiểu Mỹ,"fried rice,sausage,egg",35000,,RCAT-RESTAURANT|RCAT-FAMILYREST
-9,ເຂົ້າຜັດຜົງກະຫຼີ,Curry Fried Rice,ข้าวผัดผงกะหรี่,咖喱炒饭,카레 볶음밥,カレーチャーハン,Cơm chiên cà ri,"fried rice,curry",30000,,RCAT-RESTAURANT|RCAT-THAIFOOD
-9,ເຂົ້າຜັດກະເພົາ,Basil Fried Rice,ข้าวผัดกะเพรา,九层塔炒饭,바질 볶음밥,バジルチャーハン,Cơm chiên húng quế,"fried rice,basil,spicy",30000,,RCAT-RESTAURANT|RCAT-THAIFOOD|RCAT-MADETOORDER
-9,ເຂົ້າຜັດນ້ຳພິກເຜົາ,Chili Paste Fried Rice,ข้าวผัดน้ำพริกเผา,辣酱炒饭,칠리페이스트 볶음밥,チリペーストチャーハン,Cơm chiên ớt xào,"fried rice,chili paste",30000,,RCAT-RESTAURANT|RCAT-THAIFOOD
-10,ເຂົ້າໜຽວໄກ່ຍ່າງ,Grilled Chicken with Sticky Rice,ข้าวเหนียวไก่ย่าง,烤鸡配糯米饭,닭꼬치와 찹쌀밥,焼き鳥と餅米,Xôi gà nướng,"grilled chicken,sticky rice",35000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-GRILLHOUSE|RCAT-BEERGARDEN
-10,ເຂົ້າມັນໄກ່,Chicken Rice (Hainanese),ข้าวมันไก่,海南鸡饭,하이난 치킨라이스,海南チキンライス,Cơm gà Hải Nam,"chicken rice,hainanese",30000,,RCAT-CHINESEFOOD|RCAT-RESTAURANT|RCAT-RICESHOP
-10,ເຂົ້າຂາໝູ,Pork Leg Rice,ข้าวขาหมู,猪脚饭,족발덮밥,豚足丼,Cơm giò heo,"pork leg,rice",35000,,RCAT-CHINESEFOOD|RCAT-RICESHOP|RCAT-THAIFOOD
-10,ເຂົ້າໝູແດງ,Red Pork Rice,ข้าวหมูแดง,叉烧饭,차슈덮밥,チャーシュー丼,Cơm xá xíu,"red pork,char siu",30000,,RCAT-CHINESEFOOD|RCAT-RICESHOP
-10,ເຂົ້າໝູກອບ,Crispy Pork Rice,ข้าวหมูกรอบ,脆皮猪肉饭,바삭 삼겹살 덮밥,カリカリ豚丼,Cơm heo quay,"crispy pork,rice",35000,,RCAT-CHINESEFOOD|RCAT-RICESHOP|RCAT-THAIFOOD
-10,ເຂົ້າເປັດຍ່າງ,Roast Duck Rice,ข้าวเป็ดย่าง,烤鸭饭,오리구이 덮밥,ローストダック丼,Cơm vịt quay,"duck,roast,rice",40000,,RCAT-CHINESEFOOD|RCAT-RICESHOP
-10,ເຂົ້າຄະນ້າໝູກອບ,Crispy Pork with Chinese Broccoli Rice,ข้าวคะน้าหมูกรอบ,芥兰脆皮猪肉饭,카이란 바삭 삼겹살 덮밥,カイラン豚丼,Cơm cải heo quay,"crispy pork,chinese broccoli",35000,,RCAT-CHINESEFOOD|RCAT-RICESHOP|RCAT-THAIFOOD
-11,ເຝີໄກ່,Chicken Pho,เฝอไก่,鸡肉粉,치킨 포,チキンフォー,Phở gà,"pho,chicken,noodle soup",25000,,RCAT-VIETNAMESEFOOD|RCAT-NOODLESHOP|RCAT-LAOFOOD
-11,ເຝີຊີ້ນ,Beef Pho,เฝอเนื้อ,牛肉粉,소고기 포,ビーフフォー,Phở bò,"pho,beef,noodle soup",30000,,RCAT-VIETNAMESEFOOD|RCAT-NOODLESHOP|RCAT-LAOFOOD
-11,ເຝີລວມ,Mixed Pho,เฝอรวม,综合粉,모듬 포,ミックスフォー,Phở thập cẩm,"pho,mixed,combination",35000,,RCAT-VIETNAMESEFOOD|RCAT-NOODLESHOP
-11,ເຝີນ້ຳຫມາກນາວ,Pho with Lime,เฝอน้ำมะนาว,柠檬粉,라임 포,ライムフォー,Phở chanh,"pho,lime,sour",25000,,RCAT-LAOFOOD|RCAT-NOODLESHOP
-11,ກ໋ວຍຈັບ,Kuay Jab (Rolled Noodle Soup),ก๋วยจั๊บ,卷粉汤,꽈이잡,クイチャップ,Cuốn nước,"kuay jab,rolled noodle,pork",30000,,RCAT-THAIFOOD|RCAT-NOODLESHOP
-11,ຜັດໄທ,Pad Thai,ผัดไทย,泰式炒河粉,팟타이,パッタイ,Phở xào Thái,"pad thai,stir fried noodle",30000,,RCAT-THAIFOOD|RCAT-RESTAURANT|RCAT-MADETOORDER
-11,ຜັດໄທໄກ່,Chicken Pad Thai,ผัดไทยไก่,鸡肉炒河粉,치킨 팟타이,チキンパッタイ,Phở xào Thái gà,"pad thai,chicken",32000,,RCAT-THAIFOOD|RCAT-RESTAURANT
-11,ຜັດໄທກຸ້ງ,Shrimp Pad Thai,ผัดไทยกุ้ง,虾仁炒河粉,새우 팟타이,エビパッタイ,Phở xào Thái tôm,"pad thai,shrimp",38000,,RCAT-THAIFOOD|RCAT-RESTAURANT|RCAT-SEAFOOD
-11,ຜັດຊີອິ໊ວ,Pad See Ew,ผัดซีอิ๊ว,豉油皇炒面,팟씨유,パッシーユー,Hủ tiếu xào,"pad see ew,soy sauce noodle",28000,,RCAT-THAIFOOD|RCAT-RESTAURANT|RCAT-MADETOORDER
-11,ຜັດຂີ້ເມົາ,Drunken Noodles,ผัดขี้เมา,醉面,팟끼마오,パッキーマオ,Mì say,"pad kee mao,spicy noodle",30000,,RCAT-THAIFOOD|RCAT-RESTAURANT|RCAT-BEERGARDEN
-11,ເສັ້ນຜັດ,Stir-Fried Noodles,เส้นผัด,炒面,볶음면,焼きそば,Mì xào,"stir fried noodle",25000,,RCAT-RESTAURANT|RCAT-MADETOORDER|RCAT-CHINESEFOOD
-11,ບະໝີ່ນ້ຳ,Egg Noodle Soup,บะหมี่น้ำ,汤面,국수,ラーメン,Mì nước,"egg noodle,soup",25000,,RCAT-NOODLESHOP|RCAT-RESTAURANT
-11,ບະໝີ່ແຫ້ງ,Dry Egg Noodles,บะหมี่แห้ง,干面,비빔면,汁なしラーメン,Mì khô,"egg noodle,dry",25000,,RCAT-NOODLESHOP|RCAT-RESTAURANT
-11,ລາດໜ້າ,Rad Na (Gravy Noodles),ราดหน้า,芡汁面,랏나,ラートナー,Hủ tiếu sốt,"rad na,gravy noodle",30000,,RCAT-THAIFOOD|RCAT-CHINESEFOOD|RCAT-NOODLESHOP
-11,ເສັ້ນໃຫຍ່ເນື້ອຕຸ້ນ,Beef Stew Noodles,เส้นใหญ่เนื้อตุ๋น,红烧牛肉面,소고기 장조림 국수,牛肉煮込み麺,Hủ tiếu bò kho,"beef stew,wide noodle",35000,,RCAT-VIETNAMESEFOOD|RCAT-NOODLESHOP
-12,ລາບໝູ,Minced Pork Salad,ลาบหมู,猪肉沙拉,라프 무,ラープムー,Lạp heo,"laab,pork,minced",30000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-BEERGARDEN|RCAT-GRILLHOUSE
-12,ລາບໄກ່,Minced Chicken Salad,ลาบไก่,鸡肉沙拉,라프 까이,ラープガイ,Lạp gà,"laab,chicken",30000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-BEERGARDEN
-12,ລາບປາ,Minced Fish Salad,ลาบปลา,鱼肉沙拉,라프 빠,ラープパー,Lạp cá,"laab,fish",35000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-SEAFOOD
-12,ລາບເປັດ,Minced Duck Salad,ลาบเป็ด,鸭肉沙拉,라프 뻿,ラープペット,Lạp vịt,"laab,duck",40000,,RCAT-LAOFOOD|RCAT-THAIFOOD
-12,ລາບເຫັດ,Mushroom Salad,ลาบเห็ด,蘑菇沙拉,라프 헷,ラープヘット,Lạp nấm,"laab,mushroom,vegetarian",28000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-RESTAURANT
-12,ສົ້ມຕຳໄທ,Thai Papaya Salad,ส้มตำไทย,泰式青木瓜沙拉,솜땀 타이,ソムタムタイ,Gỏi đu đủ Thái,"somtam,papaya,thai style",25000,,RCAT-THAIFOOD|RCAT-LAOFOOD|RCAT-BEERGARDEN
-12,ສົ້ມຕຳລາວ,Lao Papaya Salad,ส้มตำลาว,老挝青木瓜沙拉,솜땀 라오,ソムタムラオ,Gỏi đu đủ Lào,"somtam,papaya,lao style,padaek",25000,,RCAT-LAOFOOD|RCAT-BEERGARDEN
-12,ສົ້ມຕຳປູ,Papaya Salad with Crab,ส้มตำปู,蟹肉青木瓜沙拉,솜땀 부,ソムタムプー,Gỏi đu đủ cua,"somtam,crab",35000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-SEAFOOD
-12,ສົ້ມຕຳປູປະລາ,Papaya Salad with Salted Crab,ส้มตำปูปลาร้า,腌蟹青木瓜沙拉,솜땀 부 빠라,ソムタムプーパラー,Gỏi đu đủ cua muối,"somtam,salted crab,fermented",30000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-BEERGARDEN
-12,ສົ້ມຕຳທະເລ,Seafood Papaya Salad,ส้มตำทะเล,海鲜青木瓜沙拉,솜땀 탈레,ソムタムタレー,Gỏi đu đủ hải sản,"somtam,seafood",40000,,RCAT-THAIFOOD|RCAT-SEAFOOD
-12,ຍຳວຸ້ນເສັ້ນ,Glass Noodle Salad,ยำวุ้นเส้น,凉拌粉丝,얌운센,ヤムウンセン,Gỏi miến,"yum,glass noodle",30000,,RCAT-THAIFOOD|RCAT-RESTAURANT|RCAT-BEERGARDEN
-12,ຍຳທະເລ,Seafood Salad,ยำทะเล,海鲜沙拉,얌 탈레,ヤムタレー,Gỏi hải sản,"yum,seafood",45000,,RCAT-THAIFOOD|RCAT-SEAFOOD|RCAT-BEERGARDEN
-12,ຍຳໝາກເຜືອ,Eggplant Salad,ยำมะเขือ,茄子沙拉,얌 마꾸아,ヤムマクア,Gỏi cà tím,"yum,eggplant",25000,,RCAT-THAIFOOD|RCAT-RESTAURANT
-12,ຍຳໝູຢໍ,Pork Ear Salad,ยำหูหมู,猪耳沙拉,얌 후무,ヤムフームー,Gỏi tai heo,"yum,pork ear",30000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-BEERGARDEN
-12,ນ້ຳຕົກ,Waterfall Beef Salad,น้ำตก,瀑布牛肉沙拉,남톡,ナムトック,Thác bò,"namtok,beef,grilled",35000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-GRILLHOUSE
-13,ຕົ້ມຍຳກຸ້ງ,Tom Yum Shrimp,ต้มยำกุ้ง,冬阴功,똠얌꿍,トムヤムクン,Tom Yum tôm,"tom yum,shrimp,soup",40000,,RCAT-THAIFOOD|RCAT-RESTAURANT|RCAT-SEAFOOD
-13,ຕົ້ມຍຳໄກ່,Tom Yum Chicken,ต้มยำไก่,鸡肉冬阴汤,똠얌 까이,トムヤムガイ,Tom Yum gà,"tom yum,chicken",35000,,RCAT-THAIFOOD|RCAT-RESTAURANT
-13,ຕົ້ມຍຳທະເລ,Tom Yum Seafood,ต้มยำทะเล,海鲜冬阴汤,똠얌 탈레,トムヤムタレー,Tom Yum hải sản,"tom yum,seafood",45000,,RCAT-THAIFOOD|RCAT-SEAFOOD
-13,ຕົ້ມຍຳປາ,Tom Yum Fish,ต้มยำปลา,鱼肉冬阴汤,똠얌 빠,トムヤムパー,Tom Yum cá,"tom yum,fish",40000,,RCAT-THAIFOOD|RCAT-SEAFOOD
-13,ຕົ້ມຂ່າໄກ່,Tom Kha Chicken,ต้มข่าไก่,椰奶鸡汤,똠카 까이,トムカーガイ,Tom Kha gà,"tom kha,chicken,coconut",35000,,RCAT-THAIFOOD|RCAT-RESTAURANT
-13,ຕົ້ມຂ່າກຸ້ງ,Tom Kha Shrimp,ต้มข่ากุ้ง,椰奶虾汤,똠카 꿍,トムカークン,Tom Kha tôm,"tom kha,shrimp,coconut",40000,,RCAT-THAIFOOD|RCAT-SEAFOOD
-13,ແກງຂຽວຫວານໄກ່,Green Curry Chicken,แกงเขียวหวานไก่,绿咖喱鸡,그린 커리 치킨,グリーンカレーチキン,Cà ri xanh gà,"green curry,chicken",35000,,RCAT-THAIFOOD|RCAT-RESTAURANT
-13,ແກງຂຽວຫວານໝູ,Green Curry Pork,แกงเขียวหวานหมู,绿咖喱猪肉,그린 커리 포크,グリーンカレーポーク,Cà ri xanh heo,"green curry,pork",35000,,RCAT-THAIFOOD|RCAT-RESTAURANT
-13,ແກງແດງ,Red Curry,แกงแดง,红咖喱,레드 커리,レッドカレー,Cà ri đỏ,"red curry,spicy",35000,,RCAT-THAIFOOD|RCAT-RESTAURANT
-13,ແກງເຜັດ,Spicy Curry,แกงเผ็ด,辣咖喱,매운 카레,激辛カレー,Cà ri cay,"spicy curry,hot",35000,,RCAT-THAIFOOD|RCAT-LAOFOOD
-13,ແກງເຫຼືອງ,Yellow Curry,แกงเหลือง,黄咖喱,옐로우 커리,イエローカレー,Cà ri vàng,"yellow curry,mild",35000,,RCAT-THAIFOOD|RCAT-RESTAURANT
-13,ແກງມັດສະໝັ່ນ,Massaman Curry,แกงมัสมั่น,玛莎曼咖喱,마싸만 커리,マッサマンカレー,Cà ri Massaman,"massaman,curry,peanut",40000,,RCAT-THAIFOOD|RCAT-RESTAURANT
-13,ແກງພະແນງ,Panang Curry,แกงพะแนง,帕能咖喱,파넹 커리,パネンカレー,Cà ri Panang,"panang,curry,rich",40000,,RCAT-THAIFOOD|RCAT-RESTAURANT
-13,ແກງຈືດ,Clear Soup,แกงจืด,清汤,깽 쯧,ゲーンジュート,Canh trong,"clear soup,vegetable",25000,,RCAT-RESTAURANT|RCAT-THAIFOOD|RCAT-FAMILYREST
-13,ແກງຈືດໝູສັບ,Clear Soup with Minced Pork,แกงจืดหมูสับ,猪肉清汤,깽 쯧 무쌉,ゲーンジュートムーサップ,Canh heo băm,"clear soup,minced pork",28000,,RCAT-RESTAURANT|RCAT-THAIFOOD
-13,ແກງຈືດເຕົ້າຫູ້,Clear Soup with Tofu,แกงจืดเต้าหู้,豆腐清汤,깽 쯧 따오후,ゲーンジュートタオフー,Canh đậu hủ,"clear soup,tofu",25000,,RCAT-RESTAURANT|RCAT-THAIFOOD|RCAT-FAMILYREST
-14,ປີ້ງໄກ່,Grilled Chicken,ไก่ย่าง,烤鸡,닭꼬치,焼き鳥,Gà nướng,"grilled chicken,ປີ້ງໄກ່",35000,,RCAT-GRILLHOUSE|RCAT-BEERGARDEN|RCAT-LAOFOOD|RCAT-THAIFOOD
-14,ໄກ່ຍ່າງ (ເຄິ່ງໂຕ),Half Grilled Chicken,ไก่ย่าง (ครึ่งตัว),烤鸡 (半只),반 마리 구이,焼き鳥 (半身),Gà nướng (nửa con),"grilled chicken,half",50000,,RCAT-GRILLHOUSE|RCAT-BEERGARDEN|RCAT-LAOFOOD
-14,ໄກ່ຍ່າງ (ໝົດໂຕ),Whole Grilled Chicken,ไก่ย่าง (ทั้งตัว),烤鸡 (整只),한 마리 구이,焼き鳥 (一羽),Gà nướng (nguyên con),"grilled chicken,whole",90000,,RCAT-GRILLHOUSE|RCAT-BEERGARDEN|RCAT-LAOFOOD
-14,ປີ້ງໝູ,Grilled Pork,หมูย่าง,烤猪肉,삼겹살 구이,焼き豚,Thịt heo nướng,"grilled pork,ປີ້ງໝູ",35000,,RCAT-GRILLHOUSE|RCAT-BEERGARDEN|RCAT-LAOFOOD
-14,ໝູປີ້ງ,Grilled Pork Skewer,หมูปิ้ง,烤猪肉串,돼지꼬치,豚串,Xiên heo nướng,"pork skewer,ໝູປີ້ງ",5000,,RCAT-GRILLHOUSE|RCAT-BEERGARDEN|RCAT-STREETFOOD
-14,ຄໍໝູຍ່າງ,Grilled Pork Neck,คอหมูย่าง,烤猪颈肉,목살 구이,豚トロ焼き,Cổ heo nướng,"pork neck,grilled",40000,,RCAT-GRILLHOUSE|RCAT-BEERGARDEN|RCAT-THAIFOOD
-14,ປີ້ງຊີ້ນງົວ,Grilled Beef,เนื้อย่าง,烤牛肉,소고기 구이,焼肉,Thịt bò nướng,"grilled beef,steak",50000,,RCAT-GRILLHOUSE|RCAT-BBQ|RCAT-KOREANFOOD
-14,ສະເຕັກ,Steak,สเต็ก,牛排,스테이크,ステーキ,Bít tết,"steak,beef",80000,,RCAT-WESTERNFOOD|RCAT-FINEDINING|RCAT-HOTEL
-14,ສະເຕັກໝູ,Pork Steak,สเต็กหมู,猪排,돈까스,ポークステーキ,Thăn heo,"pork steak",45000,,RCAT-WESTERNFOOD|RCAT-RESTAURANT
-14,ສະເຕັກໄກ່,Chicken Steak,สเต็กไก่,鸡排,치킨 스테이크,チキンステーキ,Ức gà áp chảo,"chicken steak",40000,,RCAT-WESTERNFOOD|RCAT-RESTAURANT|RCAT-FAMILYREST
-14,ປີ້ງປາ,Grilled Fish,ปลาย่าง,烤鱼,생선구이,焼き魚,Cá nướng,"grilled fish,ປາປີ້ງ",50000,,RCAT-GRILLHOUSE|RCAT-SEAFOOD|RCAT-BEERGARDEN
-14,ປາເຜົາ,Grilled Fish (Whole),ปลาเผา,盐烤鱼,생선 통구이,魚の塩焼き,Cá nướng muối,"grilled fish,whole,salt",60000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-SEAFOOD
-14,ປີ້ງກຸ້ງ,Grilled Shrimp,กุ้งย่าง,烤虾,새우 구이,エビ焼き,Tôm nướng,"grilled shrimp",60000,,RCAT-GRILLHOUSE|RCAT-SEAFOOD|RCAT-BEERGARDEN
-14,ກຸ້ງເຜົາ,Grilled Shrimp (Large),กุ้งเผา,烤大虾,왕새우 구이,大エビ焼き,Tôm sú nướng,"grilled shrimp,large",80000,,RCAT-SEAFOOD|RCAT-BEERGARDEN
-14,ປີ້ງປາຫມຶກ,Grilled Squid,ปลาหมึกย่าง,烤鱿鱼,오징어 구이,イカ焼き,Mực nướng,"grilled squid,calamari",45000,,RCAT-GRILLHOUSE|RCAT-SEAFOOD|RCAT-BEERGARDEN
-14,ປີ້ງຫອຍ,Grilled Shellfish,หอยย่าง,烤贝类,조개구이,貝焼き,Sò nướng,"grilled shellfish,clam",50000,,RCAT-SEAFOOD|RCAT-BEERGARDEN
-14,ປີ້ງຜັກລວມ,Grilled Vegetables,ผักย่างรวม,烤蔬菜,야채 구이,焼き野菜,Rau củ nướng,"grilled vegetables,mixed",25000,,RCAT-GRILLHOUSE|RCAT-BBQ|RCAT-RESTAURANT
-14,ໄສ້ກອກອີສານ,Isaan Sausage,ไส้กรอกอีสาน,泰东北香肠,이싼 소시지,イサーンソーセージ,Lạp xưởng Isaan,"sausage,fermented",35000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-GRILLHOUSE|RCAT-BEERGARDEN
-14,ໄສ້ອັ່ວ,Northern Thai Sausage,ไส้อั่ว,清迈香肠,싸이 우아,サイウア,Lạp xưởng Bắc Thái,"sausage,herb,northern",35000,,RCAT-THAIFOOD|RCAT-GRILLHOUSE|RCAT-BEERGARDEN
-15,ໄກ່ທອດ,Fried Chicken,ไก่ทอด,炸鸡,후라이드 치킨,フライドチキン,Gà chiên,"fried chicken,crispy",35000,,RCAT-RESTAURANT|RCAT-FASTFOOD|RCAT-FAMILYREST|RCAT-BEERGARDEN
-15,ໄກ່ທອດກະທຽມ,Garlic Fried Chicken,ไก่ทอดกระเทียม,蒜香炸鸡,마늘 후라이드 치킨,ガーリックチキン,Gà chiên tỏi,"fried chicken,garlic",38000,,RCAT-RESTAURANT|RCAT-THAIFOOD|RCAT-BEERGARDEN
-15,ປີກໄກ່ທອດ,Fried Chicken Wings,ปีกไก่ทอด,炸鸡翅,치킨 윙,手羽先揚げ,Cánh gà chiên,"chicken wings,fried",30000,,RCAT-RESTAURANT|RCAT-BAR|RCAT-BEERGARDEN
-15,ໄກ່ທອດນ້ຳປາ,Fish Sauce Fried Chicken,ไก่ทอดน้ำปลา,鱼露炸鸡,남빠 치킨,ナンプラーチキン,Gà chiên nước mắm,"fried chicken,fish sauce",38000,,RCAT-VIETNAMESEFOOD|RCAT-THAIFOOD|RCAT-BEERGARDEN
-15,ໝູທອດກະທຽມ,Garlic Fried Pork,หมูทอดกระเทียม,蒜香炸猪肉,마늘 돼지고기 튀김,ガーリックポーク,Heo chiên tỏi,"fried pork,garlic",35000,,RCAT-RESTAURANT|RCAT-THAIFOOD|RCAT-MADETOORDER
-15,ໝູຊຸບແປ້ງທອດ,Battered Fried Pork,หมูชุบแป้งทอด,炸猪排,돈까스,とんかつ,Heo cốt lết,"pork cutlet,breaded",35000,,RCAT-JAPANESEFOOD|RCAT-RESTAURANT
-15,ປາທອດ,Fried Fish,ปลาทอด,炸鱼,생선 튀김,フライドフィッシュ,Cá chiên,"fried fish",40000,,RCAT-RESTAURANT|RCAT-SEAFOOD|RCAT-MADETOORDER
-15,ປາທອດນ້ຳປາ,Fish Sauce Fried Fish,ปลาทอดน้ำปลา,鱼露炸鱼,남빠 생선 튀김,ナンプラーフィッシュ,Cá chiên nước mắm,"fried fish,fish sauce",45000,,RCAT-VIETNAMESEFOOD|RCAT-THAIFOOD
-15,ປາທອດກະທຽມ,Garlic Fried Fish,ปลาทอดกระเทียม,蒜香炸鱼,마늘 생선 튀김,ガーリックフィッシュ,Cá chiên tỏi,"fried fish,garlic",45000,,RCAT-RESTAURANT|RCAT-SEAFOOD
-15,ກຸ້ງທອດ,Fried Shrimp,กุ้งทอด,炸虾,새우튀김,エビフライ,Tôm chiên,"fried shrimp,tempura",45000,,RCAT-RESTAURANT|RCAT-SEAFOOD|RCAT-JAPANESEFOOD
-15,ກຸ້ງຊຸບແປ້ງທອດ,Tempura Shrimp,กุ้งชุบแป้งทอด,炸大虾,새우 덴뿌라,海老天ぷら,Tôm tẩm bột chiên,"tempura,shrimp,battered",50000,,RCAT-JAPANESEFOOD|RCAT-RESTAURANT
-15,ປາຫມຶກທອດ,Fried Calamari,ปลาหมึกทอด,炸鱿鱼,오징어 튀김,イカフライ,Mực chiên giòn,"calamari,fried,squid",40000,,RCAT-RESTAURANT|RCAT-SEAFOOD|RCAT-BEERGARDEN
-15,ເຕົ້າຫູ້ທອດ,Fried Tofu,เต้าหู้ทอด,炸豆腐,두부 튀김,揚げ豆腐,Đậu hủ chiên,"tofu,fried,vegetarian",25000,,RCAT-RESTAURANT|RCAT-CHINESEFOOD
-15,ຜັກທອດ,Fried Vegetables,ผักทอด,炸蔬菜,야채 튀김,野菜の天ぷら,Rau củ chiên,"vegetable,tempura",28000,,RCAT-JAPANESEFOOD|RCAT-RESTAURANT
-15,ປໍເປ໊ຍທອດ,Fried Spring Rolls,ปอเปี๊ยะทอด,炸春卷,스프링롤,春巻き,Chả giò,"spring roll,fried",25000,,RCAT-VIETNAMESEFOOD|RCAT-CHINESEFOOD|RCAT-RESTAURANT
-15,ເຂົ້າຫມານທອດ,Fried Dumpling,เกี๊ยวทอด,炸饺子,군만두,揚げ餃子,Há cảo chiên,"dumpling,fried,gyoza",25000,,RCAT-CHINESEFOOD|RCAT-JAPANESEFOOD
+code,categoryIndex,name,name_en,name_th,name_cn,name_kr,name_jp,name_vi,keywords,standardPrice,imageUrl,recommendedRestaurantTypes
+MENU-COFFEE-HOT,0,ກາເຟຮ້ອນ,Hot Coffee,กาแฟร้อน,热咖啡,핫 커피,ホットコーヒー,Cà phê nóng,"coffee,hot,ກາເຟ",15000,,RCAT-CAFE|RCAT-COFFEESHOP|RCAT-RESTAURANT|RCAT-HOTEL
+MENU-COFFEE-ICED,0,ກາເຟເຢັນ,Iced Coffee,กาแฟเย็น,冰咖啡,아이스 커피,アイスコーヒー,Cà phê đá,"coffee,iced,cold",18000,,RCAT-CAFE|RCAT-COFFEESHOP|RCAT-RESTAURANT
+MENU-AMERICANO,0,ອາເມຣິກາໂນ,Americano,อเมริกาโน่,美式咖啡,아메리카노,アメリカーノ,Americano,"americano,black coffee",20000,,RCAT-CAFE|RCAT-COFFEESHOP
+MENU-AMERICANO-ICED,0,ອາເມຣິກາໂນເຢັນ,Iced Americano,อเมริกาโน่เย็น,冰美式咖啡,아이스 아메리카노,アイスアメリカーノ,Americano đá,"americano,iced",22000,,RCAT-CAFE|RCAT-COFFEESHOP
+MENU-LATTE,0,ລາເຕ້,Latte,ลาเต้,拿铁,라떼,ラテ,Latte,"latte,milk coffee",25000,,RCAT-CAFE|RCAT-COFFEESHOP|RCAT-HOTEL
+MENU-LATTE-ICED,0,ລາເຕ້ເຢັນ,Iced Latte,ลาเต้เย็น,冰拿铁,아이스 라떼,アイスラテ,Latte đá,"latte,iced",28000,,RCAT-CAFE|RCAT-COFFEESHOP
+MENU-CAPPUCCINO,0,ຄາປູຊິໂນ,Cappuccino,คาปูชิโน่,卡布奇诺,카푸치노,カプチーノ,Cappuccino,"cappuccino,foam",25000,,RCAT-CAFE|RCAT-COFFEESHOP|RCAT-HOTEL
+MENU-CAPPUCCINO-ICED,0,ຄາປູຊິໂນເຢັນ,Iced Cappuccino,คาปูชิโน่เย็น,冰卡布奇诺,아이스 카푸치노,アイスカプチーノ,Cappuccino đá,"cappuccino,iced",28000,,RCAT-CAFE|RCAT-COFFEESHOP
+MENU-MOCHA,0,ໂມຄ່າ,Mocha,มอคค่า,摩卡,모카,モカ,Mocha,"mocha,chocolate coffee",28000,,RCAT-CAFE|RCAT-COFFEESHOP
+MENU-MOCHA-ICED,0,ໂມຄ່າເຢັນ,Iced Mocha,มอคค่าเย็น,冰摩卡,아이스 모카,アイスモカ,Mocha đá,"mocha,iced",30000,,RCAT-CAFE|RCAT-COFFEESHOP
+MENU-ESPRESSO,0,ເອສເປຣສໂຊ,Espresso,เอสเปรสโซ่,浓缩咖啡,에스프레소,エスプレッソ,Espresso,"espresso,shot",15000,,RCAT-CAFE|RCAT-COFFEESHOP|RCAT-HOTEL
+MENU-ESPRESSO-DOUBLE,0,ເອສເປຣສໂຊຄູ່,Double Espresso,ดับเบิ้ลเอสเปรสโซ่,双份浓缩,더블 에스프레소,ダブルエスプレッソ,Espresso đúp,"espresso,double",20000,,RCAT-CAFE|RCAT-COFFEESHOP
+MENU-MACCHIATO,0,ແມັກຄິອາໂຕ,Macchiato,แมคคิอาโต้,玛奇朵,마끼아또,マキアート,Macchiato,"macchiato,espresso",22000,,RCAT-CAFE|RCAT-COFFEESHOP
+MENU-CARAMEL-MACCHIATO,0,ຄາລາເມວ ແມັກຄິອາໂຕ,Caramel Macchiato,คาราเมลแมคคิอาโต้,焦糖玛奇朵,카라멜 마끼아또,キャラメルマキアート,Caramel Macchiato,"caramel,macchiato",30000,,RCAT-CAFE|RCAT-COFFEESHOP
+MENU-FRAPPE,0,ແຟຣບເປ,Frappe,แฟรปเป้,星冰乐,프라페,フラペチーノ,Frappé,"frappe,blended",30000,,RCAT-CAFE|RCAT-COFFEESHOP
+MENU-COFFEE-CONDENSED,0,ກາເຟນົມຂົ້ນຫວານ,Coffee with Condensed Milk,กาแฟนมข้นหวาน,炼乳咖啡,연유 커피,練乳コーヒー,Cà phê sữa đặc,"condensed milk,sweet",20000,,RCAT-CAFE|RCAT-VIETNAMESEFOOD|RCAT-RESTAURANT
+MENU-COFFEE-OVALTINE,0,ກາເຟໂອວັນຕິນ,Ovaltine Coffee,กาแฟโอวัลติน,阿华田咖啡,오발틴 커피,オバルチンコーヒー,Cà phê Ovaltine,"ovaltine,malt",22000,,RCAT-CAFE|RCAT-RESTAURANT
+MENU-COFFEE-BLACK,0,ກາເຟດຳ,Black Coffee,กาแฟดำ,黑咖啡,블랙 커피,ブラックコーヒー,Cà phê đen,"black,no milk",12000,,RCAT-CAFE|RCAT-VIETNAMESEFOOD|RCAT-RESTAURANT
+MENU-TEA-HOT,1,ຊາຮ້ອນ,Hot Tea,ชาร้อน,热茶,핫 티,ホットティー,Trà nóng,"tea,hot,ຊາ",12000,,RCAT-CAFE|RCAT-RESTAURANT|RCAT-CHINESEFOOD
+MENU-TEA-ICED,1,ຊາເຢັນ,Iced Tea,ชาเย็น,冰茶,아이스 티,アイスティー,Trà đá,"tea,iced,cold",15000,,RCAT-CAFE|RCAT-RESTAURANT|RCAT-BEERGARDEN
+MENU-TEA-GREEN,1,ຊາຂຽວ,Green Tea,ชาเขียว,绿茶,녹차,緑茶,Trà xanh,"green tea,matcha",18000,,RCAT-CAFE|RCAT-JAPANESEFOOD|RCAT-BUBBLETEA
+MENU-TEA-GREEN-ICED,1,ຊາຂຽວເຢັນ,Iced Green Tea,ชาเขียวเย็น,冰绿茶,아이스 녹차,アイス緑茶,Trà xanh đá,"green tea,iced",20000,,RCAT-CAFE|RCAT-BUBBLETEA
+MENU-TEA-MILK,1,ຊານົມ,Milk Tea,ชานม,奶茶,밀크티,ミルクティー,Trà sữa,"milk tea,ຊານົມ",20000,,RCAT-BUBBLETEA|RCAT-CAFE|RCAT-RESTAURANT
+MENU-TEA-MILK-ICED,1,ຊານົມເຢັນ,Iced Milk Tea,ชานมเย็น,冰奶茶,아이스 밀크티,アイスミルクティー,Trà sữa đá,"milk tea,iced",22000,,RCAT-BUBBLETEA|RCAT-CAFE
+MENU-TEA-THAI,1,ຊານົມໄທ,Thai Milk Tea,ชาไทย,泰式奶茶,타이 밀크티,タイミルクティー,Trà sữa Thái,"thai tea,orange",22000,,RCAT-BUBBLETEA|RCAT-THAIFOOD|RCAT-CAFE
+MENU-TEA-BUBBLE,1,ຊານົມໄຂ່ມຸກ,Bubble Milk Tea,ชานมไข่มุก,珍珠奶茶,버블티,タピオカミルクティー,Trà sữa trân châu,"bubble tea,boba,pearl",25000,,RCAT-BUBBLETEA|RCAT-CAFE
+MENU-TEA-LEMON,1,ຊາມະນາວ,Lemon Tea,ชามะนาว,柠檬茶,레몬티,レモンティー,Trà chanh,"lemon tea,citrus",18000,,RCAT-CAFE|RCAT-RESTAURANT
+MENU-TEA-FLOWER,1,ຊາດອກໄມ້,Flower Tea,ชาดอกไม้,花茶,꽃차,フラワーティー,Trà hoa,"flower tea,herbal",20000,,RCAT-CAFE|RCAT-CHINESEFOOD
+MENU-TEA-GINGER,1,ຊາຂິງ,Ginger Tea,ชาขิง,姜茶,생강차,ジンジャーティー,Trà gừng,"ginger tea,ຂິງ",15000,,RCAT-CAFE|RCAT-RESTAURANT
+MENU-MATCHA-LATTE,1,ມັດຊະ ລາເຕ້,Matcha Latte,มัทฉะลาเต้,抹茶拿铁,말차 라떼,抹茶ラテ,Matcha Latte,"matcha,latte,green tea",28000,,RCAT-CAFE|RCAT-JAPANESEFOOD
+MENU-SMOOTHIE-BANANA,2,ສະມູດຕີ້ໝາກກ້ວຍ,Banana Smoothie,สมูทตี้กล้วย,香蕉冰沙,바나나 스무디,バナナスムージー,Sinh tố chuối,"banana,smoothie,blend",25000,,RCAT-CAFE|RCAT-DESSERT
+MENU-SMOOTHIE-MANGO,2,ສະມູດຕີ້ໝາກມ່ວງ,Mango Smoothie,สมูทตี้มะม่วง,芒果冰沙,망고 스무디,マンゴースムージー,Sinh tố xoài,"mango,smoothie",28000,,RCAT-CAFE|RCAT-DESSERT
+MENU-SMOOTHIE-STRAWBERRY,2,ສະມູດຕີ້ໝາກສະຕໍເບີຣີ,Strawberry Smoothie,สมูทตี้สตรอเบอร์รี่,草莓冰沙,딸기 스무디,イチゴスムージー,Sinh tố dâu,"strawberry,smoothie",28000,,RCAT-CAFE|RCAT-DESSERT
+MENU-SMOOTHIE-MIXED,2,ສະມູດຕີ້ໝາກໄມ້ລວມ,Mixed Fruit Smoothie,สมูทตี้ผลไม้รวม,综合水果冰沙,믹스 과일 스무디,ミックスフルーツスムージー,Sinh tố trái cây thập cẩm,"mixed fruit,smoothie",30000,,RCAT-CAFE|RCAT-DESSERT
+MENU-MILKSHAKE,2,ເຊກນົມ,Milk Shake,มิลค์เชค,奶昔,밀크쉐이크,ミルクシェイク,Sữa lắc,"milkshake,shake",25000,,RCAT-CAFE|RCAT-FASTFOOD
+MENU-MILKSHAKE-CHOCO,2,ເຊກຊອກໂກແລັດ,Chocolate Shake,ช็อกโกแลตเชค,巧克力奶昔,초코 쉐이크,チョコレートシェイク,Sữa lắc socola,"chocolate,shake",28000,,RCAT-CAFE|RCAT-FASTFOOD
+MENU-MILKSHAKE-VANILLA,2,ເຊກວານິລາ,Vanilla Shake,วานิลลาเชค,香草奶昔,바닐라 쉐이크,バニラシェイク,Sữa lắc vani,"vanilla,shake",28000,,RCAT-CAFE|RCAT-FASTFOOD
+MENU-SMOOTHIE-YOGURT,2,ໂຢເກີດສະມູດຕີ້,Yogurt Smoothie,โยเกิร์ตสมูทตี้,酸奶冰沙,요거트 스무디,ヨーグルトスムージー,Sinh tố sữa chua,"yogurt,smoothie",28000,,RCAT-CAFE|RCAT-DESSERT
+MENU-JUICE-ORANGE,3,ນ້ຳສົ້ມຄັ້ນ,Fresh Orange Juice,น้ำส้มคั้น,鲜榨橙汁,생오렌지 주스,フレッシュオレンジジュース,Nước cam tươi,"orange,fresh,juice",20000,,RCAT-CAFE|RCAT-RESTAURANT|RCAT-HOTEL
+MENU-JUICE-LIME,3,ນ້ຳໝາກນາວ,Lime Juice,น้ำมะนาว,柠檬汁,라임 주스,ライムジュース,Nước chanh,"lime,lemon,juice",15000,,RCAT-CAFE|RCAT-RESTAURANT|RCAT-BEERGARDEN
+MENU-JUICE-COCONUT,3,ນ້ຳໝາກພ້າວ,Coconut Water,น้ำมะพร้าว,椰子水,코코넛 워터,ココナッツウォーター,Nước dừa,"coconut,fresh",20000,,RCAT-CAFE|RCAT-RESTAURANT|RCAT-BEERGARDEN
+MENU-JUICE-WATERMELON,3,ນ້ຳໝາກໂມ,Watermelon Juice,น้ำแตงโม,西瓜汁,수박 주스,スイカジュース,Nước dưa hấu,"watermelon,juice",18000,,RCAT-CAFE|RCAT-RESTAURANT
+MENU-JUICE-PINEAPPLE,3,ນ້ຳສັບປະລົດ,Pineapple Juice,น้ำสับปะรด,菠萝汁,파인애플 주스,パイナップルジュース,Nước dứa,"pineapple,juice",18000,,RCAT-CAFE|RCAT-RESTAURANT
+MENU-JUICE-APPLE,3,ນ້ຳແອັບເປິ້ນ,Apple Juice,น้ำแอปเปิ้ล,苹果汁,사과 주스,アップルジュース,Nước táo,"apple,juice",20000,,RCAT-CAFE|RCAT-RESTAURANT
+MENU-JUICE-DRAGON,3,ນ້ຳມັງກອນ,Dragon Fruit Juice,น้ำแก้วมังกร,火龙果汁,용과 주스,ドラゴンフルーツジュース,Nước thanh long,"dragon fruit,juice",22000,,RCAT-CAFE|RCAT-RESTAURANT
+MENU-JUICE-PASSION,3,ນ້ຳໝາກກ້ຽງ,Passion Fruit Juice,น้ำเสาวรส,百香果汁,패션후르츠 주스,パッションフルーツジュース,Nước chanh dây,"passion fruit,juice",22000,,RCAT-CAFE|RCAT-RESTAURANT
+MENU-COKE,4,ໂຄກ,Coca-Cola,โค้ก,可口可乐,코카콜라,コカ・コーラ,Coca-Cola,"coke,coca cola",10000,,RCAT-RESTAURANT|RCAT-FASTFOOD|RCAT-BEERGARDEN
+MENU-SPRITE,4,ສະໄປຣ,Sprite,สไปรท์,雪碧,스프라이트,スプライト,Sprite,"sprite,lemon lime",10000,,RCAT-RESTAURANT|RCAT-FASTFOOD|RCAT-BEERGARDEN
+MENU-FANTA,4,ແຟນຕ້າ,Fanta,แฟนต้า,芬达,환타,ファンタ,Fanta,"fanta,orange",10000,,RCAT-RESTAURANT|RCAT-FASTFOOD
+MENU-PEPSI,4,ເປັບຊີ,Pepsi,เป๊ปซี่,百事可乐,펩시,ペプシ,Pepsi,"pepsi,cola",10000,,RCAT-RESTAURANT|RCAT-FASTFOOD
+MENU-WATER,4,ນ້ຳແຮ່,Mineral Water,น้ำแร่,矿泉水,생수,ミネラルウォーター,Nước khoáng,"water,mineral",8000,,RCAT-RESTAURANT|RCAT-HOTEL|RCAT-CAFE
+MENU-SODA,4,ນ້ຳໂຊດາ,Soda Water,น้ำโซดา,苏打水,소다수,ソーダ水,Nước soda,"soda,sparkling",10000,,RCAT-BAR|RCAT-RESTAURANT
+MENU-REDBULL,4,ເຣດບູລ,Red Bull,เรดบูล,红牛,레드불,レッドブル,Red Bull,"red bull,energy",15000,,RCAT-RESTAURANT|RCAT-NIGHTCLUB|RCAT-BAR
+MENU-M150,4,ເອັມ150,M-150,เอ็ม150,M-150,엠150,M-150,M-150,"energy drink,m150",10000,,RCAT-RESTAURANT|RCAT-BEERGARDEN
+MENU-BEERLAO,5,ເບຍລາວ,Beerlao,เบียร์ลาว,老挝啤酒,비어라오,ビアラオ,Bia Lào,"beerlao,lao beer,ເບຍລາວ",15000,,RCAT-BEERGARDEN|RCAT-BEERHOUSE|RCAT-RESTAURANT|RCAT-LAOFOOD|RCAT-KARAOKE
+MENU-BEERLAO-DARK,5,ເບຍລາວດຳ,Beerlao Dark,เบียร์ลาวดำ,老挝黑啤,비어라오 다크,ビアラオダーク,Bia Lào đen,"beerlao dark,dark beer",18000,,RCAT-BEERGARDEN|RCAT-BEERHOUSE|RCAT-BAR
+MENU-BEERLAO-WHITE,5,ເບຍລາວຂາວ,Beerlao White,เบียร์ลาวขาว,老挝白啤,비어라오 화이트,ビアラオホワイト,Bia Lào trắng,"beerlao white",18000,,RCAT-BEERGARDEN|RCAT-BEERHOUSE|RCAT-BAR
+MENU-BEERLAO-GOLD,5,ເບຍລາວໂກລ,Beerlao Gold,เบียร์ลาวโกลด์,老挝金啤,비어라오 골드,ビアラオゴールド,Bia Lào vàng,"beerlao gold,premium",20000,,RCAT-BEERGARDEN|RCAT-BEERHOUSE|RCAT-BAR|RCAT-HOTEL
+MENU-HEINEKEN,5,ໄຮເນເກັນ,Heineken,ไฮเนเก้น,喜力,하이네켄,ハイネケン,Heineken,"heineken,imported",25000,,RCAT-BEERGARDEN|RCAT-BAR|RCAT-NIGHTCLUB|RCAT-HOTEL
+MENU-TIGER,5,ໄທເກີ,Tiger,ไทเกอร์,虎牌,타이거,タイガー,Tiger,"tiger,singapore",20000,,RCAT-BEERGARDEN|RCAT-BAR|RCAT-RESTAURANT
+MENU-SINGHA,5,ສິງ,Singha,สิงห์,胜狮,싱하,シンハー,Singha,"singha,thai beer",20000,,RCAT-BEERGARDEN|RCAT-BAR|RCAT-THAIFOOD
+MENU-CHANG,5,ຊ້າງ,Chang,ช้าง,象牌,창,チャーン,Chang,"chang,thai beer,elephant",18000,,RCAT-BEERGARDEN|RCAT-BAR|RCAT-THAIFOOD
+MENU-LEO,5,ລີໂອ,Leo,ลีโอ,利奥,레오,レオ,Leo,"leo,thai beer",18000,,RCAT-BEERGARDEN|RCAT-RESTAURANT|RCAT-THAIFOOD
+MENU-ASAHI,5,ອາຊາຮີ,Asahi,อาซาฮี,朝日,아사히,アサヒ,Asahi,"asahi,japanese beer",25000,,RCAT-BEERGARDEN|RCAT-BAR|RCAT-JAPANESEFOOD
+MENU-SAPPORO,5,ຊັບໂປໂຣ,Sapporo,ซัปโปโร,三宝乐,삿포로,サッポロ,Sapporo,"sapporo,japanese",25000,,RCAT-BEERGARDEN|RCAT-BAR|RCAT-JAPANESEFOOD
+MENU-KIRIN,5,ກິຣິນ,Kirin,คิริน,麒麟,기린,キリン,Kirin,"kirin,japanese",25000,,RCAT-BEERGARDEN|RCAT-BAR|RCAT-JAPANESEFOOD
+MENU-CORONA,5,ໂຄໂຣນາ,Corona,โคโรน่า,科罗娜,코로나,コロナ,Corona,"corona,mexican",30000,,RCAT-BAR|RCAT-BEERGARDEN|RCAT-NIGHTCLUB
+MENU-BUDWEISER,5,ບັດໄວເຊີ,Budweiser,บัดไวเซอร์,百威,버드와이저,バドワイザー,Budweiser,"budweiser,american",25000,,RCAT-BAR|RCAT-BEERGARDEN|RCAT-NIGHTCLUB
+MENU-STELLA,5,ສະເຕລາ ອາຕົວ,Stella Artois,สเตลล่าอาร์ทัวส์,时代,스텔라 아르투아,ステラ・アルトワ,Stella Artois,"stella,belgian",30000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
+MENU-HOEGAARDEN,5,ຮູການ,Hoegaarden,ฮูการ์เด้น,福佳,호가든,ヒューガルデン,Hoegaarden,"hoegaarden,wheat beer",30000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
+MENU-CARLSBERG,5,ຄາລສເບີກ,Carlsberg,คาร์ลสเบิร์ก,嘉士伯,칼스버그,カールスバーグ,Carlsberg,"carlsberg,danish",22000,,RCAT-BEERGARDEN|RCAT-BAR
+MENU-AMSTEL,5,ແອັບສະເຕລ,Amstel,แอมสเตล,阿姆斯特丹,암스텔,アムステル,Amstel,"amstel,dutch",22000,,RCAT-BAR|RCAT-BEERGARDEN
+MENU-GUINNESS,5,ກິນເນສ,Guinness,กินเนสส์,健力士,기네스,ギネス,Guinness,"guinness,stout",35000,,RCAT-BAR|RCAT-HOTEL
+MENU-BEER-DRAFT-S,5,ເບຍສົດ (ນ້ອຍ),Draft Beer (Small),เบียร์สด (เล็ก),生啤 (小),생맥주 (소),生ビール (小),Bia tươi (nhỏ),"draft beer,small",20000,,RCAT-BEERGARDEN|RCAT-BEERHOUSE|RCAT-BAR
+MENU-BEER-DRAFT-L,5,ເບຍສົດ (ໃຫຍ່),Draft Beer (Large),เบียร์สด (ใหญ่),生啤 (大),생맥주 (대),生ビール (大),Bia tươi (lớn),"draft beer,large",35000,,RCAT-BEERGARDEN|RCAT-BEERHOUSE|RCAT-BAR
+MENU-BEER-TOWER,5,ເບຍຖັງ,Beer Tower,เบียร์ทาวเวอร์,啤酒塔,맥주 타워,ビールタワー,Tháp bia,"beer tower,pitcher",150000,,RCAT-BEERGARDEN|RCAT-BEERHOUSE|RCAT-BAR|RCAT-NIGHTCLUB
+MENU-JW-RED,6,ຈອນນີ ວອກເກີ (ແດງ),Johnnie Walker (Red Label),จอห์นนี่ วอล์คเกอร์ (แดง),尊尼获加红牌,조니워커 (레드),ジョニーウォーカー (レッド),Johnnie Walker (Đỏ),"johnnie walker,red label,whiskey",25000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-KARAOKE|RCAT-BEERGARDEN
+MENU-JW-BLACK,6,ຈອນນີ ວອກເກີ (ດຳ),Johnnie Walker (Black Label),จอห์นนี่ วอล์คเกอร์ (ดำ),尊尼获加黑牌,조니워커 (블랙),ジョニーウォーカー (ブラック),Johnnie Walker (Đen),"johnnie walker,black label",35000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-KARAOKE|RCAT-HOTEL
+MENU-JW-GOLD,6,ຈອນນີ ວອກເກີ (ຄຳ),Johnnie Walker (Gold Label),จอห์นนี่ วอล์คเกอร์ (ทอง),尊尼获加金牌,조니워커 (골드),ジョニーウォーカー (ゴールド),Johnnie Walker (Vàng),"johnnie walker,gold label",50000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
+MENU-JW-BLUE,6,ຈອນນີ ວອກເກີ (ຟ້າ),Johnnie Walker (Blue Label),จอห์นนี่ วอล์คเกอร์ (น้ำเงิน),尊尼获加蓝牌,조니워커 (블루),ジョニーウォーカー (ブルー),Johnnie Walker (Xanh),"johnnie walker,blue label",150000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
+MENU-CHIVAS-12,6,ຊີວັສ ຣີໂກລ (12ປີ),Chivas Regal (12 Year),ชีวาส รีกัล (12 ปี),芝华士 (12年),시바스 리갈 (12년),シーバス リーガル (12年),Chivas Regal (12 năm),"chivas regal,12 year,whiskey",35000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-KARAOKE
+MENU-CHIVAS-18,6,ຊີວັສ ຣີໂກລ (18ປີ),Chivas Regal (18 Year),ชีวาส รีกัล (18 ปี),芝华士 (18年),시바스 리갈 (18년),シーバス リーガル (18年),Chivas Regal (18 năm),"chivas regal,18 year",60000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
+MENU-JACK-DANIELS,6,ແຈັກ ແດນນຽລ,Jack Daniel's,แจ็ค แดเนียลส์,杰克丹尼,잭 다니엘스,ジャック ダニエル,Jack Daniel's,"jack daniels,tennessee whiskey",30000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-KARAOKE
+MENU-JIM-BEAM,6,ຈິມ ບີມ,Jim Beam,จิม บีม,占边,짐 빔,ジム ビーム,Jim Beam,"jim beam,bourbon",25000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-BEERGARDEN
+MENU-BALLANTINES,6,ບາເລນທາຍ,Ballantine's,บาเลนไทน์,百龄坛,발렌타인,バランタイン,Ballantine's,"ballantines,scotch",25000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-KARAOKE
+MENU-HENNESSY-VS,6,ເຮັນເນຊີ VS,Hennessy VS,เฮนเนสซี่ วีเอส,轩尼诗VS,헤네시 VS,ヘネシー VS,Hennessy VS,"hennessy,cognac,vs",40000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-KARAOKE
+MENU-HENNESSY-VSOP,6,ເຮັນເນຊີ VSOP,Hennessy VSOP,เฮนเนสซี่ วีเอสโอพี,轩尼诗VSOP,헤네시 VSOP,ヘネシー VSOP,Hennessy VSOP,"hennessy,vsop,cognac",60000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
+MENU-HENNESSY-XO,6,ເຮັນເນຊີ XO,Hennessy XO,เฮนเนสซี่ เอ็กซ์โอ,轩尼诗XO,헤네시 XO,ヘネシー XO,Hennessy XO,"hennessy,xo,cognac",200000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
+MENU-LAOLAO,6,ເຫຼົ້າຂາວລາວ,Lao-Lao (Rice Whiskey),เหล้าขาวลาว,老挝米酒,라오라오,ラオラオ,Rượu gạo Lào,"lao lao,rice whiskey,ເຫຼົ້າຂາວ",10000,,RCAT-BEERGARDEN|RCAT-LAOFOOD|RCAT-RESTAURANT
+MENU-SMIRNOFF,6,ສະມິໂນຟ (ວອດກາ),Smirnoff (Vodka),สเมียร์นอฟ (วอดก้า),斯米诺伏特加,스미노프 (보드카),スミノフ (ウォッカ),Smirnoff (Vodka),"smirnoff,vodka",25000,,RCAT-BAR|RCAT-NIGHTCLUB
+MENU-ABSOLUT,6,ແອັບໂຊລຸດ (ວອດກາ),Absolut (Vodka),แอบโซลูท (วอดก้า),绝对伏特加,앱솔루트 (보드카),アブソルート (ウォッカ),Absolut (Vodka),"absolut,vodka,swedish",30000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-HOTEL
+MENU-GREYGOOSE,6,ເກຣ ກູສ (ວອດກາ),Grey Goose (Vodka),เกรย์กูส (วอดก้า),灰雁伏特加,그레이구스 (보드카),グレイグース (ウォッカ),Grey Goose (Vodka),"grey goose,vodka,french",45000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
+MENU-BACARDI,6,ບາກາດີ (ຣັມ),Bacardi (Rum),บาคาร์ดี (รัม),百加得朗姆酒,바카디 (럼),バカルディ (ラム),Bacardi (Rum),"bacardi,rum,white rum",25000,,RCAT-BAR|RCAT-NIGHTCLUB
+MENU-CAPTAIN-MORGAN,6,ກັບຕັນ ມໍແກນ (ຣັມ),Captain Morgan (Rum),กัปตันมอร์แกน (รัม),摩根船长朗姆酒,캡틴 모건 (럼),キャプテンモルガン (ラム),Captain Morgan (Rum),"captain morgan,rum,spiced",28000,,RCAT-BAR|RCAT-NIGHTCLUB
+MENU-JOSE-CUERVO,6,ໂຮເຊ ເກີໂວ (ເຕກີລາ),Jose Cuervo (Tequila),โฮเซ่ เกร์โว (เตกีล่า),豪帅龙舌兰,호세 쿠에르보 (데킬라),ホセ・クエルボ (テキーラ),Jose Cuervo (Tequila),"jose cuervo,tequila",30000,,RCAT-BAR|RCAT-NIGHTCLUB
+MENU-PATRON,6,ເປຕຣ໋ອນ (ເຕກີລາ),Patron (Tequila),แพทรอน (เตกีล่า),培恩龙舌兰,패트론 (데킬라),パトロン (テキーラ),Patron (Tequila),"patron,tequila,premium",50000,,RCAT-BAR|RCAT-HOTEL
+MENU-BOMBAY,6,ບອມເບ (ຈິນ),Bombay Sapphire (Gin),บอมเบย์ (จิน),孟买蓝宝石金酒,봄베이 (진),ボンベイ (ジン),Bombay Sapphire (Gin),"bombay,gin,sapphire",30000,,RCAT-BAR|RCAT-HOTEL
+MENU-GORDONS,6,ກໍດອນ (ຈິນ),Gordon's (Gin),กอร์ดอนส์ (จิน),哥顿金酒,고든스 (진),ゴードン (ジン),Gordon's (Gin),"gordons,gin",25000,,RCAT-BAR|RCAT-NIGHTCLUB
+MENU-JAGERMEISTER,6,ເຢເກີໄມສເຕີ,Jagermeister,เยเกอร์ไมสเตอร์,野格,예거마이스터,イエーガーマイスター,Jagermeister,"jagermeister,herbal",30000,,RCAT-BAR|RCAT-NIGHTCLUB
+MENU-WINE-RED-G,7,ໄວນ໌ແດງ (ແກ້ວ),Red Wine (Glass),ไวน์แดง (แก้ว),红酒 (杯),레드와인 (잔),赤ワイン (グラス),Rượu vang đỏ (ly),"red wine,glass",35000,,RCAT-BAR|RCAT-FINEDINING|RCAT-HOTEL|RCAT-WESTERNFOOD
+MENU-WINE-RED-B,7,ໄວນ໌ແດງ (ຂວດ),Red Wine (Bottle),ไวน์แดง (ขวด),红酒 (瓶),레드와인 (병),赤ワイン (ボトル),Rượu vang đỏ (chai),"red wine,bottle",250000,,RCAT-BAR|RCAT-FINEDINING|RCAT-HOTEL
+MENU-WINE-WHITE-G,7,ໄວນ໌ຂາວ (ແກ້ວ),White Wine (Glass),ไวน์ขาว (แก้ว),白酒 (杯),화이트와인 (잔),白ワイン (グラス),Rượu vang trắng (ly),"white wine,glass",35000,,RCAT-BAR|RCAT-FINEDINING|RCAT-HOTEL|RCAT-SEAFOOD
+MENU-WINE-WHITE-B,7,ໄວນ໌ຂາວ (ຂວດ),White Wine (Bottle),ไวน์ขาว (ขวด),白酒 (瓶),화이트와인 (병),白ワイン (ボトル),Rượu vang trắng (chai),"white wine,bottle",250000,,RCAT-BAR|RCAT-FINEDINING|RCAT-HOTEL
+MENU-WINE-ROSE-G,7,ໄວນ໌ໂຣເຊ (ແກ້ວ),Rosé Wine (Glass),ไวน์โรเซ่ (แก้ว),玫瑰酒 (杯),로제와인 (잔),ロゼワイン (グラス),Rượu vang hồng (ly),"rose wine,pink",35000,,RCAT-BAR|RCAT-FINEDINING|RCAT-HOTEL
+MENU-WINE-ROSE-B,7,ໄວນ໌ໂຣເຊ (ຂວດ),Rosé Wine (Bottle),ไวน์โรเซ่ (ขวด),玫瑰酒 (瓶),로제와인 (병),ロゼワイン (ボトル),Rượu vang hồng (chai),"rose wine,bottle",250000,,RCAT-BAR|RCAT-FINEDINING|RCAT-HOTEL
+MENU-CHAMPAGNE,7,ແຊມເປນ,Champagne,แชมเปญ,香槟,샴페인,シャンパン,Champagne,"champagne,sparkling",80000,,RCAT-FINEDINING|RCAT-HOTEL|RCAT-NIGHTCLUB
+MENU-SPARKLING,7,ສະປາກລິ້ງໄວນ໌,Sparkling Wine,ไวน์สปาร์คกลิ้ง,起泡酒,스파클링와인,スパークリングワイン,Rượu vang sủi,"sparkling wine,prosecco",60000,,RCAT-BAR|RCAT-FINEDINING|RCAT-HOTEL
+MENU-MOJITO,8,ໂມຈິໂຕ,Mojito,โมฮิโต้,莫吉托,모히토,モヒート,Mojito,"mojito,rum,mint",45000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-BEERGARDEN
+MENU-MARGARITA,8,ມາກາຣິຕາ,Margarita,มาร์การิต้า,玛格丽特,마가리타,マルガリータ,Margarita,"margarita,tequila,lime",45000,,RCAT-BAR|RCAT-NIGHTCLUB
+MENU-LONGISLAND,8,ລອງ ໄອແລນ ໄອສ ທີ,Long Island Iced Tea,ลองไอส์แลนด์ไอซ์ที,长岛冰茶,롱 아일랜드 아이스티,ロングアイランドアイスティー,Trà đá Long Island,"long island,mixed",50000,,RCAT-BAR|RCAT-NIGHTCLUB
+MENU-WHISKEY-SOUR,8,ໄວສກີ ຊາວ,Whiskey Sour,วิสกี้ซาวร์,威士忌酸酒,위스키 사워,ウイスキーサワー,Whiskey Sour,"whiskey sour,lemon",40000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-HOTEL
+MENU-COSMO,8,ຄອສໂມໂປລິຕັນ,Cosmopolitan,คอสโมโพลิแทน,大都会,코스모폴리탄,コスモポリタン,Cosmopolitan,"cosmopolitan,vodka",45000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-HOTEL
+MENU-RUM-COKE,8,ຣັມແອນໂຄກ,Rum and Coke,รัมแอนด์โค้ก,朗姆可乐,럼 앤 코크,ラム＆コーク,Rum và Coca,"rum coke,cuba libre",35000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-BEERGARDEN
+MENU-GIN-TONIC,8,ຈິນໂທນິກ,Gin and Tonic,จิน แอนด์ โทนิก,金汤力,진 토닉,ジン・トニック,Gin Tonic,"gin tonic,g&t",35000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-HOTEL
+MENU-VODKA-TONIC,8,ວອດກາໂທນິກ,Vodka Tonic,วอดก้าโทนิก,伏特加汤力,보드카 토닉,ウォッカトニック,Vodka Tonic,"vodka tonic",35000,,RCAT-BAR|RCAT-NIGHTCLUB
+MENU-SCREWDRIVER,8,ສະກຣູໄດເວີ,Screwdriver,สกรูไดร์เวอร์,螺丝刀,스크루 드라이버,スクリュードライバー,Screwdriver,"screwdriver,vodka orange",35000,,RCAT-BAR|RCAT-NIGHTCLUB
+MENU-TEQUILA-SUNRISE,8,ເຕກີລາ ຊັນໄຣສ໌,Tequila Sunrise,เตกีล่าซันไรส์,龙舌兰日出,데킬라 선라이즈,テキーラサンライズ,Tequila Sunrise,"tequila sunrise,orange",40000,,RCAT-BAR|RCAT-NIGHTCLUB
+MENU-BLOODY-MARY,8,ບລັດດີ ແມຣີ,Bloody Mary,บลัดดี้แมรี่,血腥玛丽,블러디 메리,ブラッディマリー,Bloody Mary,"bloody mary,vodka tomato",40000,,RCAT-BAR|RCAT-HOTEL
+MENU-PINA-COLADA,8,ປິນາ ໂຄລາດາ,Pina Colada,พีน่า โคลาด้า,椰林飘香,피나 콜라다,ピニャ・コラーダ,Pina Colada,"pina colada,rum coconut",45000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-BEERGARDEN
+MENU-MARTINI,8,ມາຕິນີ,Martini,มาตินี่,马提尼,마티니,マティーニ,Martini,"martini,gin,vermouth",45000,,RCAT-BAR|RCAT-HOTEL|RCAT-FINEDINING
+MENU-AMARETTO-SOUR,8,ອາເມເຣດໂຕ ຊາວ,Amaretto Sour,อมาเรตโต้ซาวร์,杏仁利口酒酸酒,아마레또 사워,アマレットサワー,Amaretto Sour,"amaretto sour,almond",40000,,RCAT-BAR|RCAT-NIGHTCLUB
+MENU-B52,8,ຊ໋ອດ B-52,B-52,บี52,B-52,B-52,B-52,B-52,"b52,shot,layered",40000,,RCAT-BAR|RCAT-NIGHTCLUB
+MENU-JELLY-SHOT,8,ເຢລີ ຊ໋ອດ,Jelly Shot,เยลลี่ช็อต,果冻酒,젤리 샷,ゼリーショット,Thạch rượu,"jelly shot,party",20000,,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-KARAOKE
+MENU-FRIED-RICE,9,ເຂົ້າຜັດ,Fried Rice,ข้าวผัด,炒饭,볶음밥,チャーハン,Cơm chiên,"fried rice,ເຂົ້າຜັດ,ข้าวผัด",25000,,RCAT-RESTAURANT|RCAT-MADETOORDER|RCAT-THAIFOOD|RCAT-CHINESEFOOD
+MENU-FRIED-RICE-CHICKEN,9,ເຂົ້າຜັດໄກ່,Chicken Fried Rice,ข้าวผัดไก่,鸡肉炒饭,치킨 볶음밥,チキンチャーハン,Cơm chiên gà,"fried rice,chicken",30000,,RCAT-RESTAURANT|RCAT-MADETOORDER|RCAT-FAMILYREST
+MENU-FRIED-RICE-PORK,9,ເຂົ້າຜັດໝູ,Pork Fried Rice,ข้าวผัดหมู,猪肉炒饭,돼지고기 볶음밥,ポークチャーハン,Cơm chiên heo,"fried rice,pork",30000,,RCAT-RESTAURANT|RCAT-MADETOORDER
+MENU-FRIED-RICE-SHRIMP,9,ເຂົ້າຜັດກຸ້ງ,Shrimp Fried Rice,ข้าวผัดกุ้ง,虾仁炒饭,새우 볶음밥,エビチャーハン,Cơm chiên tôm,"fried rice,shrimp",35000,,RCAT-RESTAURANT|RCAT-SEAFOOD|RCAT-CHINESEFOOD
+MENU-FRIED-RICE-CRAB,9,ເຂົ້າຜັດປູ,Crab Fried Rice,ข้าวผัดปู,蟹肉炒饭,게살 볶음밥,カニチャーハン,Cơm chiên cua,"fried rice,crab",40000,,RCAT-RESTAURANT|RCAT-SEAFOOD|RCAT-CHINESEFOOD
+MENU-FRIED-RICE-SEAFOOD,9,ເຂົ້າຜັດທະເລ,Seafood Fried Rice,ข้าวผัดทะเล,海鲜炒饭,해물 볶음밥,シーフードチャーハン,Cơm chiên hải sản,"fried rice,seafood",40000,,RCAT-RESTAURANT|RCAT-SEAFOOD
+MENU-FRIED-RICE-AMERICAN,9,ເຂົ້າຜັດອາເມລິກັນ,American Fried Rice,ข้าวผัดอเมริกัน,美式炒饭,아메리칸 볶음밥,アメリカンチャーハン,Cơm chiên kiểu Mỹ,"fried rice,sausage,egg",35000,,RCAT-RESTAURANT|RCAT-FAMILYREST
+MENU-FRIED-RICE-CURRY,9,ເຂົ້າຜັດຜົງກະຫຼີ,Curry Fried Rice,ข้าวผัดผงกะหรี่,咖喱炒饭,카레 볶음밥,カレーチャーハン,Cơm chiên cà ri,"fried rice,curry",30000,,RCAT-RESTAURANT|RCAT-THAIFOOD
+MENU-FRIED-RICE-BASIL,9,ເຂົ້າຜັດກະເພົາ,Basil Fried Rice,ข้าวผัดกะเพรา,九层塔炒饭,바질 볶음밥,バジルチャーハン,Cơm chiên húng quế,"fried rice,basil,spicy",30000,,RCAT-RESTAURANT|RCAT-THAIFOOD|RCAT-MADETOORDER
+MENU-FRIED-RICE-CHILI,9,ເຂົ້າຜັດນ້ຳພິກເຜົາ,Chili Paste Fried Rice,ข้าวผัดน้ำพริกเผา,辣酱炒饭,칠리페이스트 볶음밥,チリペーストチャーハン,Cơm chiên ớt xào,"fried rice,chili paste",30000,,RCAT-RESTAURANT|RCAT-THAIFOOD
+MENU-STICKY-RICE-CHICKEN,10,ເຂົ້າໜຽວໄກ່ຍ່າງ,Grilled Chicken with Sticky Rice,ข้าวเหนียวไก่ย่าง,烤鸡配糯米饭,닭꼬치와 찹쌀밥,焼き鳥と餅米,Xôi gà nướng,"grilled chicken,sticky rice",35000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-GRILLHOUSE|RCAT-BEERGARDEN
+MENU-HAINANESE-CHICKEN,10,ເຂົ້າມັນໄກ່,Chicken Rice (Hainanese),ข้าวมันไก่,海南鸡饭,하이난 치킨라이스,海南チキンライス,Cơm gà Hải Nam,"chicken rice,hainanese",30000,,RCAT-CHINESEFOOD|RCAT-RESTAURANT|RCAT-RICESHOP
+MENU-PORK-LEG-RICE,10,ເຂົ້າຂາໝູ,Pork Leg Rice,ข้าวขาหมู,猪脚饭,족발덮밥,豚足丼,Cơm giò heo,"pork leg,rice",35000,,RCAT-CHINESEFOOD|RCAT-RICESHOP|RCAT-THAIFOOD
+MENU-RED-PORK-RICE,10,ເຂົ້າໝູແດງ,Red Pork Rice,ข้าวหมูแดง,叉烧饭,차슈덮밥,チャーシュー丼,Cơm xá xíu,"red pork,char siu",30000,,RCAT-CHINESEFOOD|RCAT-RICESHOP
+MENU-CRISPY-PORK-RICE,10,ເຂົ້າໝູກອບ,Crispy Pork Rice,ข้าวหมูกรอบ,脆皮猪肉饭,바삭 삼겹살 덮밥,カリカリ豚丼,Cơm heo quay,"crispy pork,rice",35000,,RCAT-CHINESEFOOD|RCAT-RICESHOP|RCAT-THAIFOOD
+MENU-DUCK-RICE,10,ເຂົ້າເປັດຍ່າງ,Roast Duck Rice,ข้าวเป็ดย่าง,烤鸭饭,오리구이 덮밥,ローストダック丼,Cơm vịt quay,"duck,roast,rice",40000,,RCAT-CHINESEFOOD|RCAT-RICESHOP
+MENU-KANA-PORK-RICE,10,ເຂົ້າຄະນ້າໝູກອບ,Crispy Pork with Chinese Broccoli Rice,ข้าวคะน้าหมูกรอบ,芥兰脆皮猪肉饭,카이란 바삭 삼겹살 덮밥,カイラン豚丼,Cơm cải heo quay,"crispy pork,chinese broccoli",35000,,RCAT-CHINESEFOOD|RCAT-RICESHOP|RCAT-THAIFOOD
+MENU-PHO-CHICKEN,11,ເຝີໄກ່,Chicken Pho,เฝอไก่,鸡肉粉,치킨 포,チキンフォー,Phở gà,"pho,chicken,noodle soup",25000,,RCAT-VIETNAMESEFOOD|RCAT-NOODLESHOP|RCAT-LAOFOOD
+MENU-PHO-BEEF,11,ເຝີຊີ້ນ,Beef Pho,เฝอเนื้อ,牛肉粉,소고기 포,ビーフフォー,Phở bò,"pho,beef,noodle soup",30000,,RCAT-VIETNAMESEFOOD|RCAT-NOODLESHOP|RCAT-LAOFOOD
+MENU-PHO-MIXED,11,ເຝີລວມ,Mixed Pho,เฝอรวม,综合粉,모듬 포,ミックスフォー,Phở thập cẩm,"pho,mixed,combination",35000,,RCAT-VIETNAMESEFOOD|RCAT-NOODLESHOP
+MENU-PHO-LIME,11,ເຝີນ້ຳຫມາກນາວ,Pho with Lime,เฝอน้ำมะนาว,柠檬粉,라임 포,ライムフォー,Phở chanh,"pho,lime,sour",25000,,RCAT-LAOFOOD|RCAT-NOODLESHOP
+MENU-KUAYJAB,11,ກ໋ວຍຈັບ,Kuay Jab (Rolled Noodle Soup),ก๋วยจั๊บ,卷粉汤,꽈이잡,クイチャップ,Cuốn nước,"kuay jab,rolled noodle,pork",30000,,RCAT-THAIFOOD|RCAT-NOODLESHOP
+MENU-PADTHAI,11,ຜັດໄທ,Pad Thai,ผัดไทย,泰式炒河粉,팟타이,パッタイ,Phở xào Thái,"pad thai,stir fried noodle",30000,,RCAT-THAIFOOD|RCAT-RESTAURANT|RCAT-MADETOORDER
+MENU-PADTHAI-CHICKEN,11,ຜັດໄທໄກ່,Chicken Pad Thai,ผัดไทยไก่,鸡肉炒河粉,치킨 팟타이,チキンパッタイ,Phở xào Thái gà,"pad thai,chicken",32000,,RCAT-THAIFOOD|RCAT-RESTAURANT
+MENU-PADTHAI-SHRIMP,11,ຜັດໄທກຸ້ງ,Shrimp Pad Thai,ผัดไทยกุ้ง,虾仁炒河粉,새우 팟타이,エビパッタイ,Phở xào Thái tôm,"pad thai,shrimp",38000,,RCAT-THAIFOOD|RCAT-RESTAURANT|RCAT-SEAFOOD
+MENU-PADSEEEW,11,ຜັດຊີອິ໊ວ,Pad See Ew,ผัดซีอิ๊ว,豉油皇炒面,팟씨유,パッシーユー,Hủ tiếu xào,"pad see ew,soy sauce noodle",28000,,RCAT-THAIFOOD|RCAT-RESTAURANT|RCAT-MADETOORDER
+MENU-PADKEEMAO,11,ຜັດຂີ້ເມົາ,Drunken Noodles,ผัดขี้เมา,醉面,팟끼마오,パッキーマオ,Mì say,"pad kee mao,spicy noodle",30000,,RCAT-THAIFOOD|RCAT-RESTAURANT|RCAT-BEERGARDEN
+MENU-NOODLE-STIRFRY,11,ເສັ້ນຜັດ,Stir-Fried Noodles,เส้นผัด,炒面,볶음면,焼きそば,Mì xào,"stir fried noodle",25000,,RCAT-RESTAURANT|RCAT-MADETOORDER|RCAT-CHINESEFOOD
+MENU-EGG-NOODLE-SOUP,11,ບະໝີ່ນ້ຳ,Egg Noodle Soup,บะหมี่น้ำ,汤面,국수,ラーメン,Mì nước,"egg noodle,soup",25000,,RCAT-NOODLESHOP|RCAT-RESTAURANT
+MENU-EGG-NOODLE-DRY,11,ບະໝີ່ແຫ້ງ,Dry Egg Noodles,บะหมี่แห้ง,干面,비빔면,汁なしラーメン,Mì khô,"egg noodle,dry",25000,,RCAT-NOODLESHOP|RCAT-RESTAURANT
+MENU-RADNA,11,ລາດໜ້າ,Rad Na (Gravy Noodles),ราดหน้า,芡汁面,랏나,ラートナー,Hủ tiếu sốt,"rad na,gravy noodle",30000,,RCAT-THAIFOOD|RCAT-CHINESEFOOD|RCAT-NOODLESHOP
+MENU-BEEF-STEW-NOODLE,11,ເສັ້ນໃຫຍ່ເນື້ອຕຸ້ນ,Beef Stew Noodles,เส้นใหญ่เนื้อตุ๋น,红烧牛肉面,소고기 장조림 국수,牛肉煮込み麺,Hủ tiếu bò kho,"beef stew,wide noodle",35000,,RCAT-VIETNAMESEFOOD|RCAT-NOODLESHOP
+MENU-LAAB-PORK,12,ລາບໝູ,Minced Pork Salad,ลาบหมู,猪肉沙拉,라프 무,ラープムー,Lạp heo,"laab,pork,minced",30000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-BEERGARDEN|RCAT-GRILLHOUSE
+MENU-LAAB-CHICKEN,12,ລາບໄກ່,Minced Chicken Salad,ลาบไก่,鸡肉沙拉,라프 까이,ラープガイ,Lạp gà,"laab,chicken",30000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-BEERGARDEN
+MENU-LAAB-FISH,12,ລາບປາ,Minced Fish Salad,ลาบปลา,鱼肉沙拉,라프 빠,ラープパー,Lạp cá,"laab,fish",35000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-SEAFOOD
+MENU-LAAB-DUCK,12,ລາບເປັດ,Minced Duck Salad,ลาบเป็ด,鸭肉沙拉,라프 뻿,ラープペット,Lạp vịt,"laab,duck",40000,,RCAT-LAOFOOD|RCAT-THAIFOOD
+MENU-LAAB-MUSHROOM,12,ລາບເຫັດ,Mushroom Salad,ลาบเห็ด,蘑菇沙拉,라프 헷,ラープヘット,Lạp nấm,"laab,mushroom,vegetarian",28000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-RESTAURANT
+MENU-SOMTAM-THAI,12,ສົ້ມຕຳໄທ,Thai Papaya Salad,ส้มตำไทย,泰式青木瓜沙拉,솜땀 타이,ソムタムタイ,Gỏi đu đủ Thái,"somtam,papaya,thai style",25000,,RCAT-THAIFOOD|RCAT-LAOFOOD|RCAT-BEERGARDEN
+MENU-SOMTAM-LAO,12,ສົ້ມຕຳລາວ,Lao Papaya Salad,ส้มตำลาว,老挝青木瓜沙拉,솜땀 라오,ソムタムラオ,Gỏi đu đủ Lào,"somtam,papaya,lao style,padaek",25000,,RCAT-LAOFOOD|RCAT-BEERGARDEN
+MENU-SOMTAM-CRAB,12,ສົ້ມຕຳປູ,Papaya Salad with Crab,ส้มตำปู,蟹肉青木瓜沙拉,솜땀 부,ソムタムプー,Gỏi đu đủ cua,"somtam,crab",35000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-SEAFOOD
+MENU-SOMTAM-SALTED,12,ສົ້ມຕຳປູປະລາ,Papaya Salad with Salted Crab,ส้มตำปูปลาร้า,腌蟹青木瓜沙拉,솜땀 부 빠라,ソムタムプーパラー,Gỏi đu đủ cua muối,"somtam,salted crab,fermented",30000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-BEERGARDEN
+MENU-SOMTAM-SEAFOOD,12,ສົ້ມຕຳທະເລ,Seafood Papaya Salad,ส้มตำทะเล,海鲜青木瓜沙拉,솜땀 탈레,ソムタムタレー,Gỏi đu đủ hải sản,"somtam,seafood",40000,,RCAT-THAIFOOD|RCAT-SEAFOOD
+MENU-YUM-WOONSEN,12,ຍຳວຸ້ນເສັ້ນ,Glass Noodle Salad,ยำวุ้นเส้น,凉拌粉丝,얌운센,ヤムウンセン,Gỏi miến,"yum,glass noodle",30000,,RCAT-THAIFOOD|RCAT-RESTAURANT|RCAT-BEERGARDEN
+MENU-YUM-SEAFOOD,12,ຍຳທະເລ,Seafood Salad,ยำทะเล,海鲜沙拉,얌 탈레,ヤムタレー,Gỏi hải sản,"yum,seafood",45000,,RCAT-THAIFOOD|RCAT-SEAFOOD|RCAT-BEERGARDEN
+MENU-YUM-EGGPLANT,12,ຍຳໝາກເຜືອ,Eggplant Salad,ยำมะเขือ,茄子沙拉,얌 마꾸아,ヤムマクア,Gỏi cà tím,"yum,eggplant",25000,,RCAT-THAIFOOD|RCAT-RESTAURANT
+MENU-YUM-PORK-EAR,12,ຍຳໝູຢໍ,Pork Ear Salad,ยำหูหมู,猪耳沙拉,얌 후무,ヤムフームー,Gỏi tai heo,"yum,pork ear",30000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-BEERGARDEN
+MENU-NAMTOK,12,ນ້ຳຕົກ,Waterfall Beef Salad,น้ำตก,瀑布牛肉沙拉,남톡,ナムトック,Thác bò,"namtok,beef,grilled",35000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-GRILLHOUSE
+MENU-TOMYUM-SHRIMP,13,ຕົ້ມຍຳກຸ້ງ,Tom Yum Shrimp,ต้มยำกุ้ง,冬阴功,똠얌꿍,トムヤムクン,Tom Yum tôm,"tom yum,shrimp,soup",40000,,RCAT-THAIFOOD|RCAT-RESTAURANT|RCAT-SEAFOOD
+MENU-TOMYUM-CHICKEN,13,ຕົ້ມຍຳໄກ່,Tom Yum Chicken,ต้มยำไก่,鸡肉冬阴汤,똠얌 까이,トムヤムガイ,Tom Yum gà,"tom yum,chicken",35000,,RCAT-THAIFOOD|RCAT-RESTAURANT
+MENU-TOMYUM-SEAFOOD,13,ຕົ້ມຍຳທະເລ,Tom Yum Seafood,ต้มยำทะเล,海鲜冬阴汤,똠얌 탈레,トムヤムタレー,Tom Yum hải sản,"tom yum,seafood",45000,,RCAT-THAIFOOD|RCAT-SEAFOOD
+MENU-TOMYUM-FISH,13,ຕົ້ມຍຳປາ,Tom Yum Fish,ต้มยำปลา,鱼肉冬阴汤,똠얌 빠,トムヤムパー,Tom Yum cá,"tom yum,fish",40000,,RCAT-THAIFOOD|RCAT-SEAFOOD
+MENU-TOMKHA-CHICKEN,13,ຕົ້ມຂ່າໄກ່,Tom Kha Chicken,ต้มข่าไก่,椰奶鸡汤,똠카 까이,トムカーガイ,Tom Kha gà,"tom kha,chicken,coconut",35000,,RCAT-THAIFOOD|RCAT-RESTAURANT
+MENU-TOMKHA-SHRIMP,13,ຕົ້ມຂ່າກຸ້ງ,Tom Kha Shrimp,ต้มข่ากุ้ง,椰奶虾汤,똠카 꿍,トムカークン,Tom Kha tôm,"tom kha,shrimp,coconut",40000,,RCAT-THAIFOOD|RCAT-SEAFOOD
+MENU-GREEN-CURRY-CHICKEN,13,ແກງຂຽວຫວານໄກ່,Green Curry Chicken,แกงเขียวหวานไก่,绿咖喱鸡,그린 커리 치킨,グリーンカレーチキン,Cà ri xanh gà,"green curry,chicken",35000,,RCAT-THAIFOOD|RCAT-RESTAURANT
+MENU-GREEN-CURRY-PORK,13,ແກງຂຽວຫວານໝູ,Green Curry Pork,แกงเขียวหวานหมู,绿咖喱猪肉,그린 커리 포크,グリーンカレーポーク,Cà ri xanh heo,"green curry,pork",35000,,RCAT-THAIFOOD|RCAT-RESTAURANT
+MENU-RED-CURRY,13,ແກງແດງ,Red Curry,แกงแดง,红咖喱,레드 커리,レッドカレー,Cà ri đỏ,"red curry,spicy",35000,,RCAT-THAIFOOD|RCAT-RESTAURANT
+MENU-SPICY-CURRY,13,ແກງເຜັດ,Spicy Curry,แกงเผ็ด,辣咖喱,매운 카레,激辛カレー,Cà ri cay,"spicy curry,hot",35000,,RCAT-THAIFOOD|RCAT-LAOFOOD
+MENU-YELLOW-CURRY,13,ແກງເຫຼືອງ,Yellow Curry,แกงเหลือง,黄咖喱,옐로우 커리,イエローカレー,Cà ri vàng,"yellow curry,mild",35000,,RCAT-THAIFOOD|RCAT-RESTAURANT
+MENU-MASSAMAN,13,ແກງມັດສະໝັ່ນ,Massaman Curry,แกงมัสมั่น,玛莎曼咖喱,마싸만 커리,マッサマンカレー,Cà ri Massaman,"massaman,curry,peanut",40000,,RCAT-THAIFOOD|RCAT-RESTAURANT
+MENU-PANANG,13,ແກງພະແນງ,Panang Curry,แกงพะแนง,帕能咖喱,파넹 커리,パネンカレー,Cà ri Panang,"panang,curry,rich",40000,,RCAT-THAIFOOD|RCAT-RESTAURANT
+MENU-CLEAR-SOUP,13,ແກງຈືດ,Clear Soup,แกงจืด,清汤,깽 쯧,ゲーンジュート,Canh trong,"clear soup,vegetable",25000,,RCAT-RESTAURANT|RCAT-THAIFOOD|RCAT-FAMILYREST
+MENU-CLEAR-SOUP-PORK,13,ແກງຈືດໝູສັບ,Clear Soup with Minced Pork,แกงจืดหมูสับ,猪肉清汤,깽 쯧 무쌉,ゲーンジュートムーサップ,Canh heo băm,"clear soup,minced pork",28000,,RCAT-RESTAURANT|RCAT-THAIFOOD
+MENU-CLEAR-SOUP-TOFU,13,ແກງຈືດເຕົ້າຫູ້,Clear Soup with Tofu,แกงจืดเต้าหู้,豆腐清汤,깽 쯧 따오후,ゲーンジュートタオフー,Canh đậu hủ,"clear soup,tofu",25000,,RCAT-RESTAURANT|RCAT-THAIFOOD|RCAT-FAMILYREST
+MENU-GRILLED-CHICKEN,14,ປີ້ງໄກ່,Grilled Chicken,ไก่ย่าง,烤鸡,닭꼬치,焼き鳥,Gà nướng,"grilled chicken,ປີ້ງໄກ່",35000,,RCAT-GRILLHOUSE|RCAT-BEERGARDEN|RCAT-LAOFOOD|RCAT-THAIFOOD
+MENU-GRILLED-CHICKEN-HALF,14,ໄກ່ຍ່າງ (ເຄິ່ງໂຕ),Half Grilled Chicken,ไก่ย่าง (ครึ่งตัว),烤鸡 (半只),반 마리 구이,焼き鳥 (半身),Gà nướng (nửa con),"grilled chicken,half",50000,,RCAT-GRILLHOUSE|RCAT-BEERGARDEN|RCAT-LAOFOOD
+MENU-GRILLED-CHICKEN-WHOLE,14,ໄກ່ຍ່າງ (ໝົດໂຕ),Whole Grilled Chicken,ไก่ย่าง (ทั้งตัว),烤鸡 (整只),한 마리 구이,焼き鳥 (一羽),Gà nướng (nguyên con),"grilled chicken,whole",90000,,RCAT-GRILLHOUSE|RCAT-BEERGARDEN|RCAT-LAOFOOD
+MENU-GRILLED-PORK,14,ປີ້ງໝູ,Grilled Pork,หมูย่าง,烤猪肉,삼겹살 구이,焼き豚,Thịt heo nướng,"grilled pork,ປີ້ງໝູ",35000,,RCAT-GRILLHOUSE|RCAT-BEERGARDEN|RCAT-LAOFOOD
+MENU-PORK-SKEWER,14,ໝູປີ້ງ,Grilled Pork Skewer,หมูปิ้ง,烤猪肉串,돼지꼬치,豚串,Xiên heo nướng,"pork skewer,ໝູປີ້ງ",5000,,RCAT-GRILLHOUSE|RCAT-BEERGARDEN|RCAT-STREETFOOD
+MENU-GRILLED-PORK-NECK,14,ຄໍໝູຍ່າງ,Grilled Pork Neck,คอหมูย่าง,烤猪颈肉,목살 구이,豚トロ焼き,Cổ heo nướng,"pork neck,grilled",40000,,RCAT-GRILLHOUSE|RCAT-BEERGARDEN|RCAT-THAIFOOD
+MENU-GRILLED-BEEF,14,ປີ້ງຊີ້ນງົວ,Grilled Beef,เนื้อย่าง,烤牛肉,소고기 구이,焼肉,Thịt bò nướng,"grilled beef,steak",50000,,RCAT-GRILLHOUSE|RCAT-BBQ|RCAT-KOREANFOOD
+MENU-STEAK,14,ສະເຕັກ,Steak,สเต็ก,牛排,스테이크,ステーキ,Bít tết,"steak,beef",80000,,RCAT-WESTERNFOOD|RCAT-FINEDINING|RCAT-HOTEL
+MENU-STEAK-PORK,14,ສະເຕັກໝູ,Pork Steak,สเต็กหมู,猪排,돈까스,ポークステーキ,Thăn heo,"pork steak",45000,,RCAT-WESTERNFOOD|RCAT-RESTAURANT
+MENU-STEAK-CHICKEN,14,ສະເຕັກໄກ່,Chicken Steak,สเต็กไก่,鸡排,치킨 스테이크,チキンステーキ,Ức gà áp chảo,"chicken steak",40000,,RCAT-WESTERNFOOD|RCAT-RESTAURANT|RCAT-FAMILYREST
+MENU-GRILLED-FISH,14,ປີ້ງປາ,Grilled Fish,ปลาย่าง,烤鱼,생선구이,焼き魚,Cá nướng,"grilled fish,ປາປີ້ງ",50000,,RCAT-GRILLHOUSE|RCAT-SEAFOOD|RCAT-BEERGARDEN
+MENU-FISH-SALT-GRILLED,14,ປາເຜົາ,Grilled Fish (Whole),ปลาเผา,盐烤鱼,생선 통구이,魚の塩焼き,Cá nướng muối,"grilled fish,whole,salt",60000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-SEAFOOD
+MENU-GRILLED-SHRIMP,14,ປີ້ງກຸ້ງ,Grilled Shrimp,กุ้งย่าง,烤虾,새우 구이,エビ焼き,Tôm nướng,"grilled shrimp",60000,,RCAT-GRILLHOUSE|RCAT-SEAFOOD|RCAT-BEERGARDEN
+MENU-SHRIMP-GRILLED-LARGE,14,ກຸ້ງເຜົາ,Grilled Shrimp (Large),กุ้งเผา,烤大虾,왕새우 구이,大エビ焼き,Tôm sú nướng,"grilled shrimp,large",80000,,RCAT-SEAFOOD|RCAT-BEERGARDEN
+MENU-GRILLED-SQUID,14,ປີ້ງປາຫມຶກ,Grilled Squid,ปลาหมึกย่าง,烤鱿鱼,오징어 구이,イカ焼き,Mực nướng,"grilled squid,calamari",45000,,RCAT-GRILLHOUSE|RCAT-SEAFOOD|RCAT-BEERGARDEN
+MENU-GRILLED-SHELLFISH,14,ປີ້ງຫອຍ,Grilled Shellfish,หอยย่าง,烤贝类,조개구이,貝焼き,Sò nướng,"grilled shellfish,clam",50000,,RCAT-SEAFOOD|RCAT-BEERGARDEN
+MENU-GRILLED-VEG,14,ປີ້ງຜັກລວມ,Grilled Vegetables,ผักย่างรวม,烤蔬菜,야채 구이,焼き野菜,Rau củ nướng,"grilled vegetables,mixed",25000,,RCAT-GRILLHOUSE|RCAT-BBQ|RCAT-RESTAURANT
+MENU-ISAAN-SAUSAGE,14,ໄສ້ກອກອີສານ,Isaan Sausage,ไส้กรอกอีสาน,泰东北香肠,이싼 소시지,イサーンソーセージ,Lạp xưởng Isaan,"sausage,fermented",35000,,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-GRILLHOUSE|RCAT-BEERGARDEN
+MENU-SAI-UA,14,ໄສ້ອັ່ວ,Northern Thai Sausage,ไส้อั่ว,清迈香肠,싸이 우아,サイウア,Lạp xưởng Bắc Thái,"sausage,herb,northern",35000,,RCAT-THAIFOOD|RCAT-GRILLHOUSE|RCAT-BEERGARDEN
+MENU-FRIED-CHICKEN,15,ໄກ່ທອດ,Fried Chicken,ไก่ทอด,炸鸡,후라이드 치킨,フライドチキン,Gà chiên,"fried chicken,crispy",35000,,RCAT-RESTAURANT|RCAT-FASTFOOD|RCAT-FAMILYREST|RCAT-BEERGARDEN
+MENU-FRIED-CHICKEN-GARLIC,15,ໄກ່ທອດກະທຽມ,Garlic Fried Chicken,ไก่ทอดกระเทียม,蒜香炸鸡,마늘 후라이드 치킨,ガーリックチキン,Gà chiên tỏi,"fried chicken,garlic",38000,,RCAT-RESTAURANT|RCAT-THAIFOOD|RCAT-BEERGARDEN
+MENU-FRIED-WINGS,15,ປີກໄກ່ທອດ,Fried Chicken Wings,ปีกไก่ทอด,炸鸡翅,치킨 윙,手羽先揚げ,Cánh gà chiên,"chicken wings,fried",30000,,RCAT-RESTAURANT|RCAT-BAR|RCAT-BEERGARDEN
+MENU-FRIED-CHICKEN-FISH-SAUCE,15,ໄກ່ທອດນ້ຳປາ,Fish Sauce Fried Chicken,ไก่ทอดน้ำปลา,鱼露炸鸡,남빠 치킨,ナンプラーチキン,Gà chiên nước mắm,"fried chicken,fish sauce",38000,,RCAT-VIETNAMESEFOOD|RCAT-THAIFOOD|RCAT-BEERGARDEN
+MENU-FRIED-PORK-GARLIC,15,ໝູທອດກະທຽມ,Garlic Fried Pork,หมูทอดกระเทียม,蒜香炸猪肉,마늘 돼지고기 튀김,ガーリックポーク,Heo chiên tỏi,"fried pork,garlic",35000,,RCAT-RESTAURANT|RCAT-THAIFOOD|RCAT-MADETOORDER
+MENU-TONKATSU,15,ໝູຊຸບແປ້ງທອດ,Battered Fried Pork,หมูชุบแป้งทอด,炸猪排,돈까스,とんかつ,Heo cốt lết,"pork cutlet,breaded",35000,,RCAT-JAPANESEFOOD|RCAT-RESTAURANT
+MENU-FRIED-FISH,15,ປາທອດ,Fried Fish,ปลาทอด,炸鱼,생선 튀김,フライドフィッシュ,Cá chiên,"fried fish",40000,,RCAT-RESTAURANT|RCAT-SEAFOOD|RCAT-MADETOORDER
+MENU-FRIED-FISH-FISH-SAUCE,15,ປາທອດນ້ຳປາ,Fish Sauce Fried Fish,ปลาทอดน้ำปลา,鱼露炸鱼,남빠 생선 튀김,ナンプラーフィッシュ,Cá chiên nước mắm,"fried fish,fish sauce",45000,,RCAT-VIETNAMESEFOOD|RCAT-THAIFOOD
+MENU-FRIED-FISH-GARLIC,15,ປາທອດກະທຽມ,Garlic Fried Fish,ปลาทอดกระเทียม,蒜香炸鱼,마늘 생선 튀김,ガーリックフィッシュ,Cá chiên tỏi,"fried fish,garlic",45000,,RCAT-RESTAURANT|RCAT-SEAFOOD
+MENU-FRIED-SHRIMP,15,ກຸ້ງທອດ,Fried Shrimp,กุ้งทอด,炸虾,새우튀김,エビフライ,Tôm chiên,"fried shrimp,tempura",45000,,RCAT-RESTAURANT|RCAT-SEAFOOD|RCAT-JAPANESEFOOD
+MENU-TEMPURA-SHRIMP,15,ກຸ້ງຊຸບແປ້ງທອດ,Tempura Shrimp,กุ้งชุบแป้งทอด,炸大虾,새우 덴뿌라,海老天ぷら,Tôm tẩm bột chiên,"tempura,shrimp,battered",50000,,RCAT-JAPANESEFOOD|RCAT-RESTAURANT
+MENU-FRIED-CALAMARI,15,ປາຫມຶກທອດ,Fried Calamari,ปลาหมึกทอด,炸鱿鱼,오징어 튀김,イカフライ,Mực chiên giòn,"calamari,fried,squid",40000,,RCAT-RESTAURANT|RCAT-SEAFOOD|RCAT-BEERGARDEN
+MENU-FRIED-TOFU,15,ເຕົ້າຫູ້ທອດ,Fried Tofu,เต้าหู้ทอด,炸豆腐,두부 튀김,揚げ豆腐,Đậu hủ chiên,"tofu,fried,vegetarian",25000,,RCAT-RESTAURANT|RCAT-CHINESEFOOD
+MENU-FRIED-VEG,15,ຜັກທອດ,Fried Vegetables,ผักทอด,炸蔬菜,야채 튀김,野菜の天ぷら,Rau củ chiên,"vegetable,tempura",28000,,RCAT-JAPANESEFOOD|RCAT-RESTAURANT
+MENU-SPRING-ROLL,15,ປໍເປ໊ຍທອດ,Fried Spring Rolls,ปอเปี๊ยะทอด,炸春卷,스프링롤,春巻き,Chả giò,"spring roll,fried",25000,,RCAT-VIETNAMESEFOOD|RCAT-CHINESEFOOD|RCAT-RESTAURANT
+MENU-FRIED-DUMPLING,15,ເຂົ້າຫມານທອດ,Fried Dumpling,เกี๊ยวทอด,炸饺子,군만두,揚げ餃子,Há cảo chiên,"dumpling,fried,gyoza",25000,,RCAT-CHINESEFOOD|RCAT-JAPANESEFOOD
+MENU-MORNING-GLORY,16,ຜັກບົ໋ງໄຟແດງ,Stir-Fried Morning Glory,ผักบุ้งไฟแดง,蒜炒空心菜,공심채 볶음,空心菜炒め,Rau muống xào,"morning glory,water spinach,stir fry",30000,,RCAT-THAIFOOD|RCAT-LAOFOOD|RCAT-RESTAURANT|RCAT-BEERGARDEN

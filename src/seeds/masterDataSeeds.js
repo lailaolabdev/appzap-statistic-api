@@ -14,15 +14,30 @@
 require('dotenv').config();
 const { MongoClient } = require('mongodb');
 const path = require('path');
+const fs = require('fs');
 const {
     generateMasterCategoryCode,
     generateMasterMenuCode,
     generateMasterIngredientCategoryCode,
     generateMasterIngredientCode,
     generateMasterRecipeCategoryCode,
+    generateMasterRecipeCode,
     generateMasterRestaurantCategoryCode
 } = require('../utils/codeGenerator');
 const { loadAllMasterData } = require('../utils/csvParser');
+
+/**
+ * Load recipes from JSON file
+ */
+function loadRecipesFromJSON(dataDir) {
+    const filePath = path.join(dataDir, 'masterRecipes.json');
+    if (fs.existsSync(filePath)) {
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const data = JSON.parse(content);
+        return data.recipes || [];
+    }
+    return [];
+}
 
 /**
  * Main seed function
@@ -62,7 +77,7 @@ async function seedMasterData() {
             console.log(`   Skipping: ${existingCategories} categories already exist`);
         } else {
             const categoryDocs = data.masterCategories.map(cat => ({
-                code: generateMasterCategoryCode(),
+                code: cat.code || generateMasterCategoryCode(), // Use code from CSV if available
                 name: cat.name,
                 name_en: cat.name_en || '',
                 name_th: cat.name_th || '',
@@ -105,7 +120,7 @@ async function seedMasterData() {
             console.log(`   Skipping: ${existingMenus} menus already exist`);
         } else {
             const menuDocs = data.masterMenus.map(menu => ({
-                code: generateMasterMenuCode(),
+                code: menu.code || generateMasterMenuCode(), // Use code from CSV if available
                 masterCategoryCode: categoryCodeMap[menu.categoryIndex] || categoryCodeMap[0],
                 name: menu.name,
                 name_en: menu.name_en || '',
@@ -196,7 +211,7 @@ async function seedMasterData() {
             console.log(`   Skipping: ${existingIngCats} ingredient categories already exist`);
         } else {
             const ingCatDocs = data.masterIngredientCategories.map((cat, index) => ({
-                code: generateMasterIngredientCategoryCode(),
+                code: cat.code || generateMasterIngredientCategoryCode(), // Use code from CSV if available
                 parentCode: null,
                 name: cat.name,
                 name_en: cat.name_en || '',
@@ -242,7 +257,7 @@ async function seedMasterData() {
             console.log(`   Skipping: ${existingIngs} ingredients already exist`);
         } else {
             const ingDocs = data.masterIngredients.map(ing => ({
-                code: generateMasterIngredientCode(),
+                code: ing.code || generateMasterIngredientCode(), // Use code from CSV if available
                 masterIngredientCategoryCode: ingCategoryCodeMap[ing.categoryIndex] || ingCategoryCodeMap[0],
                 name: ing.name,
                 name_en: ing.name_en || '',
@@ -290,7 +305,7 @@ async function seedMasterData() {
             console.log(`   Skipping: ${existingRecCats} recipe categories already exist`);
         } else {
             const recCatDocs = data.masterRecipeCategories.map((cat, index) => ({
-                code: generateMasterRecipeCategoryCode(),
+                code: cat.code || generateMasterRecipeCategoryCode(), // Use code from CSV if available
                 parentCode: null,
                 categoryType: cat.categoryType || 'cuisine',
                 name: cat.name,
@@ -317,9 +332,142 @@ async function seedMasterData() {
         }
 
         // ============================================
-        // 7. Create Indexes
+        // 7. Seed Master Recipes (from JSON)
         // ============================================
-        console.log('\n7. Creating indexes...');
+        console.log('\n7. Seeding Master Recipes...');
+        const existingRecipes = await db.collection('masterRecipes').countDocuments();
+        
+        if (existingRecipes > 0) {
+            console.log(`   Skipping: ${existingRecipes} recipes already exist`);
+        } else {
+            // Load recipes from JSON
+            const recipesData = loadRecipesFromJSON(dataDir);
+            
+            if (recipesData.length === 0) {
+                console.log('   No recipe data found in masterRecipes.json');
+            } else {
+                // Validate codes exist in database (optional but good for data integrity)
+                const allMenuCodes = new Set((await db.collection('masterMenus').find({}).toArray()).map(m => m.code));
+                const allRecipeCatCodes = new Set((await db.collection('masterRecipeCategories').find({}).toArray()).map(c => c.code));
+                const allIngredientCodes = new Set((await db.collection('masterIngredients').find({}).toArray()).map(i => i.code));
+                
+                // Process each recipe - use codes directly from JSON
+                const recipeDocs = [];
+                let skippedCount = 0;
+                
+                for (const recipe of recipesData) {
+                    // Use menu code directly from JSON
+                    const masterMenuCode = recipe.menuCode;
+                    if (!masterMenuCode) {
+                        console.log(`   Warning: No menuCode for recipe "${recipe.name_en}"`);
+                        skippedCount++;
+                        continue;
+                    }
+                    if (!allMenuCodes.has(masterMenuCode)) {
+                        console.log(`   Warning: Menu code "${masterMenuCode}" not found for recipe "${recipe.name_en}" (menuName: ${recipe.menuName})`);
+                        skippedCount++;
+                        continue;
+                    }
+                    
+                    // Use recipe category code directly from JSON
+                    const masterRecipeCategoryCode = recipe.recipeCategoryCode || null;
+                    if (masterRecipeCategoryCode && !allRecipeCatCodes.has(masterRecipeCategoryCode)) {
+                        console.log(`   Warning: Recipe category code "${masterRecipeCategoryCode}" not found for recipe "${recipe.name_en}"`);
+                    }
+                    
+                    // Process ingredients - use codes directly from JSON
+                    const processedIngredients = [];
+                    
+                    for (const ing of recipe.ingredients) {
+                        const ingredientCode = ing.ingredientCode;
+                        if (!ingredientCode) {
+                            console.log(`   Warning: No ingredientCode for ingredient in recipe "${recipe.name_en}" (ingredientName: ${ing.ingredientName})`);
+                        } else if (!allIngredientCodes.has(ingredientCode)) {
+                            console.log(`   Warning: Ingredient code "${ingredientCode}" not found (ingredientName: ${ing.ingredientName}) in recipe "${recipe.name_en}"`);
+                        }
+                        processedIngredients.push({
+                            masterIngredientCode: ingredientCode || 'UNKNOWN',
+                            ingredientName: ing.ingredientName || '', // Keep name for quick checking
+                            quantity: ing.quantity,
+                            quantityUnit: ing.quantityUnit,
+                            displayQuantity: ing.displayQuantity,
+                            displayUnit: ing.displayUnit,
+                            isOptional: ing.isOptional || false,
+                            notes: ing.notes || ''
+                        });
+                    }
+                    
+                    // Create recipe document
+                    const recipeDoc = {
+                        code: generateMasterRecipeCode(),
+                        masterMenuCode,
+                        menuName: recipe.menuName || '', // Keep name for quick checking
+                        masterRecipeCategoryCode,
+                        recipeCategoryName: recipe.recipeCategoryName || '', // Keep name for quick checking
+                        name: recipe.name,
+                        name_en: recipe.name_en,
+                        name_th: recipe.name_th || '',
+                        name_cn: recipe.name_cn || '',
+                        name_kr: recipe.name_kr || '',
+                        name_jp: recipe.name_jp || '',
+                        name_vi: recipe.name_vi || '',
+                        description: recipe.description || '',
+                        version: 1,
+                        servingSize: recipe.servingSize || 1,
+                        difficultyLevel: recipe.difficultyLevel || 1,
+                        spiceLevel: recipe.spiceLevel || 0,
+                        ingredients: processedIngredients,
+                        preparationSteps: (recipe.preparationSteps || []).map((step, idx) => ({
+                            stepNumber: step.stepNumber || idx + 1,
+                            title: step.title || '',
+                            title_en: step.title_en || step.title || '',
+                            instruction: step.instruction || '',
+                            instruction_en: step.instruction_en || step.instruction || '',
+                            timeMinutes: step.timeMinutes || 0
+                        })),
+                        prepTimeMinutes: recipe.prepTimeMinutes || 0,
+                        cookTimeMinutes: recipe.cookTimeMinutes || 0,
+                        totalTimeMinutes: recipe.totalTimeMinutes || 0,
+                        nutritionPerServing: recipe.nutritionPerServing || {},
+                        costPerServing: 0,
+                        totalWeightPerServing: 0,
+                        equipmentNeeded: recipe.equipmentNeeded || [],
+                        tags: recipe.tags || [],
+                        isVegetarian: recipe.isVegetarian || false,
+                        isVegan: recipe.isVegan || false,
+                        isHalal: recipe.isHalal || false,
+                        isGlutenFree: recipe.isGlutenFree || false,
+                        allergens: recipe.allergens || [],
+                        imageUrl: '',
+                        videoUrl: '',
+                        isPrimary: true,
+                        isActive: true,
+                        isDeleted: false,
+                        createdBy: 'seed',
+                        updatedBy: 'seed',
+                        createdAt: now,
+                        updatedAt: now
+                    };
+                    
+                    recipeDocs.push(recipeDoc);
+                }
+                
+                if (recipeDocs.length > 0) {
+                    const result = await db.collection('masterRecipes').insertMany(recipeDocs);
+                    console.log(`   Created ${result.insertedCount} master recipes`);
+                    if (skippedCount > 0) {
+                        console.log(`   Skipped ${skippedCount} recipes (menu not found)`);
+                    }
+                } else {
+                    console.log('   No recipes created (all menus not found)');
+                }
+            }
+        }
+
+        // ============================================
+        // 8. Create Indexes
+        // ============================================
+        console.log('\n8. Creating indexes...');
         
         // Master Categories
         await db.collection('masterCategories').createIndex({ code: 1 }, { unique: true });
@@ -393,15 +541,18 @@ async function seedMasterData() {
         console.log(`Master Recipe Categories:     ${counts[5]}`);
         console.log(`Master Recipes:               ${counts[6]}`);
         console.log('\n----------------------------------------');
-        console.log('CSV Data Location: src/data/');
-        console.log('  - masterCategories.csv');
-        console.log('  - masterMenus.csv');
-        console.log('  - masterRestaurantCategories.csv');
-        console.log('  - masterIngredientCategories.csv');
-        console.log('  - masterIngredients.csv');
-        console.log('  - masterRecipeCategories.csv');
+        console.log('Data Location: src/data/');
+        console.log('  CSV Files:');
+        console.log('    - masterCategories.csv');
+        console.log('    - masterMenus.csv');
+        console.log('    - masterRestaurantCategories.csv');
+        console.log('    - masterIngredientCategories.csv');
+        console.log('    - masterIngredients.csv');
+        console.log('    - masterRecipeCategories.csv');
+        console.log('  JSON Files:');
+        console.log('    - masterRecipes.json (nested recipe data)');
         console.log('----------------------------------------');
-        console.log('\nTo modify data, edit the CSV files and re-run');
+        console.log('\nTo modify data, edit the data files and re-run');
         console.log('this seed script (after clearing collections).');
         console.log('========================================\n');
 
