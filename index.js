@@ -43,6 +43,10 @@ MongoClient.connect(process.env.MONGODB_URI, {
     const menusRouter = require('./src/routes/v1/menus')(db); // Pass db to routes
     app.use('/api/v1/menus', menusRouter);
 
+    // Master Data Routes (Ingredients Analytics System)
+    const masterRouter = require('./src/routes/v1/master')(db);
+    app.use('/api/v1/master', masterRouter);
+
     // Error handling middleware
     app.use((err, req, res, next) => {
         console.error(err.stack);

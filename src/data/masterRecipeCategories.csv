@@ -1,0 +1,25 @@
+categoryType,name,name_en,name_th,name_cn,name_kr,name_jp,name_vi,keywords,sortOrder
+cuisine,ອາຫານລາວ,Lao Cuisine,อาหารลาว,老挝菜,라오스 요리,ラオス料理,Ẩm thực Lào,"lao,laos,traditional",1
+cuisine,ອາຫານໄທ,Thai Cuisine,อาหารไทย,泰国菜,태국 요리,タイ料理,Ẩm thực Thái,"thai,thailand",2
+cuisine,ອາຫານຈີນ,Chinese Cuisine,อาหารจีน,中国菜,중국 요리,中華料理,Ẩm thực Trung Hoa,"chinese,china",3
+cuisine,ອາຫານຕາເວັນຕົກ,Western Cuisine,อาหารตะวันตก,西餐,서양 요리,西洋料理,Ẩm thực Phương Tây,"western,european",4
+cuisine,ອາຫານຍີ່ປຸ່ນ,Japanese Cuisine,อาหารญี่ปุ่น,日本料理,일식,日本料理,Ẩm thực Nhật Bản,"japanese,japan",5
+cuisine,ອາຫານເກົາຫຼີ,Korean Cuisine,อาหารเกาหลี,韩国料理,한식,韓国料理,Ẩm thực Hàn Quốc,"korean,korea",6
+cuisine,ອາຫານຫວຽດນາມ,Vietnamese Cuisine,อาหารเวียดนาม,越南菜,베트남 요리,ベトナム料理,Ẩm thực Việt Nam,"vietnamese,vietnam",7
+cuisine,ອາຫານອິນເດຍ,Indian Cuisine,อาหารอินเดีย,印度菜,인도 요리,インド料理,Ẩm thực Ấn Độ,"indian,india,curry",8
+cooking_method,ທອດ,Frying,ทอด,油炸,튀기기,揚げ,Chiên,"fry,fried,deep fry",9
+cooking_method,ຍ່າງ/ປີ້ງ,Grilling,ย่าง,烧烤,굽기,焼く,Nướng,"grill,bbq,roast",10
+cooking_method,ຕົ້ມ,Boiling,ต้ม,煮,끓이기,煮る,Luộc,"boil,soup,stew",11
+cooking_method,ນຶ່ງ,Steaming,นึ่ง,蒸,찌기,蒸す,Hấp,"steam,steamed",12
+cooking_method,ຜັດ,Stir-frying,ผัด,炒,볶기,炒める,Xào,"stir fry,wok",13
+cooking_method,ດິບ,Raw,ดิบ,生,날것,生,Sống,"raw,fresh,sashimi",14
+cooking_method,ອົບ,Baking,อบ,烘烤,굽기,オーブン,Nướng lò,"bake,oven",15
+meal_type,ອາຫານເຊົ້າ,Breakfast,อาหารเช้า,早餐,아침 식사,朝食,Bữa sáng,"breakfast,morning",16
+meal_type,ອາຫານທ່ຽງ,Lunch,อาหารกลางวัน,午餐,점심,昼食,Bữa trưa,"lunch,midday",17
+meal_type,ອາຫານແລງ,Dinner,อาหารเย็น,晚餐,저녁 식사,夕食,Bữa tối,"dinner,evening",18
+meal_type,ຂອງຫວ່າງ,Snacks,ของว่าง,小吃,간식,スナック,Ăn vặt,"snack,light",19
+meal_type,ຂອງຫວານ,Desserts,ของหวาน,甜点,디저트,デザート,Tráng miệng,"dessert,sweet",20
+dietary,ມັງສະວິລັດ,Vegetarian,มังสวิรัติ,素食,채식,ベジタリアン,Chay,"vegetarian,veg,no meat",21
+dietary,ວີແກນ,Vegan,วีแกน,纯素,비건,ビーガン,Thuần chay,"vegan,plant based",22
+dietary,ຮາລານ,Halal,ฮาลาล,清真,할랄,ハラール,Halal,"halal,muslim",23
+dietary,ບໍ່ມີກູເຕັນ,Gluten-Free,ไม่มีกลูเตน,无麸质,글루텐 프리,グルテンフリー,Không gluten,"gluten free,celiac",24

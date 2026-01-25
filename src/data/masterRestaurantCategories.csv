@@ -1,0 +1,34 @@
+code,name,name_en,name_th,name_cn,name_kr,name_jp,name_vi,keywords,description,hasAlcohol,hasFood,typicalMenuCount,typicalCategoryCount,sortOrder
+RCAT-CAFE,ຄາເຟ,Cafe,คาเฟ่,咖啡店,카페,カフェ,Quán cà phê,"cafe,coffee shop,ร้านกาแฟ",Coffee shop with light food,false,true,30,8,1
+RCAT-COFFEESHOP,ຮ້ານກາເຟ,Coffee Shop,ร้านกาแฟ,咖啡馆,커피숍,コーヒーショップ,Tiệm cà phê,"coffee,drinks,ກາເຟ",Dedicated coffee establishment,false,true,25,6,2
+RCAT-BEERGARDEN,ສວນເບຍ,Beer Garden,สวนเบียร์,啤酒花园,비어 가든,ビアガーデン,Vườn bia,"beer garden,outdoor,ສວນເບຍ,สวนเบียร์",Outdoor drinking establishment,true,true,80,15,3
+RCAT-BEERHOUSE,ຮ້ານເບຍ,Beer House,ร้านเบียร์,啤酒屋,맥줏집,ビアハウス,Quán bia,"beer house,pub,ຮ້ານເບຍ",Beer-focused establishment,true,true,70,12,4
+RCAT-BAR,ບາ,Bar,บาร์,酒吧,바,バー,Quán bar,"bar,lounge,drinks",Cocktail and spirits bar,true,true,60,10,5
+RCAT-NIGHTCLUB,ໄນທ໌ຄລັບ,Nightclub,ไนท์คลับ,夜店,나이트클럽,ナイトクラブ,Hộp đêm,"nightclub,club,disco",Late-night entertainment venue,true,true,40,8,6
+RCAT-KARAOKE,ລາວເຄ,Karaoke,คาราโอเกะ,卡拉OK,노래방,カラオケ,Karaoke,"karaoke,ktv,ລາວເຄ",Karaoke entertainment venue,true,true,50,10,7
+RCAT-RESTAURANT,ຮ້ານອາຫານ,Restaurant,ร้านอาหาร,餐厅,레스토랑,レストラン,Nhà hàng,"restaurant,dining,ຮ້ານອາຫານ",Full-service restaurant,true,true,100,18,8
+RCAT-LAOFOOD,ຮ້ານອາຫານລາວ,Lao Restaurant,ร้านอาหารลาว,老挝餐厅,라오스 레스토랑,ラオスレストラン,Nhà hàng Lào,"lao food,traditional,ອາຫານລາວ",Traditional Lao cuisine,true,true,80,15,9
+RCAT-THAIFOOD,ຮ້ານອາຫານໄທ,Thai Restaurant,ร้านอาหารไทย,泰国餐厅,태국 레스토랑,タイレストラン,Nhà hàng Thái,"thai food,อาหารไทย",Thai cuisine restaurant,true,true,100,18,10
+RCAT-CHINESEFOOD,ຮ້ານອາຫານຈີນ,Chinese Restaurant,ร้านอาหารจีน,中餐厅,중식당,中華料理店,Nhà hàng Trung Hoa,"chinese food,dim sum",Chinese cuisine restaurant,true,true,120,20,11
+RCAT-JAPANESEFOOD,ຮ້ານອາຫານຍີ່ປຸ່ນ,Japanese Restaurant,ร้านอาหารญี่ปุ่น,日本料理店,일식당,日本料理店,Nhà hàng Nhật,"japanese,sushi,ramen",Japanese cuisine restaurant,true,true,80,15,12
+RCAT-KOREANFOOD,ຮ້ານອາຫານເກົາຫຼີ,Korean Restaurant,ร้านอาหารเกาหลี,韩国餐厅,한식당,韓国料理店,Nhà hàng Hàn Quốc,"korean,bbq,kimchi",Korean cuisine restaurant,true,true,70,12,13
+RCAT-WESTERNFOOD,ຮ້ານອາຫານຕາເວັນຕົກ,Western Restaurant,ร้านอาหารตะวันตก,西餐厅,양식당,西洋料理店,Nhà hàng Phương Tây,"western,steak,pasta",Western cuisine restaurant,true,true,80,15,14
+RCAT-VIETNAMESEFOOD,ຮ້ານອາຫານຫວຽດນາມ,Vietnamese Restaurant,ร้านอาหารเวียดนาม,越南餐厅,베트남 식당,ベトナム料理店,Nhà hàng Việt Nam,"vietnamese,pho,banh mi",Vietnamese cuisine restaurant,true,true,70,12,15
+RCAT-NOODLESHOP,ຮ້ານເຝີ,Noodle Shop,ร้านก๋วยเตี๋ยว,面馆,국수집,麺屋,Quán phở,"noodle,pho,ເຝີ,ก๋วยเตี๋ยว",Noodle soup specialist,false,true,30,6,16
+RCAT-RICESHOP,ຮ້ານຂາຍເຂົ້າ,Rice Shop,ร้านข้าว,饭店,밥집,定食屋,Quán cơm,"rice,ເຂົ້າ,ข้าว",Rice dish specialist,false,true,40,8,17
+RCAT-MADETOORDER,ຮ້ານອາຫານຕາມສັ່ງ,Made-to-Order Restaurant,ร้านอาหารตามสั่ง,快餐店,분식집,定食屋,Quán cơm bình dân,"made to order,quick,ຕາມສັ່ງ",Quick made-to-order food,true,true,60,12,18
+RCAT-BBQ,ຮ້ານຊີ້ນດາດ,BBQ Restaurant,ร้านหมูกระทะ,烧烤店,고기집,焼肉店,Quán thịt nướng,"bbq,grill,mookata,ຊີ້ນດາດ,หมูกระทะ",Korean BBQ or Moo Kata style,true,true,50,10,19
+RCAT-GRILLHOUSE,ຮ້ານປິ້ງຍ່າງ,Grill House,ร้านปิ้งย่าง,烧烤屋,구이집,グリルハウス,Quán nướng,"grill,bbq,ປິ້ງຍ່າງ",Grilled food specialist,true,true,60,10,20
+RCAT-HOTPOT,ຮ້ານຈຸ່ມ,Hotpot Restaurant,ร้านชาบู,火锅店,샤브샤브,しゃぶしゃぶ,Quán lẩu,"hotpot,shabu,sukiyaki,ຈຸ່ມ",Hotpot and Shabu-shabu,true,true,50,8,21
+RCAT-SEAFOOD,ຮ້ານອາຫານທະເລ,Seafood Restaurant,ร้านอาหารทะเล,海鲜餐厅,해산물 식당,シーフードレストラン,Nhà hàng hải sản,"seafood,fish,shrimp,ທະເລ",Seafood specialist,true,true,80,12,22
+RCAT-DESSERT,ຮ້ານຂອງຫວານ,Dessert Shop,ร้านขนมหวาน,甜品店,디저트 가게,デザートショップ,Quán tráng miệng,"dessert,sweet,bakery,ຂອງຫວານ",Desserts and sweets,false,true,40,8,23
+RCAT-BAKERY,ເບເກີຣີ,Bakery,เบเกอรี่,面包店,베이커리,ベーカリー,Tiệm bánh,"bakery,bread,cake,ເບເກີຣີ",Bread and pastry shop,false,true,50,10,24
+RCAT-BUBBLETEA,ຮ້ານຊານົມໄຂ່ມຸກ,Bubble Tea Shop,ร้านชานมไข่มุก,奶茶店,버블티 가게,タピオカティー店,Quán trà sữa,"bubble tea,boba,ຊານົມໄຂ່ມຸກ",Bubble tea specialist,false,true,30,5,25
+RCAT-FOODCOURT,ຟູດຄອດ,Food Court,ฟู้ดคอร์ท,美食广场,푸드코트,フードコート,Khu ẩm thực,"food court,mall,variety",Multiple food vendors,true,true,150,25,26
+RCAT-FOODTRUCK,ຟູດທຣັກ,Food Truck,ฟู้ดทรัค,餐车,푸드트럭,フードトラック,Xe đồ ăn,"food truck,mobile,street",Mobile food vendor,false,true,20,4,27
+RCAT-STREETFOOD,ຮ້ານອາຫານຣີມທາງ,Street Food,ร้านอาหารริมทาง,街边小吃,길거리 음식,屋台,Quán ăn vỉa hè,"street food,vendor,ຣີມທາງ",Street food vendor,false,true,25,5,28
+RCAT-BUFFET,ບຸບເຟ,Buffet,บุฟเฟ่ต์,自助餐,뷔페,ビュッフェ,Buffet,"buffet,all you can eat,ບຸບເຟ",All-you-can-eat restaurant,true,true,100,15,29
+RCAT-FINEDINING,ຮ້ານອາຫານຫຼູຫຼາ,Fine Dining,ร้านอาหารหรู,高级餐厅,파인다이닝,ファインダイニング,Nhà hàng cao cấp,"fine dining,luxury,upscale",High-end restaurant,true,true,60,12,30
+RCAT-FAMILYREST,ຮ້ານອາຫານຄອບຄົວ,Family Restaurant,ร้านอาหารครอบครัว,家庭餐厅,패밀리 레스토랑,ファミリーレストラン,Nhà hàng gia đình,"family,casual,ຄອບຄົວ",Family-friendly restaurant,true,true,80,15,31
+RCAT-FASTFOOD,ຟາສຟູດ,Fast Food,ฟาสต์ฟู้ด,快餐,패스트푸드,ファストフード,Thức ăn nhanh,"fast food,quick service",Quick service restaurant,false,true,40,8,32
+RCAT-HOTEL,ໂຮງແຮມ,Hotel Restaurant,ร้านอาหารโรงแรม,酒店餐厅,호텔 레스토랑,ホテルレストラン,Nhà hàng khách sạn,"hotel,dining,ໂຮງແຮມ",Hotel dining establishment,true,true,120,20,33

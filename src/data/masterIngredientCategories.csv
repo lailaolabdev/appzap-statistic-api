@@ -1,0 +1,19 @@
+name,name_en,name_th,name_cn,name_kr,name_jp,name_vi,keywords,storageType,sortOrder
+ຊີ້ນ,Meat,เนื้อสัตว์,肉类,육류,肉類,Thịt,"meat,protein,ຊີ້ນ",refrigerated,1
+ອາຫານທະເລ,Seafood,อาหารทะเล,海鲜,해산물,シーフード,Hải sản,"seafood,fish,shrimp,ປາ",refrigerated,2
+ຜັກ,Vegetables,ผัก,蔬菜,채소,野菜,Rau củ,"vegetable,greens,ผัก",refrigerated,3
+ໝາກໄມ້,Fruits,ผลไม้,水果,과일,果物,Trái cây,"fruit,fresh,ໝາກໄມ້",refrigerated,4
+ເຂົ້າ ແລະ ທັນຍະພືດ,Rice & Grains,ข้าวและธัญพืช,米和谷物,쌀과 곡물,米と穀物,Gạo & Ngũ cốc,"rice,grain,wheat,ເຂົ້າ",dry,5
+ເສັ້ນ,Noodles,เส้น,面条,면,麺類,Mì,"noodle,pasta,ເສັ້ນ",dry,6
+ເຄື່ອງປຸງ,Seasonings,เครื่องปรุง,调味料,조미료,調味料,Gia vị,"seasoning,spice,salt,sugar",dry,7
+ຊອດ,Sauces,ซอส,酱料,소스,ソース,Sốt,"sauce,dressing,ຊອດ",refrigerated,8
+ນົມ ແລະ ໄຂ່,Dairy & Eggs,นมและไข่,乳制品和蛋,유제품과 달걀,乳製品と卵,Sữa & Trứng,"dairy,egg,milk,cheese",refrigerated,9
+ນ້ຳມັນ,Oils & Fats,น้ำมัน,油脂,식용유,油脂,Dầu mỡ,"oil,fat,butter,ນ້ຳມັນ",dry,10
+ເຄື່ອງດື່ມ,Beverage Ingredients,วัตถุดิบเครื่องดื่ม,饮料原料,음료 재료,飲料材料,Nguyên liệu đồ uống,"coffee,tea,syrup",dry,11
+ເຄື່ອງແກງ,Curry Pastes,เครื่องแกง,咖喱酱,카레 페이스트,カレーペースト,Bột cà ri,"curry,paste,ແກງ",refrigerated,12
+ເຄື່ອງເທດ,Herbs & Spices,สมุนไพรและเครื่องเทศ,香草和香料,허브와 향신료,ハーブ＆スパイス,Thảo mộc & Gia vị,"herb,spice,aromatic",dry,13
+ຖົ່ວ ແລະ ແກ່ນ,Beans & Nuts,ถั่วและเมล็ด,豆类和坚果,콩과 견과류,豆とナッツ,Đậu & Hạt,"bean,nut,seed,ຖົ່ວ",dry,14
+ອາຫານແຫ້ງ,Dried Goods,ของแห้ง,干货,건조식품,乾物,Đồ khô,"dried,preserved,ແຫ້ງ",dry,15
+ອາຫານແຊ່ແຂງ,Frozen Foods,อาหารแช่แข็ง,冷冻食品,냉동식품,冷凍食品,Thực phẩm đông lạnh,"frozen,iced,ແຊ່ແຂງ",frozen,16
+ເຄື່ອງດື່ມແອນກໍຮໍ,Alcoholic Beverages,เครื่องดื่มแอลกอฮอล์,酒精饮料,주류,アルコール飲料,Đồ uống có cồn,"alcohol,beer,wine,spirit",dry,17
+ເຄື່ອງດື່ມບໍ່ມີແອນກໍຮໍ,Non-Alcoholic Beverages,เครื่องดื่มไม่มีแอลกอฮอล์,非酒精饮料,비알콜 음료,ノンアルコール飲料,Đồ uống không cồn,"soda,juice,water",refrigerated,18

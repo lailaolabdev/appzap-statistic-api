@@ -1,0 +1,29 @@
+name,name_en,name_th,name_cn,name_kr,name_jp,name_vi,keywords,description,sortOrder,recommendedRestaurantTypes
+ກາເຟ,Coffee,กาแฟ,咖啡,커피,コーヒー,Cà phê,"coffee,cafe,ກາເຟ,กาแฟ",Coffee and espresso drinks,1,RCAT-CAFE|RCAT-COFFEESHOP|RCAT-RESTAURANT|RCAT-HOTEL
+ຊາ,Tea,ชา,茶,차,お茶,Trà,"tea,ຊາ,ชา,茶",Tea and herbal beverages,2,RCAT-CAFE|RCAT-COFFEESHOP|RCAT-BUBBLETEA|RCAT-RESTAURANT
+ສະມູດຕີ້ ແລະ ເຊກ,Smoothies & Shakes,สมูทตี้และเชค,冰沙和奶昔,스무디와 쉐이크,スムージー＆シェイク,Sinh tố & Sữa lắc,"smoothie,shake,blend,ສະມູດຕີ້",Blended drinks and milkshakes,3,RCAT-CAFE|RCAT-DESSERT|RCAT-RESTAURANT
+ນ້ຳໝາກໄມ້,Fruit Juices,น้ำผลไม้,果汁,과일 주스,フルーツジュース,Nước ép trái cây,"juice,fruit,ນ້ຳ,น้ำ",Fresh fruit juices,4,RCAT-CAFE|RCAT-RESTAURANT|RCAT-BEERGARDEN
+ນ້ຳອັດລົມ,Soft Drinks,น้ำอัดลม,碳酸饮料,탄산음료,ソフトドリンク,Nước ngọt,"soda,soft drink,ນ້ຳອັດລົມ",Carbonated beverages,5,RCAT-RESTAURANT|RCAT-BEERGARDEN|RCAT-FASTFOOD|RCAT-FOODCOURT
+ເບຍ,Beer,เบียร์,啤酒,맥주,ビール,Bia,"beer,ເບຍ,เบียร์,啤酒",All types of beer,6,RCAT-BEERGARDEN|RCAT-BEERHOUSE|RCAT-BAR|RCAT-NIGHTCLUB|RCAT-KARAOKE|RCAT-RESTAURANT
+ເຫຼົ້າ,Spirits,เหล้า,烈酒,증류주,スピリッツ,Rượu mạnh,"whiskey,vodka,rum,gin,ເຫຼົ້າ,เหล้า",Hard liquor and spirits,7,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-KARAOKE|RCAT-BEERGARDEN|RCAT-HOTEL
+ໄວນ໌,Wine,ไวน์,葡萄酒,와인,ワイン,Rượu vang,"wine,red,white,ໄວນ໌,ไวน์",Red white and sparkling wines,8,RCAT-BAR|RCAT-FINEDINING|RCAT-HOTEL|RCAT-WESTERNFOOD
+ຄອກເທວ,Cocktails,ค็อกเทล,鸡尾酒,칵테일,カクテル,Cocktail,"cocktail,mixed drink,ຄອກເທວ",Mixed alcoholic drinks,9,RCAT-BAR|RCAT-NIGHTCLUB|RCAT-HOTEL|RCAT-BEERGARDEN
+ອາຫານຈານຫຼັກ,Main Dishes,อาหารจานหลัก,主菜,메인 요리,メイン料理,Món chính,"main,dish,rice,noodle,ອາຫານ",Main course dishes,10,RCAT-RESTAURANT|RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-FAMILYREST
+ເຂົ້າ,Rice Dishes,อาหารข้าว,米饭,밥 요리,ご飯料理,Cơm,"rice,fried rice,ເຂົ້າ,ข้าว",Rice-based dishes,11,RCAT-RESTAURANT|RCAT-RICESHOP|RCAT-LAOFOOD|RCAT-MADETOORDER
+ເຝີ ແລະ ເສັ້ນ,Noodles,ก๋วยเตี๋ยว,面条,면 요리,麺類,Phở & Bún,"noodle,pho,ເຝີ,ก๋วยเตี๋ยว",Noodle soups and stir-fried noodles,12,RCAT-NOODLESHOP|RCAT-RESTAURANT|RCAT-VIETNAMESEFOOD|RCAT-LAOFOOD
+ສະລັດ ແລະ ຍຳ,Salads,สลัดและยำ,沙拉,샐러드,サラダ,Salad & Gỏi,"salad,yum,laab,ສະລັດ,ລາບ,ยำ",Fresh salads and Thai/Lao salads,13,RCAT-RESTAURANT|RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-BEERGARDEN
+ແກງ ແລະ ຊຸບ,Soups & Curries,แกงและซุป,汤和咖喱,국과 카레,スープ＆カレー,Súp & Cà ri,"soup,curry,tom yum,ແກງ,ซุป",Soups and curry dishes,14,RCAT-RESTAURANT|RCAT-THAIFOOD|RCAT-LAOFOOD|RCAT-VIETNAMESEFOOD
+ອາຫານປິ້ງ/ຍ່າງ,Grilled Items,อาหารย่าง,烧烤,구이 요리,焼き物,Đồ nướng,"grill,bbq,ປິ້ງ,ย่าง",Grilled meats and seafood,15,RCAT-GRILLHOUSE|RCAT-BBQ|RCAT-BEERGARDEN|RCAT-LAOFOOD
+ອາຫານທອດ,Fried Items,อาหารทอด,油炸食品,튀김 요리,揚げ物,Đồ chiên,"fried,deep fried,ທອດ,ทอด",Deep fried dishes,16,RCAT-RESTAURANT|RCAT-STREETFOOD|RCAT-FASTFOOD|RCAT-MADETOORDER
+ອາຫານທະເລ,Seafood,อาหารทะเล,海鲜,해산물,シーフード,Hải sản,"seafood,fish,shrimp,ອາຫານທະເລ",Seafood dishes,17,RCAT-SEAFOOD|RCAT-RESTAURANT|RCAT-BEERGARDEN
+ອາຫານດິບ,Raw Dishes,อาหารดิบ,生食,날것 요리,刺身,Đồ sống,"raw,sashimi,ດິບ,ดิบ",Raw fish and seafood,18,RCAT-JAPANESEFOOD|RCAT-SEAFOOD|RCAT-FINEDINING
+ກັບແກ້ມ,Drinking Snacks,กับแกล้ม,下酒菜,안주,おつまみ,Mồi nhậu,"snack,appetizer,ກັບແກ້ມ,กับแกล้ม",Snacks to accompany drinks,19,RCAT-BEERGARDEN|RCAT-BEERHOUSE|RCAT-BAR|RCAT-KARAOKE|RCAT-NIGHTCLUB
+ອາຫານເຈຍນ,Appetizers,อาหารเรียกน้ำย่อย,开胃菜,애피타이저,前菜,Khai vị,"appetizer,starter,ເຄື່ອງແກ້ມ",Starters and finger foods,20,RCAT-RESTAURANT|RCAT-FINEDINING|RCAT-HOTEL|RCAT-WESTERNFOOD
+ອາຫານຈຸ່ມ,Hotpot Items,อาหารจิ้ม,火锅,훠궈,しゃぶしゃぶ,Lẩu,"hotpot,shabu,ຈຸ່ມ,จิ้ม",Hotpot and shabu shabu items,21,RCAT-HOTPOT|RCAT-CHINESEFOOD|RCAT-KOREANFOOD
+ອາຫານເກົາຫຼີ,Korean Food,อาหารเกาหลี,韩国料理,한식,韓国料理,Món Hàn Quốc,"korean,bbq,kimchi,ເກົາຫຼີ",Korean style dishes,22,RCAT-KOREANFOOD|RCAT-BBQ
+ອາຫານຍີ່ປຸ່ນ,Japanese Food,อาหารญี่ปุ่น,日本料理,일식,日本料理,Món Nhật Bản,"japanese,sushi,ramen,ຍີ່ປຸ່ນ",Japanese style dishes,23,RCAT-JAPANESEFOOD
+ຂອງຫວານ,Desserts,ของหวาน,甜点,디저트,デザート,Tráng miệng,"dessert,sweet,ຂອງຫວານ,ของหวาน",Sweet desserts and treats,24,RCAT-DESSERT|RCAT-CAFE|RCAT-RESTAURANT|RCAT-BAKERY
+ເຂົ້າໜົມ,Bakery & Pastry,ขนมอบ,烘焙,베이커리,ベーカリー,Bánh,"bakery,cake,bread,ເຂົ້າໜົມ",Baked goods and pastries,25,RCAT-BAKERY|RCAT-CAFE|RCAT-COFFEESHOP
+ເຂົ້າໜຽວ ແລະ ເຂົ້າ,Rice & Sticky Rice,ข้าวเหนียวและข้าว,糯米饭,찹쌀밥,もち米,Xôi & Cơm trắng,"sticky rice,steamed rice,ເຂົ້າໜຽວ",Rice sides,26,RCAT-LAOFOOD|RCAT-THAIFOOD|RCAT-RESTAURANT|RCAT-RICESHOP
+ອາຫານເຊົ້າ,Breakfast,อาหารเช้า,早餐,아침 식사,朝食,Bữa sáng,"breakfast,morning,ເຊົ້າ",Breakfast items,27,RCAT-HOTEL|RCAT-CAFE|RCAT-RESTAURANT|RCAT-FAMILYREST
+ອາຫານເດັກ,Kids Menu,เมนูเด็ก,儿童餐,키즈 메뉴,キッズメニュー,Thực đơn trẻ em,"kids,children,ເດັກ",Menu for children,28,RCAT-FAMILYREST|RCAT-FASTFOOD|RCAT-RESTAURANT
