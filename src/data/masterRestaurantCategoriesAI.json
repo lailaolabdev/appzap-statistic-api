@@ -1,0 +1,230 @@
+{
+  "description": "AI enrichment data for master restaurant categories - indexed by restaurant category code",
+  "version": "1.0",
+  "aiData": {
+    "RCAT-CAFE": {
+      "ambiance": ["cozy", "casual", "quiet", "trendy"],
+      "features": ["wifi", "air-conditioned", "instagram-worthy", "work-friendly"],
+      "typicalOccasions": ["casual", "business", "study", "date", "hangout"],
+      "priceTier": 2,
+      "noiseLevel": 2,
+      "aiDescription": "Cozy coffee shops with comfortable seating, perfect for working, studying, or catching up with friends over coffee and light bites."
+    },
+    "RCAT-COFFEESHOP": {
+      "ambiance": ["casual", "quick-service", "modern"],
+      "features": ["wifi", "takeaway", "quick-service"],
+      "typicalOccasions": ["casual", "morning", "quick-break"],
+      "priceTier": 2,
+      "noiseLevel": 2,
+      "aiDescription": "Dedicated coffee establishments focused on quality coffee drinks. Great for coffee lovers seeking a quick caffeine fix."
+    },
+    "RCAT-BEERGARDEN": {
+      "ambiance": ["lively", "social", "outdoor", "casual", "festive"],
+      "features": ["outdoor", "live-music", "large-groups", "parking"],
+      "typicalOccasions": ["drinking", "hangout", "party", "celebration", "after-work"],
+      "priceTier": 2,
+      "noiseLevel": 4,
+      "aiDescription": "Outdoor drinking spots with lively atmosphere, perfect for group gatherings, celebrations, and enjoying cold beer with spicy Lao food."
+    },
+    "RCAT-BEERHOUSE": {
+      "ambiance": ["lively", "social", "casual"],
+      "features": ["draft-beer", "large-groups", "sports-tv"],
+      "typicalOccasions": ["drinking", "hangout", "watching-sports"],
+      "priceTier": 2,
+      "noiseLevel": 4,
+      "aiDescription": "Beer-focused establishments with wide selections of draft and bottled beer. Social atmosphere for beer lovers."
+    },
+    "RCAT-BAR": {
+      "ambiance": ["sophisticated", "dim-lighting", "lounge", "trendy"],
+      "features": ["cocktails", "live-music", "air-conditioned"],
+      "typicalOccasions": ["drinking", "date", "after-work", "nightlife"],
+      "priceTier": 3,
+      "noiseLevel": 3,
+      "aiDescription": "Cocktail bars and lounges with sophisticated atmosphere. Great for dates, after-work drinks, and cocktail enthusiasts."
+    },
+    "RCAT-NIGHTCLUB": {
+      "ambiance": ["loud", "energetic", "party", "dancing"],
+      "features": ["dj", "dance-floor", "vip-rooms", "late-hours"],
+      "typicalOccasions": ["party", "celebration", "dancing", "nightlife"],
+      "priceTier": 3,
+      "noiseLevel": 5,
+      "aiDescription": "Late-night entertainment venues with music and dancing. The place for parties, celebrations, and nightlife adventures."
+    },
+    "RCAT-KARAOKE": {
+      "ambiance": ["private", "fun", "social"],
+      "features": ["private-room", "sound-system", "late-hours"],
+      "typicalOccasions": ["party", "celebration", "hangout", "team-building"],
+      "priceTier": 3,
+      "noiseLevel": 4,
+      "aiDescription": "Karaoke entertainment venues with private rooms. Fun group activity for celebrations and bonding."
+    },
+    "RCAT-RESTAURANT": {
+      "ambiance": ["comfortable", "family-friendly", "casual"],
+      "features": ["full-menu", "air-conditioned", "family-friendly"],
+      "typicalOccasions": ["casual", "family", "business"],
+      "priceTier": 3,
+      "noiseLevel": 3,
+      "aiDescription": "Full-service restaurants with diverse menus. Comfortable dining for families, friends, and business meals."
+    },
+    "RCAT-LAOFOOD": {
+      "ambiance": ["traditional", "authentic", "casual"],
+      "features": ["traditional-cooking", "local-ingredients"],
+      "typicalOccasions": ["casual", "family", "authentic-experience"],
+      "priceTier": 2,
+      "noiseLevel": 3,
+      "aiDescription": "Traditional Lao cuisine restaurants. Experience authentic local flavors and cooking traditions."
+    },
+    "RCAT-THAIFOOD": {
+      "ambiance": ["vibrant", "aromatic", "casual"],
+      "features": ["spicy-options", "authentic-recipes"],
+      "typicalOccasions": ["casual", "family", "spicy-lovers"],
+      "priceTier": 2,
+      "noiseLevel": 3,
+      "aiDescription": "Thai cuisine restaurants with aromatic curries, spicy salads, and classic Thai dishes."
+    },
+    "RCAT-CHINESEFOOD": {
+      "ambiance": ["traditional", "family-style", "comfortable"],
+      "features": ["dim-sum", "large-portions", "family-style"],
+      "typicalOccasions": ["family", "celebration", "casual"],
+      "priceTier": 3,
+      "noiseLevel": 3,
+      "aiDescription": "Chinese restaurants with diverse regional cuisines, dim sum, and family-style dining options."
+    },
+    "RCAT-JAPANESEFOOD": {
+      "ambiance": ["clean", "minimalist", "precise"],
+      "features": ["sushi-bar", "fresh-ingredients", "set-meals"],
+      "typicalOccasions": ["romantic", "business", "casual"],
+      "priceTier": 4,
+      "noiseLevel": 2,
+      "aiDescription": "Japanese cuisine with sushi, ramen, and traditional dishes. Clean aesthetics and precise preparation."
+    },
+    "RCAT-KOREANFOOD": {
+      "ambiance": ["social", "interactive", "vibrant"],
+      "features": ["table-grill", "banchan", "soju-selection"],
+      "typicalOccasions": ["hangout", "celebration", "group-dining"],
+      "priceTier": 3,
+      "noiseLevel": 4,
+      "aiDescription": "Korean cuisine with BBQ, stews, and authentic Korean flavors. Interactive grilling experience."
+    },
+    "RCAT-WESTERNFOOD": {
+      "ambiance": ["modern", "comfortable", "familiar"],
+      "features": ["steaks", "pasta", "burgers"],
+      "typicalOccasions": ["casual", "family", "business"],
+      "priceTier": 3,
+      "noiseLevel": 2,
+      "aiDescription": "Western cuisine restaurants with steaks, pasta, and international favorites."
+    },
+    "RCAT-VIETNAMESEFOOD": {
+      "ambiance": ["fresh", "light", "casual"],
+      "features": ["pho", "fresh-herbs", "banh-mi"],
+      "typicalOccasions": ["casual", "healthy", "morning"],
+      "priceTier": 2,
+      "noiseLevel": 2,
+      "aiDescription": "Vietnamese cuisine known for fresh flavors, pho, and healthy options."
+    },
+    "RCAT-NOODLESHOP": {
+      "ambiance": ["simple", "quick", "casual"],
+      "features": ["quick-service", "affordable", "comfort-food"],
+      "typicalOccasions": ["casual", "quick-lunch", "morning"],
+      "priceTier": 1,
+      "noiseLevel": 3,
+      "aiDescription": "Noodle soup specialists. Comforting, quick, and affordable meals perfect for any time."
+    },
+    "RCAT-BBQ": {
+      "ambiance": ["smoky", "social", "lively"],
+      "features": ["table-grill", "meat-selection", "side-dishes"],
+      "typicalOccasions": ["hangout", "celebration", "group-dining"],
+      "priceTier": 3,
+      "noiseLevel": 4,
+      "aiDescription": "BBQ restaurants with table grills. Social, interactive dining perfect for groups."
+    },
+    "RCAT-GRILLHOUSE": {
+      "ambiance": ["rustic", "smoky", "casual"],
+      "features": ["charcoal-grill", "outdoor-seating", "beer-selection"],
+      "typicalOccasions": ["drinking", "hangout", "casual"],
+      "priceTier": 2,
+      "noiseLevel": 3,
+      "aiDescription": "Grill houses specializing in charcoal-grilled meats and seafood. Rustic and flavorful."
+    },
+    "RCAT-HOTPOT": {
+      "ambiance": ["warm", "social", "interactive"],
+      "features": ["individual-pots", "ingredient-selection", "dipping-sauces"],
+      "typicalOccasions": ["family", "hangout", "cold-weather"],
+      "priceTier": 3,
+      "noiseLevel": 3,
+      "aiDescription": "Hotpot restaurants for interactive cooking at your table. Perfect for cold days and group dining."
+    },
+    "RCAT-SEAFOOD": {
+      "ambiance": ["fresh", "ocean-themed", "casual"],
+      "features": ["live-seafood", "fresh-catch", "ocean-view"],
+      "typicalOccasions": ["celebration", "family", "romantic"],
+      "priceTier": 4,
+      "noiseLevel": 3,
+      "aiDescription": "Seafood restaurants with fresh catches and ocean flavors. Perfect for seafood lovers."
+    },
+    "RCAT-DESSERT": {
+      "ambiance": ["sweet", "cute", "instagram-worthy"],
+      "features": ["instagram-worthy", "sweet-selection", "creative-desserts"],
+      "typicalOccasions": ["casual", "date", "afternoon"],
+      "priceTier": 2,
+      "noiseLevel": 2,
+      "aiDescription": "Dessert shops and sweet cafes. Indulgent treats and creative sweet creations."
+    },
+    "RCAT-BAKERY": {
+      "ambiance": ["aromatic", "cozy", "warm"],
+      "features": ["fresh-baked", "pastries", "bread"],
+      "typicalOccasions": ["morning", "casual", "breakfast"],
+      "priceTier": 2,
+      "noiseLevel": 2,
+      "aiDescription": "Bakeries with fresh bread, pastries, and baked goods. The smell of fresh baking."
+    },
+    "RCAT-BUBBLETEA": {
+      "ambiance": ["trendy", "young", "colorful"],
+      "features": ["customizable", "tapioca-pearls", "takeaway"],
+      "typicalOccasions": ["hangout", "shopping", "casual"],
+      "priceTier": 2,
+      "noiseLevel": 2,
+      "aiDescription": "Bubble tea and milk tea shops. Trendy drinks with chewy pearls and endless customizations."
+    },
+    "RCAT-STREETFOOD": {
+      "ambiance": ["authentic", "bustling", "local"],
+      "features": ["affordable", "quick", "local-flavors"],
+      "typicalOccasions": ["casual", "exploring", "budget"],
+      "priceTier": 1,
+      "noiseLevel": 4,
+      "aiDescription": "Street food vendors with authentic local flavors. Affordable, quick, and full of character."
+    },
+    "RCAT-FINEDINING": {
+      "ambiance": ["elegant", "romantic", "upscale", "quiet"],
+      "features": ["fine-service", "wine-selection", "elegant-decor", "private-room"],
+      "typicalOccasions": ["romantic", "celebration", "business", "anniversary"],
+      "priceTier": 5,
+      "noiseLevel": 1,
+      "aiDescription": "High-end dining with exceptional service and elegant atmosphere. For special occasions and fine experiences."
+    },
+    "RCAT-FAMILYREST": {
+      "ambiance": ["comfortable", "welcoming", "casual"],
+      "features": ["kids-menu", "high-chairs", "family-friendly", "large-tables"],
+      "typicalOccasions": ["family", "casual", "celebration"],
+      "priceTier": 2,
+      "noiseLevel": 3,
+      "aiDescription": "Family-friendly restaurants with diverse menus and welcoming atmosphere for all ages."
+    },
+    "RCAT-FASTFOOD": {
+      "ambiance": ["quick", "modern", "efficient"],
+      "features": ["quick-service", "consistent", "takeaway"],
+      "typicalOccasions": ["casual", "quick-meal", "family"],
+      "priceTier": 2,
+      "noiseLevel": 3,
+      "aiDescription": "Fast food restaurants with quick service and familiar flavors. Convenient and consistent."
+    },
+    "RCAT-HOTEL": {
+      "ambiance": ["elegant", "comfortable", "professional"],
+      "features": ["breakfast-buffet", "room-service", "fine-service"],
+      "typicalOccasions": ["business", "travel", "celebration"],
+      "priceTier": 4,
+      "noiseLevel": 2,
+      "aiDescription": "Hotel restaurants with professional service and quality dining. Convenient for travelers and business guests."
+    }
+  }
+}

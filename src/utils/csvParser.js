@@ -9,6 +9,36 @@ const fs = require('fs');
 const path = require('path');
 
 /**
+ * Parse a profile string in format "key1:value1|key2:value2" into an object
+ * @param {string} str - Profile string
+ * @param {string} profileType - Type of profile ('tasteProfile', 'textureProfile', 'typicalTasteProfile')
+ * @returns {Object} Parsed profile object
+ */
+function parseProfileString(str, profileType) {
+    // Default structures
+    const defaults = {
+        tasteProfile: { sweet: 0, sour: 0, spicy: 0, salty: 0, bitter: 0, umami: 0 },
+        typicalTasteProfile: { sweet: 0, sour: 0, spicy: 0, salty: 0, bitter: 0, umami: 0 },
+        textureProfile: { crispy: 0, soft: 0, chewy: 0, creamy: 0, soupy: 0 }
+    };
+    
+    const result = { ...defaults[profileType] } || {};
+    
+    if (!str) return result;
+    
+    // Parse "key:value|key:value" format
+    const pairs = str.split('|');
+    for (const pair of pairs) {
+        const [key, val] = pair.split(':').map(s => s.trim());
+        if (key && val !== undefined) {
+            result[key] = parseInt(val, 10) || 0;
+        }
+    }
+    
+    return result;
+}
+
+/**
  * Parse a CSV line handling quoted fields
  * @param {string} line - CSV line
  * @returns {string[]} Array of field values
@@ -74,7 +104,8 @@ function parseCSV(filePath) {
             // Type conversion based on header name or value
             if (header === 'sortOrder' || header === 'categoryIndex' || 
                 header === 'standardPrice' || header === 'typicalMenuCount' ||
-                header === 'typicalCategoryCount' || header === 'averageWeightPerPiece') {
+                header === 'typicalCategoryCount' || header === 'averageWeightPerPiece' ||
+                header === 'popularityScore' || header === 'priceTier' || header === 'noiseLevel') {
                 value = value ? parseInt(value, 10) : 0;
             } else if (header === 'isVegetarian' || header === 'isVegan' || 
                        header === 'isHalal' || header === 'hasAlcohol' || header === 'hasFood') {
@@ -82,9 +113,38 @@ function parseCSV(filePath) {
             } else if (header === 'keywords') {
                 // Parse keywords as array (comma-separated)
                 value = value ? value.split(',').map(k => k.trim()).filter(k => k) : [];
-            } else if (header === 'recommendedRestaurantTypes') {
-                // Parse recommendedRestaurantTypes as array (pipe-separated to avoid conflict with keywords)
+            } else if (header === 'recommendedRestaurantTypes' || 
+                       header === 'occasions' || 
+                       header === 'emotionTags' || 
+                       header === 'mealTimes' || 
+                       header === 'bestSeasons' || 
+                       header === 'pairingMenuCodes' ||
+                       header === 'ambiance' ||
+                       header === 'features' ||
+                       header === 'typicalOccasions') {
+                // Parse arrays (pipe-separated to avoid conflict with keywords)
                 value = value ? value.split('|').map(k => k.trim()).filter(k => k) : [];
+            } else if (header === 'tasteProfile' || header === 'textureProfile' || header === 'typicalTasteProfile') {
+                // Parse profile objects from format like "sweet:3|sour:2|spicy:4"
+                // or as JSON string like '{"sweet":3,"sour":2}'
+                if (value) {
+                    if (value.startsWith('{')) {
+                        try {
+                            value = JSON.parse(value);
+                        } catch (e) {
+                            value = parseProfileString(value, header);
+                        }
+                    } else {
+                        value = parseProfileString(value, header);
+                    }
+                } else {
+                    // Default values based on profile type
+                    if (header === 'tasteProfile' || header === 'typicalTasteProfile') {
+                        value = { sweet: 0, sour: 0, spicy: 0, salty: 0, bitter: 0, umami: 0 };
+                    } else if (header === 'textureProfile') {
+                        value = { crispy: 0, soft: 0, chewy: 0, creamy: 0, soupy: 0 };
+                    }
+                }
             }
             
             obj[header] = value;
@@ -115,6 +175,7 @@ function loadAllMasterData(dataDir) {
 }
 
 module.exports = {
+    parseProfileString,
     parseCSVLine,
     parseCSV,
     loadAllMasterData

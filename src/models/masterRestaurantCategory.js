@@ -116,6 +116,51 @@ const masterRestaurantCategorySchema = {
         }
     },
     
+    // ============================================
+    // AI-Ready Search Fields
+    // ============================================
+    
+    // Ambiance tags for this restaurant type
+    // Enables searches like "quiet place", "romantic dinner spot", "lively atmosphere"
+    ambiance: {
+        type: 'array',
+        default: []  // e.g., ['quiet', 'lively', 'romantic', 'casual', 'upscale', 'family-friendly', 'trendy', 'cozy']
+    },
+    
+    // Physical features typically found in this restaurant type
+    // Enables searches like "river view", "outdoor seating", "live music"
+    features: {
+        type: 'array',
+        default: []  // e.g., ['river-view', 'rooftop', 'live-music', 'outdoor', 'private-room', 'garden', 'air-conditioned', 'parking', 'wifi']
+    },
+    
+    // Typical occasions for this restaurant type
+    // e.g., "Nightclub" -> ['party', 'celebration', 'late-night']
+    typicalOccasions: {
+        type: 'array',
+        default: []  // e.g., ['casual', 'hangout', 'drinking', 'celebration', 'romantic', 'business', 'family']
+    },
+    
+    // Price tier indicator (1-5)
+    // 1=budget, 2=affordable, 3=moderate, 4=upscale, 5=luxury
+    priceTier: {
+        type: 'number',
+        default: 3
+    },
+    
+    // Noise level indicator (1-5)
+    // 1=very quiet, 2=quiet, 3=moderate, 4=lively, 5=very loud
+    noiseLevel: {
+        type: 'number',
+        default: 3
+    },
+    
+    // AI-ready rich description
+    aiDescription: {
+        type: 'string',
+        default: ''
+    },
+    
     // Sort order for display
     sortOrder: {
         type: 'number',
@@ -155,7 +200,13 @@ const indexes = [
     { key: { name: 1 } },
     { key: { name_en: 1 } },
     { key: { isActive: 1, isDeleted: 1 } },
-    { key: { keywords: 1 } }
+    { key: { keywords: 1 } },
+    // AI search indexes
+    { key: { ambiance: 1 } },
+    { key: { features: 1 } },
+    { key: { typicalOccasions: 1 } },
+    { key: { priceTier: 1 } },
+    { key: { noiseLevel: 1 } }
 ];
 
 module.exports = {

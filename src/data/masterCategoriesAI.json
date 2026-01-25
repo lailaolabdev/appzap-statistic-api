@@ -1,0 +1,126 @@
+{
+  "description": "AI enrichment data for master categories - indexed by category code",
+  "version": "1.0",
+  "aiData": {
+    "MCAT-COFFEE": {
+      "typicalTasteProfile": { "sweet": 1, "sour": 0, "spicy": 0, "salty": 0, "bitter": 3, "umami": 0 },
+      "occasions": ["casual", "business", "morning", "afternoon"],
+      "mealTimes": ["breakfast", "brunch", "afternoon", "anytime"],
+      "aiDescription": "Coffee and espresso-based drinks for energy and enjoyment. Perfect for morning wake-ups and afternoon breaks."
+    },
+    "MCAT-TEA": {
+      "typicalTasteProfile": { "sweet": 2, "sour": 0, "spicy": 0, "salty": 0, "bitter": 2, "umami": 0 },
+      "occasions": ["casual", "relaxing", "afternoon"],
+      "mealTimes": ["breakfast", "afternoon", "anytime"],
+      "aiDescription": "Traditional and modern tea beverages. Calming and refreshing options for any time of day."
+    },
+    "MCAT-SMOOTHIES": {
+      "typicalTasteProfile": { "sweet": 4, "sour": 1, "spicy": 0, "salty": 0, "bitter": 0, "umami": 0 },
+      "occasions": ["casual", "hangout", "healthy", "afternoon"],
+      "mealTimes": ["breakfast", "afternoon", "snack"],
+      "aiDescription": "Blended fruit drinks and milkshakes. Sweet, refreshing, and often healthy options."
+    },
+    "MCAT-JUICE": {
+      "typicalTasteProfile": { "sweet": 3, "sour": 2, "spicy": 0, "salty": 0, "bitter": 0, "umami": 0 },
+      "occasions": ["casual", "healthy", "morning"],
+      "mealTimes": ["breakfast", "lunch", "afternoon", "anytime"],
+      "aiDescription": "Fresh squeezed and natural fruit juices. Healthy, refreshing, vitamin-rich beverages."
+    },
+    "MCAT-SOFTDRINKS": {
+      "typicalTasteProfile": { "sweet": 4, "sour": 1, "spicy": 0, "salty": 0, "bitter": 0, "umami": 0 },
+      "occasions": ["casual", "party", "family"],
+      "mealTimes": ["lunch", "dinner", "anytime"],
+      "aiDescription": "Carbonated soft drinks and sodas. Sweet and fizzy refreshments for any occasion."
+    },
+    "MCAT-BEER": {
+      "typicalTasteProfile": { "sweet": 0, "sour": 0, "spicy": 0, "salty": 0, "bitter": 2, "umami": 0 },
+      "occasions": ["drinking", "hangout", "party", "celebration", "casual"],
+      "mealTimes": ["lunch", "dinner", "late-night"],
+      "aiDescription": "Local and international beers. The social drink for hangouts, parties, and relaxation."
+    },
+    "MCAT-SPIRITS": {
+      "typicalTasteProfile": { "sweet": 1, "sour": 0, "spicy": 1, "salty": 0, "bitter": 2, "umami": 0 },
+      "occasions": ["drinking", "celebration", "party", "business"],
+      "mealTimes": ["dinner", "late-night"],
+      "aiDescription": "Whiskey, vodka, rum, gin, and other distilled spirits. For those who appreciate fine liquor."
+    },
+    "MCAT-WINE": {
+      "typicalTasteProfile": { "sweet": 2, "sour": 2, "spicy": 0, "salty": 0, "bitter": 1, "umami": 0 },
+      "occasions": ["romantic", "celebration", "business", "fine-dining"],
+      "mealTimes": ["dinner"],
+      "aiDescription": "Red, white, and sparkling wines. Elegant choice for special occasions and fine dining."
+    },
+    "MCAT-COCKTAILS": {
+      "typicalTasteProfile": { "sweet": 3, "sour": 2, "spicy": 0, "salty": 0, "bitter": 0, "umami": 0 },
+      "occasions": ["party", "romantic", "celebration", "hangout"],
+      "mealTimes": ["dinner", "late-night"],
+      "aiDescription": "Mixed alcoholic drinks and cocktails. Creative, fun, and flavorful drink options."
+    },
+    "MCAT-MAIN": {
+      "typicalTasteProfile": { "sweet": 1, "sour": 1, "spicy": 2, "salty": 3, "bitter": 0, "umami": 4 },
+      "occasions": ["casual", "family", "celebration"],
+      "mealTimes": ["lunch", "dinner"],
+      "aiDescription": "Main course dishes including stir-fries, curries, and meat dishes. Hearty and satisfying meals."
+    },
+    "MCAT-RICE": {
+      "typicalTasteProfile": { "sweet": 1, "sour": 0, "spicy": 1, "salty": 2, "bitter": 0, "umami": 3 },
+      "occasions": ["casual", "family", "comfort"],
+      "mealTimes": ["lunch", "dinner"],
+      "aiDescription": "Rice-based dishes including fried rice and rice with toppings. The staple of Asian cuisine."
+    },
+    "MCAT-NOODLES": {
+      "typicalTasteProfile": { "sweet": 1, "sour": 1, "spicy": 2, "salty": 2, "bitter": 0, "umami": 4 },
+      "occasions": ["casual", "comfort", "family"],
+      "mealTimes": ["breakfast", "lunch", "dinner"],
+      "aiDescription": "Noodle soups and stir-fried noodles. Comfort food classics from various Asian cuisines."
+    },
+    "MCAT-SALADS": {
+      "typicalTasteProfile": { "sweet": 1, "sour": 4, "spicy": 4, "salty": 2, "bitter": 0, "umami": 2 },
+      "occasions": ["drinking", "hangout", "casual"],
+      "mealTimes": ["lunch", "dinner"],
+      "aiDescription": "Thai and Lao salads including somtam and laab. Bold, spicy flavors perfect with beer."
+    },
+    "MCAT-SOUPS": {
+      "typicalTasteProfile": { "sweet": 1, "sour": 3, "spicy": 3, "salty": 2, "bitter": 0, "umami": 4 },
+      "occasions": ["casual", "family", "comfort"],
+      "mealTimes": ["lunch", "dinner"],
+      "aiDescription": "Soups and curries including tom yum and green curry. Warming, aromatic, and nourishing."
+    },
+    "MCAT-GRILLED": {
+      "typicalTasteProfile": { "sweet": 1, "sour": 0, "spicy": 2, "salty": 3, "bitter": 0, "umami": 5 },
+      "occasions": ["drinking", "hangout", "celebration", "family"],
+      "mealTimes": ["dinner", "late-night"],
+      "aiDescription": "Grilled meats, seafood, and vegetables. BBQ favorites with smoky, savory flavors."
+    },
+    "MCAT-FRIED": {
+      "typicalTasteProfile": { "sweet": 0, "sour": 0, "spicy": 1, "salty": 3, "bitter": 0, "umami": 3 },
+      "occasions": ["casual", "party", "family"],
+      "mealTimes": ["lunch", "dinner", "snack"],
+      "aiDescription": "Deep-fried dishes - crispy, golden, and satisfying. Universal comfort food favorites."
+    },
+    "MCAT-SEAFOOD": {
+      "typicalTasteProfile": { "sweet": 1, "sour": 1, "spicy": 2, "salty": 2, "bitter": 0, "umami": 5 },
+      "occasions": ["celebration", "romantic", "family"],
+      "mealTimes": ["lunch", "dinner"],
+      "aiDescription": "Fresh seafood dishes - fish, shrimp, crab, and more. Ocean flavors at their finest."
+    },
+    "MCAT-SNACKS": {
+      "typicalTasteProfile": { "sweet": 1, "sour": 1, "spicy": 2, "salty": 3, "bitter": 0, "umami": 3 },
+      "occasions": ["drinking", "hangout", "party"],
+      "mealTimes": ["dinner", "late-night", "snack"],
+      "aiDescription": "Drinking snacks and appetizers. Perfect accompaniments to beer and spirits."
+    },
+    "MCAT-DESSERTS": {
+      "typicalTasteProfile": { "sweet": 5, "sour": 0, "spicy": 0, "salty": 0, "bitter": 0, "umami": 0 },
+      "occasions": ["casual", "romantic", "celebration"],
+      "mealTimes": ["afternoon", "dinner", "snack"],
+      "aiDescription": "Sweet treats and desserts. The perfect end to any meal or an indulgent snack."
+    },
+    "MCAT-BREAKFAST": {
+      "typicalTasteProfile": { "sweet": 2, "sour": 0, "spicy": 0, "salty": 2, "bitter": 0, "umami": 2 },
+      "occasions": ["morning", "casual", "family"],
+      "mealTimes": ["breakfast", "brunch"],
+      "aiDescription": "Morning meals and breakfast items. Start your day right with satisfying breakfast options."
+    }
+  }
+}

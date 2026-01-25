@@ -86,6 +86,44 @@ const masterCategorySchema = {
         default: ''
     },
     
+    // ============================================
+    // AI-Ready Search Fields
+    // ============================================
+    
+    // Typical taste profile for this category (0-5 scale)
+    // Helps AI understand what kind of tastes are common in this category
+    typicalTasteProfile: {
+        type: 'object',
+        default: {
+            sweet: 0,
+            sour: 0,
+            spicy: 0,
+            salty: 0,
+            bitter: 0,
+            umami: 0
+        }
+    },
+    
+    // Occasion/mood tags for this category
+    // e.g., "Beer" category -> ['hangout', 'drinking', 'party']
+    occasions: {
+        type: 'array',
+        default: []
+    },
+    
+    // Meal time suitability for this category
+    // e.g., "Breakfast" category -> ['breakfast', 'brunch']
+    mealTimes: {
+        type: 'array',
+        default: []
+    },
+    
+    // AI-ready rich description for this category
+    aiDescription: {
+        type: 'string',
+        default: ''
+    },
+    
     // Sort order for display
     sortOrder: {
         type: 'number',
@@ -126,7 +164,10 @@ const indexes = [
     { key: { name_en: 1 } },
     { key: { isActive: 1, isDeleted: 1 } },
     { key: { keywords: 1 } },
-    { key: { recommendedRestaurantTypes: 1 } }
+    { key: { recommendedRestaurantTypes: 1 } },
+    // AI search indexes
+    { key: { occasions: 1 } },
+    { key: { mealTimes: 1 } }
 ];
 
 module.exports = {

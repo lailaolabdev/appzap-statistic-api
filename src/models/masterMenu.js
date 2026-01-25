@@ -144,6 +144,105 @@ const masterMenuSchema = {
         default: 0
     },
     
+    // ============================================
+    // AI-Ready Search Fields
+    // ============================================
+    
+    // Taste profile (0-5 scale for each taste)
+    // Enables searches like "sweet things", "sour soup", "savory snack"
+    tasteProfile: {
+        type: 'object',
+        default: {
+            sweet: 0,      // ຫວານ / หวาน
+            sour: 0,       // ສົ້ມ / เปรี้ยว
+            spicy: 0,      // ເຜັດ / เผ็ด
+            salty: 0,      // ເຄັມ / เค็ม
+            bitter: 0,     // ຂົມ / ขม
+            umami: 0       // ກົ້ນລົດ / อูมามิ
+        }
+    },
+    
+    // Texture profile (0-5 scale for each texture)
+    // Enables searches like "crunchy", "soft", "creamy"
+    textureProfile: {
+        type: 'object',
+        default: {
+            crispy: 0,     // ກອບ / กรอบ
+            soft: 0,       // ນຸ້ມ / นุ่ม
+            chewy: 0,      // ໜຽວ / เหนียว
+            creamy: 0,     // ຂຸ້ນ / ครีมมี่
+            soupy: 0       // ນ້ຳ / น้ำ (liquid/broth)
+        }
+    },
+    
+    // Serving temperature
+    // Enables searches like "hot noodle", "cold dessert"
+    servingTemperature: {
+        type: 'string',
+        enum: ['hot', 'warm', 'room', 'cold', 'iced', 'varies'],
+        default: 'room'
+    },
+    
+    // Occasion/mood tags
+    // Enables searches like "hangout food", "romantic dinner", "party snacks"
+    occasions: {
+        type: 'array',
+        default: []  // e.g., ['casual', 'hangout', 'drinking', 'celebration', 'romantic', 'business', 'family', 'late-night', 'party']
+    },
+    
+    // Emotion/feeling tags
+    // Enables mood-based recommendations
+    emotionTags: {
+        type: 'array',
+        default: []  // e.g., ['comfort', 'refreshing', 'energizing', 'indulgent', 'light', 'filling', 'warming', 'cooling']
+    },
+    
+    // Meal time suitability
+    // Enables time-based recommendations
+    mealTimes: {
+        type: 'array',
+        default: []  // e.g., ['breakfast', 'brunch', 'lunch', 'dinner', 'late-night', 'snack', 'anytime']
+    },
+    
+    // Season suitability
+    // Enables weather-based recommendations
+    bestSeasons: {
+        type: 'array',
+        default: []  // e.g., ['hot-weather', 'rainy-season', 'cool-weather', 'all-year']
+    },
+    
+    // Pairing suggestions (menu codes that go well together)
+    // Enables "what goes well with this" recommendations
+    pairingMenuCodes: {
+        type: 'array',
+        default: []  // e.g., ['MENU-STICKY-RICE', 'MENU-BEERLAO']
+    },
+    
+    // AI-ready rich description for embedding/vector search
+    // Detailed description for semantic search
+    aiDescription: {
+        type: 'string',
+        default: ''
+    },
+    
+    // AI description in multiple languages (for multilingual search)
+    aiDescription_th: {
+        type: 'string',
+        default: ''
+    },
+    
+    aiDescription_en: {
+        type: 'string',
+        default: ''
+    },
+    
+    // Popularity score (0-100) - can be updated from order analytics
+    // Higher score = more popular
+    popularityScore: {
+        type: 'number',
+        default: 50
+    },
+    
     // Sort order within category
     sortOrder: {
         type: 'number',
@@ -185,7 +284,17 @@ const indexes = [
     { key: { name_en: 1 } },
     { key: { isActive: 1, isDeleted: 1 } },
     { key: { keywords: 1 } },
-    { key: { recommendedRestaurantTypes: 1 } }
+    { key: { recommendedRestaurantTypes: 1 } },
+    // AI search indexes
+    { key: { 'tasteProfile.spicy': 1 } },
+    { key: { 'tasteProfile.sweet': 1 } },
+    { key: { 'tasteProfile.sour': 1 } },
+    { key: { servingTemperature: 1 } },
+    { key: { occasions: 1 } },
+    { key: { emotionTags: 1 } },
+    { key: { mealTimes: 1 } },
+    { key: { bestSeasons: 1 } },
+    { key: { popularityScore: -1 } }
 ];
 
 module.exports = {

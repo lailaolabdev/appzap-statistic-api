@@ -40,6 +40,34 @@ function loadRecipesFromJSON(dataDir) {
 }
 
 /**
+ * Load AI enrichment data from JSON file
+ * @param {string} dataDir - Data directory path
+ * @param {string} fileName - JSON file name
+ * @returns {Object} AI data indexed by code
+ */
+function loadAIData(dataDir, fileName) {
+    const filePath = path.join(dataDir, fileName);
+    if (fs.existsSync(filePath)) {
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const data = JSON.parse(content);
+        return data.aiData || {};
+    }
+    return {};
+}
+
+/**
+ * Merge AI data with base data
+ * @param {Object} baseData - Base data from CSV
+ * @param {Object} aiData - AI enrichment data
+ * @param {string} code - The code to look up in AI data
+ * @returns {Object} Merged data
+ */
+function mergeAIData(baseData, aiData, code) {
+    const enrichment = aiData[code] || {};
+    return { ...baseData, ...enrichment };
+}
+
+/**
  * Main seed function
  */
 async function seedMasterData() {
@@ -51,6 +79,12 @@ async function seedMasterData() {
         const dataDir = path.join(__dirname, '..', 'data');
         const data = loadAllMasterData(dataDir);
         
+        // Load AI enrichment data
+        console.log('Loading AI enrichment data...');
+        const menuAIData = loadAIData(dataDir, 'masterMenusAI.json');
+        const categoryAIData = loadAIData(dataDir, 'masterCategoriesAI.json');
+        const restCategoryAIData = loadAIData(dataDir, 'masterRestaurantCategoriesAI.json');
+        
         console.log(`Loaded:`);
         console.log(`  - ${data.masterCategories.length} master categories`);
         console.log(`  - ${data.masterMenus.length} master menus`);
@@ -58,6 +92,9 @@ async function seedMasterData() {
         console.log(`  - ${data.masterIngredientCategories.length} ingredient categories`);
         console.log(`  - ${data.masterIngredients.length} ingredients`);
         console.log(`  - ${data.masterRecipeCategories.length} recipe categories`);
+        console.log(`  - ${Object.keys(menuAIData).length} menu AI enrichments`);
+        console.log(`  - ${Object.keys(categoryAIData).length} category AI enrichments`);
+        console.log(`  - ${Object.keys(restCategoryAIData).length} restaurant category AI enrichments`);
         
         // Connect to MongoDB
         console.log('\nConnecting to MongoDB...');
@@ -76,25 +113,35 @@ async function seedMasterData() {
         if (existingCategories > 0) {
             console.log(`   Skipping: ${existingCategories} categories already exist`);
         } else {
-            const categoryDocs = data.masterCategories.map(cat => ({
-                code: cat.code || generateMasterCategoryCode(), // Use code from CSV if available
-                name: cat.name,
-                name_en: cat.name_en || '',
-                name_th: cat.name_th || '',
-                name_cn: cat.name_cn || '',
-                name_kr: cat.name_kr || '',
-                name_jp: cat.name_jp || '',
-                name_vi: cat.name_vi || '',
-                keywords: cat.keywords || [],
-                description: cat.description || '',
-                icon: '',
-                sortOrder: cat.sortOrder || 0,
-                recommendedRestaurantTypes: cat.recommendedRestaurantTypes || [],
-                isActive: true,
-                isDeleted: false,
-                createdAt: now,
-                updatedAt: now
-            }));
+            const categoryDocs = data.masterCategories.map(cat => {
+                const code = cat.code || generateMasterCategoryCode();
+                const aiEnrichment = categoryAIData[code] || {};
+                
+                return {
+                    code,
+                    name: cat.name,
+                    name_en: cat.name_en || '',
+                    name_th: cat.name_th || '',
+                    name_cn: cat.name_cn || '',
+                    name_kr: cat.name_kr || '',
+                    name_jp: cat.name_jp || '',
+                    name_vi: cat.name_vi || '',
+                    keywords: cat.keywords || [],
+                    description: cat.description || '',
+                    icon: '',
+                    sortOrder: cat.sortOrder || 0,
+                    recommendedRestaurantTypes: cat.recommendedRestaurantTypes || [],
+                    // AI-Ready Fields (merged from AI enrichment data)
+                    typicalTasteProfile: aiEnrichment.typicalTasteProfile || cat.typicalTasteProfile || { sweet: 0, sour: 0, spicy: 0, salty: 0, bitter: 0, umami: 0 },
+                    occasions: aiEnrichment.occasions || cat.occasions || [],
+                    mealTimes: aiEnrichment.mealTimes || cat.mealTimes || [],
+                    aiDescription: aiEnrichment.aiDescription || cat.aiDescription || '',
+                    isActive: true,
+                    isDeleted: false,
+                    createdAt: now,
+                    updatedAt: now
+                };
+            });
             
             const result = await db.collection('masterCategories').insertMany(categoryDocs);
             console.log(`   Created ${result.insertedCount} master categories`);
@@ -119,34 +166,52 @@ async function seedMasterData() {
         if (existingMenus > 0) {
             console.log(`   Skipping: ${existingMenus} menus already exist`);
         } else {
-            const menuDocs = data.masterMenus.map(menu => ({
-                code: menu.code || generateMasterMenuCode(), // Use code from CSV if available
-                masterCategoryCode: categoryCodeMap[menu.categoryIndex] || categoryCodeMap[0],
-                name: menu.name,
-                name_en: menu.name_en || '',
-                name_th: menu.name_th || '',
-                name_cn: menu.name_cn || '',
-                name_kr: menu.name_kr || '',
-                name_jp: menu.name_jp || '',
-                name_vi: menu.name_vi || '',
-                keywords: menu.keywords || [],
-                description: '',
-                standardPrice: menu.standardPrice || 0,
-                imageUrl: menu.imageUrl || '',
-                recommendedRestaurantTypes: menu.recommendedRestaurantTypes || [],
-                allergens: [],
-                isVegetarian: false,
-                isVegan: false,
-                isHalal: true,
-                isGlutenFree: false,
-                spiceLevel: 0,
-                prepTimeMinutes: 0,
-                sortOrder: 0,
-                isActive: true,
-                isDeleted: false,
-                createdAt: now,
-                updatedAt: now
-            }));
+            const menuDocs = data.masterMenus.map(menu => {
+                const code = menu.code || generateMasterMenuCode();
+                const aiEnrichment = menuAIData[code] || {};
+                
+                return {
+                    code,
+                    masterCategoryCode: categoryCodeMap[menu.categoryIndex] || categoryCodeMap[0],
+                    name: menu.name,
+                    name_en: menu.name_en || '',
+                    name_th: menu.name_th || '',
+                    name_cn: menu.name_cn || '',
+                    name_kr: menu.name_kr || '',
+                    name_jp: menu.name_jp || '',
+                    name_vi: menu.name_vi || '',
+                    keywords: menu.keywords || [],
+                    description: menu.description || '',
+                    standardPrice: menu.standardPrice || 0,
+                    imageUrl: menu.imageUrl || '',
+                    recommendedRestaurantTypes: menu.recommendedRestaurantTypes || [],
+                    allergens: [],
+                    isVegetarian: menu.isVegetarian || false,
+                    isVegan: menu.isVegan || false,
+                    isHalal: menu.isHalal !== false,
+                    isGlutenFree: menu.isGlutenFree || false,
+                    spiceLevel: aiEnrichment.tasteProfile?.spicy || menu.spiceLevel || 0,
+                    prepTimeMinutes: menu.prepTimeMinutes || 0,
+                    // AI-Ready Fields (merged from AI enrichment data)
+                    tasteProfile: aiEnrichment.tasteProfile || menu.tasteProfile || { sweet: 0, sour: 0, spicy: 0, salty: 0, bitter: 0, umami: 0 },
+                    textureProfile: aiEnrichment.textureProfile || menu.textureProfile || { crispy: 0, soft: 0, chewy: 0, creamy: 0, soupy: 0 },
+                    servingTemperature: aiEnrichment.servingTemperature || menu.servingTemperature || 'room',
+                    occasions: aiEnrichment.occasions || menu.occasions || [],
+                    emotionTags: aiEnrichment.emotionTags || menu.emotionTags || [],
+                    mealTimes: aiEnrichment.mealTimes || menu.mealTimes || [],
+                    bestSeasons: aiEnrichment.bestSeasons || menu.bestSeasons || [],
+                    pairingMenuCodes: aiEnrichment.pairingMenuCodes || menu.pairingMenuCodes || [],
+                    aiDescription: aiEnrichment.aiDescription || menu.aiDescription || '',
+                    aiDescription_th: menu.aiDescription_th || '',
+                    aiDescription_en: aiEnrichment.aiDescription || menu.aiDescription_en || '',
+                    popularityScore: aiEnrichment.popularityScore || menu.popularityScore || 50,
+                    sortOrder: 0,
+                    isActive: true,
+                    isDeleted: false,
+                    createdAt: now,
+                    updatedAt: now
+                };
+            });
             
             const result = await db.collection('masterMenus').insertMany(menuDocs);
             console.log(`   Created ${result.insertedCount} master menus`);
@@ -162,40 +227,52 @@ async function seedMasterData() {
             console.log(`   Skipping: ${existingRestCats} restaurant categories already exist`);
         } else {
             // Restaurant categories use readable codes from CSV (e.g., RCAT-BEERGARDEN)
-            const restCatDocs = data.masterRestaurantCategories.map(cat => ({
-                code: cat.code, // Use readable code from CSV instead of auto-generating
-                name: cat.name,
-                name_en: cat.name_en || '',
-                name_th: cat.name_th || '',
-                name_cn: cat.name_cn || '',
-                name_kr: cat.name_kr || '',
-                name_jp: cat.name_jp || '',
-                name_vi: cat.name_vi || '',
-                keywords: cat.keywords || [],
-                description: cat.description || '',
-                icon: '',
-                coverImage: '',
-                // NOTE: recommendedCategoryCodes and recommendedMenuCodes are removed
-                // The relationship is reversed - categories/menus have recommendedRestaurantTypes field
-                typicalMenuCount: cat.typicalMenuCount || 50,
-                typicalCategoryCount: cat.typicalCategoryCount || 8,
-                characteristics: {
-                    hasAlcohol: cat.hasAlcohol || false,
-                    hasFood: cat.hasFood !== false,
-                    hasDineIn: true,
-                    hasTakeaway: true,
-                    hasDelivery: false,
-                    typicalOperatingHours: '',
-                    peakHours: [],
-                    avgTicketSize: 0,
-                    targetCustomers: []
-                },
-                sortOrder: cat.sortOrder || 0,
-                isActive: true,
-                isDeleted: false,
-                createdAt: now,
-                updatedAt: now
-            }));
+            const restCatDocs = data.masterRestaurantCategories.map(cat => {
+                const code = cat.code;
+                const aiEnrichment = restCategoryAIData[code] || {};
+                
+                return {
+                    code, // Use readable code from CSV instead of auto-generating
+                    name: cat.name,
+                    name_en: cat.name_en || '',
+                    name_th: cat.name_th || '',
+                    name_cn: cat.name_cn || '',
+                    name_kr: cat.name_kr || '',
+                    name_jp: cat.name_jp || '',
+                    name_vi: cat.name_vi || '',
+                    keywords: cat.keywords || [],
+                    description: cat.description || '',
+                    icon: '',
+                    coverImage: '',
+                    // NOTE: recommendedCategoryCodes and recommendedMenuCodes are removed
+                    // The relationship is reversed - categories/menus have recommendedRestaurantTypes field
+                    typicalMenuCount: cat.typicalMenuCount || 50,
+                    typicalCategoryCount: cat.typicalCategoryCount || 8,
+                    characteristics: {
+                        hasAlcohol: cat.hasAlcohol || false,
+                        hasFood: cat.hasFood !== false,
+                        hasDineIn: true,
+                        hasTakeaway: true,
+                        hasDelivery: false,
+                        typicalOperatingHours: '',
+                        peakHours: [],
+                        avgTicketSize: 0,
+                        targetCustomers: []
+                    },
+                    // AI-Ready Fields (merged from AI enrichment data)
+                    ambiance: aiEnrichment.ambiance || cat.ambiance || [],
+                    features: aiEnrichment.features || cat.features || [],
+                    typicalOccasions: aiEnrichment.typicalOccasions || cat.typicalOccasions || [],
+                    priceTier: aiEnrichment.priceTier || cat.priceTier || 3,
+                    noiseLevel: aiEnrichment.noiseLevel || cat.noiseLevel || 3,
+                    aiDescription: aiEnrichment.aiDescription || cat.aiDescription || '',
+                    sortOrder: cat.sortOrder || 0,
+                    isActive: true,
+                    isDeleted: false,
+                    createdAt: now,
+                    updatedAt: now
+                };
+            });
             
             const result = await db.collection('masterRestaurantCategories').insertMany(restCatDocs);
             console.log(`   Created ${result.insertedCount} master restaurant categories`);
@@ -474,6 +551,8 @@ async function seedMasterData() {
         await db.collection('masterCategories').createIndex({ name: 1 });
         await db.collection('masterCategories').createIndex({ isActive: 1, isDeleted: 1 });
         await db.collection('masterCategories').createIndex({ recommendedRestaurantTypes: 1 });
+        await db.collection('masterCategories').createIndex({ occasions: 1 });
+        await db.collection('masterCategories').createIndex({ mealTimes: 1 });
         
         // Master Menus
         await db.collection('masterMenus').createIndex({ code: 1 }, { unique: true });
@@ -482,11 +561,26 @@ async function seedMasterData() {
         await db.collection('masterMenus').createIndex({ isActive: 1, isDeleted: 1 });
         await db.collection('masterMenus').createIndex({ standardPrice: 1 });
         await db.collection('masterMenus').createIndex({ recommendedRestaurantTypes: 1 });
+        // AI search indexes for menus
+        await db.collection('masterMenus').createIndex({ 'tasteProfile.spicy': 1 });
+        await db.collection('masterMenus').createIndex({ 'tasteProfile.sweet': 1 });
+        await db.collection('masterMenus').createIndex({ 'tasteProfile.sour': 1 });
+        await db.collection('masterMenus').createIndex({ servingTemperature: 1 });
+        await db.collection('masterMenus').createIndex({ occasions: 1 });
+        await db.collection('masterMenus').createIndex({ emotionTags: 1 });
+        await db.collection('masterMenus').createIndex({ mealTimes: 1 });
+        await db.collection('masterMenus').createIndex({ bestSeasons: 1 });
+        await db.collection('masterMenus').createIndex({ popularityScore: -1 });
         
         // Master Restaurant Categories
         await db.collection('masterRestaurantCategories').createIndex({ code: 1 }, { unique: true });
         await db.collection('masterRestaurantCategories').createIndex({ name: 1 });
         await db.collection('masterRestaurantCategories').createIndex({ isActive: 1, isDeleted: 1 });
+        await db.collection('masterRestaurantCategories').createIndex({ ambiance: 1 });
+        await db.collection('masterRestaurantCategories').createIndex({ features: 1 });
+        await db.collection('masterRestaurantCategories').createIndex({ typicalOccasions: 1 });
+        await db.collection('masterRestaurantCategories').createIndex({ priceTier: 1 });
+        await db.collection('masterRestaurantCategories').createIndex({ noiseLevel: 1 });
         
         // Master Ingredient Categories
         await db.collection('masterIngredientCategories').createIndex({ code: 1 }, { unique: true });
@@ -549,8 +643,11 @@ async function seedMasterData() {
         console.log('    - masterIngredientCategories.csv');
         console.log('    - masterIngredients.csv');
         console.log('    - masterRecipeCategories.csv');
-        console.log('  JSON Files:');
+        console.log('  JSON Files (nested/enrichment data):');
         console.log('    - masterRecipes.json (nested recipe data)');
+        console.log('    - masterMenusAI.json (AI search fields)');
+        console.log('    - masterCategoriesAI.json (AI search fields)');
+        console.log('    - masterRestaurantCategoriesAI.json (AI search fields)');
         console.log('----------------------------------------');
         console.log('\nTo modify data, edit the data files and re-run');
         console.log('this seed script (after clearing collections).');
