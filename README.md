@@ -1,6 +1,9 @@
 # 1. Query important statistic
 http://localhost:3000/api/v1/statistics
 
+response:
+
+
 # 2. Query restaurant with params
 http://localhost:3000/api/v1/restaurants?status=PAID&hasPOS=true&paymentStatus=PAID
 
