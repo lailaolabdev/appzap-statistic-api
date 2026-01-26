@@ -1,43 +1,81 @@
 /**
- * Migration Analysis Script
+ * Migration Analysis Script - IMPROVED VERSION
  * 
  * Reads existing menus and categories from the database,
- * finds potential master matches using similarity algorithms,
+ * finds potential master matches using multi-strategy similarity algorithms,
  * and creates mapping records with suggestions.
  * 
- * This is a READ-ONLY operation on existing data.
- * It only WRITES to the mapping collections.
+ * Key Improvements:
+ * - Proper Lao/Thai Unicode handling
+ * - Category-based filtering to prevent cross-category matches
+ * - Multi-strategy matching (exact, keyword, token overlap, fuzzy)
+ * - Stricter confidence thresholds
+ * - Option to clear existing mappings
  * 
  * USAGE: npm run migration:analyze
  * 
  * Options:
- *   --menus-only     Only analyze menus
+ *   --menus-only      Only analyze menus
  *   --categories-only Only analyze categories
- *   --limit=N        Limit number of items to process (for testing)
- *   --store=ID       Only analyze specific store
+ *   --limit=N         Limit number of items to process (for testing)
+ *   --store=ID        Only analyze specific store
+ *   --clear           Clear existing mappings before analysis
+ *   --verbose         Show detailed logging
  */
 
 require('dotenv').config();
 const { MongoClient, ObjectId } = require('mongodb');
-const { normalizeText, findBestMatches } = require('../utils/textSimilarity');
+const { 
+    normalizeText, 
+    findBestMatches, 
+    detectCategory,
+    calculateMultiStrategyScore 
+} = require('../utils/textSimilarity');
 
 // Parse command line arguments
 const args = process.argv.slice(2);
 const menusOnly = args.includes('--menus-only');
 const categoriesOnly = args.includes('--categories-only');
+const clearExisting = args.includes('--clear');
+const verbose = args.includes('--verbose');
 const limitArg = args.find(a => a.startsWith('--limit='));
 const storeArg = args.find(a => a.startsWith('--store='));
 const limit = limitArg ? parseInt(limitArg.split('=')[1]) : null;
 const storeId = storeArg ? storeArg.split('=')[1] : null;
 
 /**
- * Get confidence level from score
+ * IMPROVED confidence level thresholds
+ * Much stricter than before to reduce false positives
  */
 function getConfidenceLevel(score) {
-    if (score >= 90) return 'high';
-    if (score >= 60) return 'medium';
-    if (score > 0) return 'low';
+    if (score >= 95) return 'high';      // Was 90 - now stricter
+    if (score >= 75) return 'medium';    // Was 60 - now stricter
+    if (score >= 50) return 'low';       // Was 0 - now has minimum
     return 'none';
+}
+
+/**
+ * Log message if verbose mode is enabled
+ */
+function verboseLog(...args) {
+    if (verbose) {
+        console.log(...args);
+    }
+}
+
+/**
+ * Clear existing mapping collections
+ */
+async function clearMappings(db) {
+    console.log('\n--- Clearing Existing Mappings ---');
+    
+    const menuResult = await db.collection('menuMappings').deleteMany({});
+    console.log(`  Deleted ${menuResult.deletedCount} menu mappings`);
+    
+    const categoryResult = await db.collection('categoryMappings').deleteMany({});
+    console.log(`  Deleted ${categoryResult.deletedCount} category mappings`);
+    
+    console.log('  Mappings cleared successfully\n');
 }
 
 /**
@@ -45,7 +83,7 @@ function getConfidenceLevel(score) {
  */
 async function analyzeMenus(db, masterMenus, learnedDecisions) {
     console.log('\n========================================');
-    console.log('Analyzing Menus');
+    console.log('Analyzing Menus (Improved Algorithm)');
     console.log('========================================\n');
     
     const startTime = Date.now();
@@ -64,12 +102,15 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
         console.log(`Limiting to: ${limit} menus`);
     }
     
-    // Get existing mappings to avoid duplicates
-    const existingMappings = await db.collection('menuMappings')
-        .find({}, { projection: { menuId: 1 } })
-        .toArray();
-    const existingMenuIds = new Set(existingMappings.map(m => m.menuId.toString()));
-    console.log(`Existing mappings: ${existingMenuIds.size}`);
+    // Get existing mappings to avoid duplicates (only if not clearing)
+    let existingMenuIds = new Set();
+    if (!clearExisting) {
+        const existingMappings = await db.collection('menuMappings')
+            .find({}, { projection: { menuId: 1 } })
+            .toArray();
+        existingMenuIds = new Set(existingMappings.map(m => m.menuId.toString()));
+        console.log(`Existing mappings: ${existingMenuIds.size}`);
+    }
     
     // Fetch menus
     let menusCursor = db.collection('menus').find(query);
@@ -89,7 +130,16 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
         mediumConfidence: 0,
         lowConfidence: 0,
         noMatch: 0,
-        learned: 0
+        learned: 0,
+        byMatchType: {
+            exact: 0,
+            keyword_exact: 0,
+            keyword_contains: 0,
+            combined: 0,
+            char_only: 0,
+            none: 0
+        },
+        byCategory: {}
     };
     
     // Process menus in batches
@@ -99,8 +149,8 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
     for (let i = 0; i < menus.length; i++) {
         const menu = menus[i];
         
-        // Skip if already has mapping
-        if (existingMenuIds.has(menu._id.toString())) {
+        // Skip if already has mapping (and not clearing)
+        if (!clearExisting && existingMenuIds.has(menu._id.toString())) {
             stats.skipped++;
             continue;
         }
@@ -114,6 +164,15 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
             stats.skipped++;
             continue;
         }
+        
+        // Detect category of menu item
+        const detectedCategory = detectCategory(menuName);
+        
+        // Track category stats
+        if (!stats.byCategory[detectedCategory.category]) {
+            stats.byCategory[detectedCategory.category] = 0;
+        }
+        stats.byCategory[detectedCategory.category]++;
         
         // Check if we have a learned decision for this name
         const learnedDecision = learnedDecisions.get(normalizedName);
@@ -129,6 +188,8 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
                 menuName_en,
                 normalizedName,
                 originalPrice: menu.price || 0,
+                detectedCategory: detectedCategory.category,
+                detectedCategoryConfidence: detectedCategory.confidence,
                 masterMenuCode: learnedDecision.masterCode,
                 masterMenuName: learnedDecision.masterName,
                 masterMenuName_en: learnedDecision.masterName_en,
@@ -150,6 +211,8 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
             };
             stats.learned++;
             stats.highConfidence++;
+            stats.byMatchType.exact++;
+            
         } else if (learnedDecision && learnedDecision.decisionType === 'not-applicable') {
             // Learned that this should not be mapped
             mapping = {
@@ -159,6 +222,8 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
                 menuName_en,
                 normalizedName,
                 originalPrice: menu.price || 0,
+                detectedCategory: detectedCategory.category,
+                detectedCategoryConfidence: detectedCategory.confidence,
                 masterMenuCode: null,
                 masterMenuName: '',
                 masterMenuName_en: '',
@@ -167,6 +232,7 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
                 confidenceLevel: 'none',
                 suggestedMappings: [],
                 mappingMethod: 'learned',
+                notes: 'Marked as not-applicable based on previous decision',
                 isActive: true,
                 isApplied: false,
                 createdAt: new Date(),
@@ -174,17 +240,23 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
             };
             stats.learned++;
             stats.noMatch++;
+            stats.byMatchType.none++;
+            
         } else {
-            // Find best matches using similarity algorithm
-            const matches = findBestMatches(menuName, masterMenus, 0.3, 5);
+            // Find best matches using improved multi-strategy algorithm
+            const matches = findBestMatches(menuName, masterMenus, 0.5, 5);
             
             // Also try English name if available
             if (menuName_en) {
-                const enMatches = findBestMatches(menuName_en, masterMenus, 0.3, 5);
-                // Merge and dedupe
+                const enMatches = findBestMatches(menuName_en, masterMenus, 0.5, 5);
+                // Merge and dedupe, keeping higher scores
                 for (const match of enMatches) {
-                    if (!matches.find(m => m.candidate.code === match.candidate.code)) {
+                    const existing = matches.find(m => m.candidate.code === match.candidate.code);
+                    if (!existing) {
                         matches.push(match);
+                    } else if (match.score > existing.score) {
+                        // Replace with better score
+                        Object.assign(existing, match);
                     }
                 }
                 // Re-sort by score
@@ -197,10 +269,12 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
                 masterMenuName: match.candidate.name,
                 masterMenuName_en: match.candidate.name_en || '',
                 confidenceScore: Math.round(match.score * 100),
-                matchType: match.matchType
+                matchType: match.matchType,
+                matchDetails: match.details
             }));
             
-            const topScore = suggestedMappings.length > 0 ? suggestedMappings[0].confidenceScore : 0;
+            const topMatch = suggestedMappings.length > 0 ? suggestedMappings[0] : null;
+            const topScore = topMatch ? topMatch.confidenceScore : 0;
             const confidenceLevel = getConfidenceLevel(topScore);
             
             mapping = {
@@ -210,14 +284,17 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
                 menuName_en,
                 normalizedName,
                 originalPrice: menu.price || 0,
-                masterMenuCode: suggestedMappings.length > 0 ? suggestedMappings[0].masterMenuCode : null,
-                masterMenuName: suggestedMappings.length > 0 ? suggestedMappings[0].masterMenuName : '',
-                masterMenuName_en: suggestedMappings.length > 0 ? suggestedMappings[0].masterMenuName_en : '',
-                mappingStatus: suggestedMappings.length > 0 ? 'suggested' : 'pending',
+                detectedCategory: detectedCategory.category,
+                detectedCategoryConfidence: Math.round(detectedCategory.confidence),
+                masterMenuCode: topMatch ? topMatch.masterMenuCode : null,
+                masterMenuName: topMatch ? topMatch.masterMenuName : '',
+                masterMenuName_en: topMatch ? topMatch.masterMenuName_en : '',
+                mappingStatus: topMatch ? 'suggested' : 'pending',
                 confidenceScore: topScore,
                 confidenceLevel,
                 suggestedMappings,
                 mappingMethod: 'auto_suggested',
+                matchType: topMatch ? topMatch.matchType : 'none',
                 isActive: true,
                 isApplied: false,
                 createdAt: new Date(),
@@ -231,6 +308,17 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
                 case 'low': stats.lowConfidence++; break;
                 default: stats.noMatch++; break;
             }
+            
+            // Track match type
+            const matchType = topMatch ? topMatch.matchType : 'none';
+            if (stats.byMatchType[matchType] !== undefined) {
+                stats.byMatchType[matchType]++;
+            } else {
+                stats.byMatchType[matchType] = 1;
+            }
+            
+            // Verbose logging for debugging
+            verboseLog(`  [${i+1}] "${menuName}" -> ${topMatch ? topMatch.masterMenuCode : 'NO MATCH'} (${topScore}% ${topMatch?.matchType || 'none'})`);
         }
         
         mappingsToInsert.push(mapping);
@@ -276,12 +364,23 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
     console.log(`Total processed: ${stats.total}`);
     console.log(`Skipped (existing): ${stats.skipped}`);
     console.log(`Mappings created: ${stats.created}`);
-    console.log(`  - High confidence (>=90%): ${stats.highConfidence}`);
-    console.log(`  - Medium confidence (60-89%): ${stats.mediumConfidence}`);
-    console.log(`  - Low confidence (<60%): ${stats.lowConfidence}`);
-    console.log(`  - No match: ${stats.noMatch}`);
+    console.log(`\nBy Confidence Level:`);
+    console.log(`  - High (>=95%): ${stats.highConfidence}`);
+    console.log(`  - Medium (75-94%): ${stats.mediumConfidence}`);
+    console.log(`  - Low (50-74%): ${stats.lowConfidence}`);
+    console.log(`  - No match (<50%): ${stats.noMatch}`);
     console.log(`  - From learned decisions: ${stats.learned}`);
-    console.log(`Duration: ${(duration / 1000).toFixed(2)}s`);
+    console.log(`\nBy Match Type:`);
+    for (const [type, count] of Object.entries(stats.byMatchType)) {
+        if (count > 0) {
+            console.log(`  - ${type}: ${count}`);
+        }
+    }
+    console.log(`\nBy Detected Category:`);
+    for (const [category, count] of Object.entries(stats.byCategory)) {
+        console.log(`  - ${category}: ${count}`);
+    }
+    console.log(`\nDuration: ${(duration / 1000).toFixed(2)}s`);
     
     return stats;
 }
@@ -291,7 +390,7 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
  */
 async function analyzeCategories(db, masterCategories, learnedDecisions) {
     console.log('\n========================================');
-    console.log('Analyzing Categories');
+    console.log('Analyzing Categories (Improved Algorithm)');
     console.log('========================================\n');
     
     const startTime = Date.now();
@@ -310,12 +409,15 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
         console.log(`Limiting to: ${limit} categories`);
     }
     
-    // Get existing mappings to avoid duplicates
-    const existingMappings = await db.collection('categoryMappings')
-        .find({}, { projection: { categoryId: 1 } })
-        .toArray();
-    const existingCategoryIds = new Set(existingMappings.map(m => m.categoryId.toString()));
-    console.log(`Existing mappings: ${existingCategoryIds.size}`);
+    // Get existing mappings to avoid duplicates (only if not clearing)
+    let existingCategoryIds = new Set();
+    if (!clearExisting) {
+        const existingMappings = await db.collection('categoryMappings')
+            .find({}, { projection: { categoryId: 1 } })
+            .toArray();
+        existingCategoryIds = new Set(existingMappings.map(m => m.categoryId.toString()));
+        console.log(`Existing mappings: ${existingCategoryIds.size}`);
+    }
     
     // Fetch categories
     let categoriesCursor = db.collection('categories').find(query);
@@ -335,7 +437,8 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
         mediumConfidence: 0,
         lowConfidence: 0,
         noMatch: 0,
-        learned: 0
+        learned: 0,
+        byMatchType: {}
     };
     
     // Process categories in batches
@@ -345,8 +448,8 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
     for (let i = 0; i < categories.length; i++) {
         const category = categories[i];
         
-        // Skip if already has mapping
-        if (existingCategoryIds.has(category._id.toString())) {
+        // Skip if already has mapping (and not clearing)
+        if (!clearExisting && existingCategoryIds.has(category._id.toString())) {
             stats.skipped++;
             continue;
         }
@@ -395,6 +498,7 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
             };
             stats.learned++;
             stats.highConfidence++;
+            
         } else if (learnedDecision && learnedDecision.decisionType === 'not-applicable') {
             // Learned that this should not be mapped
             mapping = {
@@ -418,17 +522,21 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
             };
             stats.learned++;
             stats.noMatch++;
+            
         } else {
-            // Find best matches using similarity algorithm
-            const matches = findBestMatches(categoryName, masterCategories, 0.3, 5);
+            // Find best matches using improved multi-strategy algorithm
+            const matches = findBestMatches(categoryName, masterCategories, 0.5, 5);
             
             // Also try English name if available
             if (categoryName_en) {
-                const enMatches = findBestMatches(categoryName_en, masterCategories, 0.3, 5);
+                const enMatches = findBestMatches(categoryName_en, masterCategories, 0.5, 5);
                 // Merge and dedupe
                 for (const match of enMatches) {
-                    if (!matches.find(m => m.candidate.code === match.candidate.code)) {
+                    const existing = matches.find(m => m.candidate.code === match.candidate.code);
+                    if (!existing) {
                         matches.push(match);
+                    } else if (match.score > existing.score) {
+                        Object.assign(existing, match);
                     }
                 }
                 // Re-sort by score
@@ -441,10 +549,12 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
                 masterCategoryName: match.candidate.name,
                 masterCategoryName_en: match.candidate.name_en || '',
                 confidenceScore: Math.round(match.score * 100),
-                matchType: match.matchType
+                matchType: match.matchType,
+                matchDetails: match.details
             }));
             
-            const topScore = suggestedMappings.length > 0 ? suggestedMappings[0].confidenceScore : 0;
+            const topMatch = suggestedMappings.length > 0 ? suggestedMappings[0] : null;
+            const topScore = topMatch ? topMatch.confidenceScore : 0;
             const confidenceLevel = getConfidenceLevel(topScore);
             
             mapping = {
@@ -453,14 +563,15 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
                 categoryName,
                 categoryName_en,
                 normalizedName,
-                masterCategoryCode: suggestedMappings.length > 0 ? suggestedMappings[0].masterCategoryCode : null,
-                masterCategoryName: suggestedMappings.length > 0 ? suggestedMappings[0].masterCategoryName : '',
-                masterCategoryName_en: suggestedMappings.length > 0 ? suggestedMappings[0].masterCategoryName_en : '',
-                mappingStatus: suggestedMappings.length > 0 ? 'suggested' : 'pending',
+                masterCategoryCode: topMatch ? topMatch.masterCategoryCode : null,
+                masterCategoryName: topMatch ? topMatch.masterCategoryName : '',
+                masterCategoryName_en: topMatch ? topMatch.masterCategoryName_en : '',
+                mappingStatus: topMatch ? 'suggested' : 'pending',
                 confidenceScore: topScore,
                 confidenceLevel,
                 suggestedMappings,
                 mappingMethod: 'auto_suggested',
+                matchType: topMatch ? topMatch.matchType : 'none',
                 isActive: true,
                 isApplied: false,
                 createdAt: new Date(),
@@ -474,6 +585,16 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
                 case 'low': stats.lowConfidence++; break;
                 default: stats.noMatch++; break;
             }
+            
+            // Track match type
+            const matchType = topMatch ? topMatch.matchType : 'none';
+            if (stats.byMatchType[matchType] !== undefined) {
+                stats.byMatchType[matchType]++;
+            } else {
+                stats.byMatchType[matchType] = 1;
+            }
+            
+            verboseLog(`  [${i+1}] "${categoryName}" -> ${topMatch ? topMatch.masterCategoryCode : 'NO MATCH'} (${topScore}%)`);
         }
         
         mappingsToInsert.push(mapping);
@@ -519,12 +640,19 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
     console.log(`Total processed: ${stats.total}`);
     console.log(`Skipped (existing): ${stats.skipped}`);
     console.log(`Mappings created: ${stats.created}`);
-    console.log(`  - High confidence (>=90%): ${stats.highConfidence}`);
-    console.log(`  - Medium confidence (60-89%): ${stats.mediumConfidence}`);
-    console.log(`  - Low confidence (<60%): ${stats.lowConfidence}`);
-    console.log(`  - No match: ${stats.noMatch}`);
+    console.log(`\nBy Confidence Level:`);
+    console.log(`  - High (>=95%): ${stats.highConfidence}`);
+    console.log(`  - Medium (75-94%): ${stats.mediumConfidence}`);
+    console.log(`  - Low (50-74%): ${stats.lowConfidence}`);
+    console.log(`  - No match (<50%): ${stats.noMatch}`);
     console.log(`  - From learned decisions: ${stats.learned}`);
-    console.log(`Duration: ${(duration / 1000).toFixed(2)}s`);
+    console.log(`\nBy Match Type:`);
+    for (const [type, count] of Object.entries(stats.byMatchType)) {
+        if (count > 0) {
+            console.log(`  - ${type}: ${count}`);
+        }
+    }
+    console.log(`\nDuration: ${(duration / 1000).toFixed(2)}s`);
     
     return stats;
 }
@@ -537,21 +665,26 @@ async function runAnalysis() {
     
     try {
         console.log('========================================');
-        console.log('Migration Analysis');
+        console.log('Migration Analysis (IMPROVED ALGORITHM)');
         console.log('========================================\n');
         
-        if (storeId) {
-            console.log(`Analyzing store: ${storeId}`);
-        }
-        if (limit) {
-            console.log(`Limit: ${limit} items`);
-        }
+        console.log('Options:');
+        if (storeId) console.log(`  Store: ${storeId}`);
+        if (limit) console.log(`  Limit: ${limit} items`);
+        if (clearExisting) console.log(`  Clear existing: YES`);
+        if (verbose) console.log(`  Verbose: YES`);
+        console.log('');
         
         // Connect to MongoDB
-        console.log('\nConnecting to MongoDB...');
+        console.log('Connecting to MongoDB...');
         client = await MongoClient.connect(process.env.MONGODB_URI);
         const db = client.db('AppZap');
         console.log('Connected successfully!');
+        
+        // Clear existing mappings if requested
+        if (clearExisting) {
+            await clearMappings(db);
+        }
         
         // Load master data
         console.log('\nLoading master data...');
@@ -605,22 +738,32 @@ async function runAnalysis() {
         console.log('========================================');
         
         if (menuStats) {
+            const highMedium = menuStats.highConfidence + menuStats.mediumConfidence;
+            const reviewPct = menuStats.created > 0 ? Math.round((highMedium / menuStats.created) * 100) : 0;
             console.log(`\nMenus:`);
             console.log(`  Created: ${menuStats.created} mappings`);
-            console.log(`  Ready for review: ${menuStats.highConfidence + menuStats.mediumConfidence}`);
+            console.log(`  Ready for quick review: ${highMedium} (${reviewPct}%)`);
+            console.log(`  Needs manual review: ${menuStats.lowConfidence + menuStats.noMatch}`);
         }
         
         if (categoryStats) {
+            const highMedium = categoryStats.highConfidence + categoryStats.mediumConfidence;
+            const reviewPct = categoryStats.created > 0 ? Math.round((highMedium / categoryStats.created) * 100) : 0;
             console.log(`\nCategories:`);
             console.log(`  Created: ${categoryStats.created} mappings`);
-            console.log(`  Ready for review: ${categoryStats.highConfidence + categoryStats.mediumConfidence}`);
+            console.log(`  Ready for quick review: ${highMedium} (${reviewPct}%)`);
+            console.log(`  Needs manual review: ${categoryStats.lowConfidence + categoryStats.noMatch}`);
         }
         
-        console.log('\nNext steps:');
-        console.log('  1. Review high-confidence mappings first (quick wins)');
-        console.log('  2. Review medium-confidence mappings');
-        console.log('  3. Handle low-confidence and no-match items');
-        console.log('\nUse the admin dashboard or API to approve/reject mappings.');
+        console.log('\n========================================');
+        console.log('Next Steps:');
+        console.log('========================================');
+        console.log('1. Review HIGH confidence mappings first (quick batch approve)');
+        console.log('2. Review MEDIUM confidence mappings (verify and approve)');
+        console.log('3. Review LOW/NO MATCH items:');
+        console.log('   - Create new master items if needed');
+        console.log('   - Mark as "not-applicable" for store-specific items');
+        console.log('4. Approved decisions are learned for future use');
         console.log('========================================\n');
         
     } catch (error) {

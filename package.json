@@ -10,7 +10,9 @@
     "migration:init": "node src/migration/migrationInit.js",
     "migration:analyze": "node src/migration/migrationAnalyze.js",
     "migration:analyze:menus": "node src/migration/migrationAnalyze.js --menus-only",
-    "migration:analyze:categories": "node src/migration/migrationAnalyze.js --categories-only"
+    "migration:analyze:categories": "node src/migration/migrationAnalyze.js --categories-only",
+    "migration:reanalyze": "node src/migration/migrationAnalyze.js --clear",
+    "migration:reanalyze:verbose": "node src/migration/migrationAnalyze.js --clear --verbose --limit=100"
   },
   "keywords": [],
   "author": "",

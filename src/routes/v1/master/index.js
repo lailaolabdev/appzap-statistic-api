@@ -14,7 +14,8 @@ const {
     masterRecipeController,
     masterRestaurantCategoryController,
     mappingController,
-    analyticsController
+    analyticsController,
+    reviewController
 } = require('../../../controllers/master');
 
 module.exports = (db) => {
@@ -320,6 +321,82 @@ module.exports = (db) => {
     // Ingredient consumption
     router.get('/analytics/ingredient-consumption', (req, res) => 
         analyticsController.getIngredientConsumption(req, res, db));
+
+    // ============================================
+    // ADMIN REVIEW
+    // ============================================
+    
+    // Review statistics
+    router.get('/reviews/stats', (req, res) => 
+        reviewController.getReviewStats(req, res, db));
+    
+    // --- Menu Review Queue ---
+    
+    // Get menu review queue
+    router.get('/reviews/menus', (req, res) => 
+        reviewController.getMenuReviewQueue(req, res, db));
+    
+    // Get single menu mapping for review
+    router.get('/reviews/menus/:id', (req, res) => 
+        reviewController.getMenuMappingForReview(req, res, db));
+    
+    // Approve a menu mapping
+    router.post('/reviews/menus/:id/approve', (req, res) => 
+        reviewController.approveMenuMapping(req, res, db));
+    
+    // Reject a menu mapping
+    router.post('/reviews/menus/:id/reject', (req, res) => 
+        reviewController.rejectMenuMapping(req, res, db));
+    
+    // Manually map a menu to a different master
+    router.put('/reviews/menus/:id/manual-map', (req, res) => 
+        reviewController.manualMapMenu(req, res, db));
+    
+    // Mark menu as not applicable
+    router.post('/reviews/menus/:id/not-applicable', (req, res) => 
+        reviewController.markMenuNotApplicable(req, res, db));
+    
+    // Bulk approve menu mappings
+    router.post('/reviews/menus/bulk/approve', (req, res) => 
+        reviewController.bulkApproveMenuMappings(req, res, db));
+    
+    // Bulk reject menu mappings
+    router.post('/reviews/menus/bulk/reject', (req, res) => 
+        reviewController.bulkRejectMenuMappings(req, res, db));
+    
+    // --- Category Review Queue ---
+    
+    // Get category review queue
+    router.get('/reviews/categories', (req, res) => 
+        reviewController.getCategoryReviewQueue(req, res, db));
+    
+    // Get single category mapping for review
+    router.get('/reviews/categories/:id', (req, res) => 
+        reviewController.getCategoryMappingForReview(req, res, db));
+    
+    // Approve a category mapping
+    router.post('/reviews/categories/:id/approve', (req, res) => 
+        reviewController.approveCategoryMapping(req, res, db));
+    
+    // Reject a category mapping
+    router.post('/reviews/categories/:id/reject', (req, res) => 
+        reviewController.rejectCategoryMapping(req, res, db));
+    
+    // Manually map a category to a different master
+    router.put('/reviews/categories/:id/manual-map', (req, res) => 
+        reviewController.manualMapCategory(req, res, db));
+    
+    // Mark category as not applicable
+    router.post('/reviews/categories/:id/not-applicable', (req, res) => 
+        reviewController.markCategoryNotApplicable(req, res, db));
+    
+    // Bulk approve category mappings
+    router.post('/reviews/categories/bulk/approve', (req, res) => 
+        reviewController.bulkApproveCategoryMappings(req, res, db));
+    
+    // Bulk reject category mappings
+    router.post('/reviews/categories/bulk/reject', (req, res) => 
+        reviewController.bulkRejectCategoryMappings(req, res, db));
 
     return router;
 };

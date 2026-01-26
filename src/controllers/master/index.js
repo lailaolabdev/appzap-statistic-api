@@ -13,6 +13,7 @@ const masterRecipeController = require('./masterRecipeController');
 const masterRestaurantCategoryController = require('./masterRestaurantCategoryController');
 const mappingController = require('./mappingController');
 const analyticsController = require('./analyticsController');
+const reviewController = require('./reviewController');
 
 module.exports = {
     masterCategoryController,
@@ -23,5 +24,6 @@ module.exports = {
     masterRecipeController,
     masterRestaurantCategoryController,
     mappingController,
-    analyticsController
+    analyticsController,
+    reviewController
 };
