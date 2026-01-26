@@ -317,7 +317,6 @@ const reviewController = {
                     },
                     $setOnInsert: {
                         timesApplied: 0,
-                        storeIds: [],
                         createdAt: now
                     },
                     $addToSet: { storeIds: mapping.storeId }
@@ -414,7 +413,6 @@ const reviewController = {
                     },
                     $setOnInsert: {
                         timesApplied: 0,
-                        storeIds: [],
                         createdAt: now
                     },
                     $addToSet: { storeIds: mapping.storeId }
@@ -495,7 +493,6 @@ const reviewController = {
                     },
                     $setOnInsert: {
                         timesApplied: 0,
-                        storeIds: [],
                         createdAt: now
                     },
                     $addToSet: { storeIds: mapping.storeId }
@@ -573,7 +570,6 @@ const reviewController = {
                     },
                     $setOnInsert: {
                         timesApplied: 0,
-                        storeIds: [],
                         createdAt: now
                     },
                     $addToSet: { storeIds: mapping.storeId }
@@ -649,6 +645,7 @@ const reviewController = {
             );
 
             // Create mapping decision
+            // Note: $addToSet creates the array if it doesn't exist, so we don't need $setOnInsert for storeIds
             await db.collection('mappingDecisions').updateOne(
                 {
                     entityType: 'menu',
@@ -669,7 +666,6 @@ const reviewController = {
                     },
                     $setOnInsert: {
                         timesApplied: 0,
-                        storeIds: [],
                         createdAt: now
                     },
                     $addToSet: { storeIds: mapping.storeId }
@@ -742,6 +738,7 @@ const reviewController = {
                 { returnDocument: 'after' }
             );
 
+            // Note: $addToSet creates the array if it doesn't exist, so we don't need $setOnInsert for storeIds
             await db.collection('mappingDecisions').updateOne(
                 {
                     entityType: 'category',
@@ -762,7 +759,6 @@ const reviewController = {
                     },
                     $setOnInsert: {
                         timesApplied: 0,
-                        storeIds: [],
                         createdAt: now
                     },
                     $addToSet: { storeIds: mapping.storeId }
@@ -846,7 +842,6 @@ const reviewController = {
                     },
                     $setOnInsert: {
                         timesApplied: 0,
-                        storeIds: [],
                         createdAt: now
                     },
                     $addToSet: { storeIds: mapping.storeId }
@@ -927,7 +922,6 @@ const reviewController = {
                     },
                     $setOnInsert: {
                         timesApplied: 0,
-                        storeIds: [],
                         createdAt: now
                     },
                     $addToSet: { storeIds: mapping.storeId }
@@ -950,7 +944,16 @@ const reviewController = {
     // ============ BULK OPERATIONS ============
 
     /**
-     * Bulk approve menu mappings
+     * Helper: Validate ObjectId string
+     */
+    _isValidObjectId: (id) => {
+        if (!id) return false;
+        const str = typeof id === 'string' ? id : String(id);
+        return /^[a-fA-F0-9]{24}$/.test(str);
+    },
+
+    /**
+     * Bulk approve menu mappings (by IDs)
      */
     bulkApproveMenuMappings: async (req, res, db) => {
         try {
@@ -964,46 +967,65 @@ const reviewController = {
                 return res.status(400).json({ error: 'ids array is required' });
             }
 
+            // Validate and convert IDs
+            const validIds = ids
+                .filter(id => reviewController._isValidObjectId(id))
+                .map(id => new ObjectId(id));
+
+            if (validIds.length === 0) {
+                return res.status(400).json({ error: 'No valid IDs provided' });
+            }
+
             const now = new Date();
-            const results = {
-                approved: 0,
-                failed: 0,
-                errors: []
-            };
 
-            for (const id of ids) {
-                try {
-                    const mapping = await db.collection('menuMappings').findOne({
-                        _id: new ObjectId(id)
-                    });
+            // Get all mappings in one query (batch fetch)
+            const mappings = await db.collection('menuMappings')
+                .find({ 
+                    _id: { $in: validIds },
+                    mappingStatus: 'suggested'
+                })
+                .toArray();
 
-                    if (!mapping) {
-                        results.failed++;
-                        results.errors.push({ id, error: 'Not found' });
-                        continue;
-                    }
+            if (mappings.length === 0) {
+                return res.status(200).json({
+                    message: 'No mappings to approve',
+                    results: { approved: 0, failed: 0, skipped: ids.length }
+                });
+            }
 
-                    const codeToUse = mapping.suggestedMappings?.[0]?.masterMenuCode;
-                    if (!codeToUse) {
-                        results.failed++;
-                        results.errors.push({ id, error: 'No suggestion available' });
-                        continue;
-                    }
+            // Get all master menu codes needed
+            const masterCodes = [...new Set(
+                mappings
+                    .filter(m => m.suggestedMappings?.[0]?.masterMenuCode)
+                    .map(m => m.suggestedMappings[0].masterMenuCode)
+            )];
 
-                    const masterMenu = await db.collection('masterMenus').findOne({
-                        code: codeToUse,
-                        isDeleted: false
-                    });
+            // Fetch all master menus in one query
+            const masterMenus = await db.collection('masterMenus')
+                .find({ code: { $in: masterCodes }, isDeleted: false })
+                .toArray();
+            
+            const masterMenuMap = new Map(masterMenus.map(m => [m.code, m]));
 
-                    if (!masterMenu) {
-                        results.failed++;
-                        results.errors.push({ id, error: 'Master menu not found' });
-                        continue;
-                    }
+            // Build bulk operations
+            const bulkOps = [];
+            const decisionOps = [];
+            let approved = 0;
+            let failed = 0;
 
-                    await db.collection('menuMappings').updateOne(
-                        { _id: new ObjectId(id) },
-                        {
+            for (const mapping of mappings) {
+                const codeToUse = mapping.suggestedMappings?.[0]?.masterMenuCode;
+                const masterMenu = codeToUse ? masterMenuMap.get(codeToUse) : null;
+
+                if (!masterMenu) {
+                    failed++;
+                    continue;
+                }
+
+                bulkOps.push({
+                    updateOne: {
+                        filter: { _id: mapping._id },
+                        update: {
                             $set: {
                                 masterMenuCode: codeToUse,
                                 masterMenuName: masterMenu.name,
@@ -1015,15 +1037,13 @@ const reviewController = {
                                 updatedAt: now
                             }
                         }
-                    );
+                    }
+                });
 
-                    // Create mapping decision
-                    await db.collection('mappingDecisions').updateOne(
-                        {
-                            entityType: 'menu',
-                            normalizedName: mapping.normalizedName
-                        },
-                        {
+                decisionOps.push({
+                    updateOne: {
+                        filter: { entityType: 'menu', normalizedName: mapping.normalizedName },
+                        update: {
                             $set: {
                                 entityType: 'menu',
                                 originalName: mapping.menuName,
@@ -1036,28 +1056,27 @@ const reviewController = {
                                 decisionAt: now,
                                 updatedAt: now
                             },
-                            $setOnInsert: {
-                                timesApplied: 0,
-                                storeIds: [],
-                                createdAt: now
-                            },
+                            $setOnInsert: { timesApplied: 0, createdAt: now },
                             $addToSet: { storeIds: mapping.storeId }
                         },
-                        { upsert: true }
-                    );
+                        upsert: true
+                    }
+                });
 
-                    results.approved++;
-                } catch (err) {
-                    results.failed++;
-                    results.errors.push({ id, error: err.message });
-                }
+                approved++;
             }
 
-            await reviewController._updateMappingStats(db, 'menu');
+            // Execute bulk operations
+            if (bulkOps.length > 0) {
+                await db.collection('menuMappings').bulkWrite(bulkOps, { ordered: false });
+            }
+            if (decisionOps.length > 0) {
+                await db.collection('mappingDecisions').bulkWrite(decisionOps, { ordered: false });
+            }
 
             res.status(200).json({
-                message: `Bulk approval completed: ${results.approved} approved, ${results.failed} failed`,
-                results
+                message: `Bulk approval completed: ${approved} approved, ${failed} failed`,
+                results: { approved, failed, total: mappings.length }
             });
         } catch (error) {
             console.error('Error bulk approving menu mappings:', error);
@@ -1066,7 +1085,215 @@ const reviewController = {
     },
 
     /**
-     * Bulk approve category mappings
+     * HIGH-PERFORMANCE: Bulk approve ALL menu mappings by confidence level
+     * This is the "Quick Win" feature - approve all high-confidence items at once
+     */
+    bulkApproveMenusByConfidence: async (req, res, db) => {
+        console.log('\n========== QUICK WIN: MENUS ==========');
+        console.log('Request body:', JSON.stringify(req.body, null, 2));
+        
+        try {
+            const { 
+                confidenceLevel = 'high',
+                minConfidence,
+                storeId,
+                approvedBy = 'admin',
+                notes = '',
+                limit = 10000  // Safety limit
+            } = req.body;
+
+            console.log('Parameters:', { confidenceLevel, minConfidence, storeId, approvedBy, limit });
+
+            const now = new Date();
+
+            // Build query for items to approve
+            const query = { 
+                mappingStatus: 'suggested',
+                'suggestedMappings.0': { $exists: true }  // Must have at least one suggestion
+            };
+
+            // Add confidence filter
+            if (minConfidence !== undefined) {
+                query.confidenceScore = { $gte: parseFloat(minConfidence) };
+            } else {
+                const levelRanges = {
+                    'high': { $gte: 95 },
+                    'medium': { $gte: 60, $lt: 95 },
+                    'low': { $gte: 1, $lt: 60 }
+                };
+                if (levelRanges[confidenceLevel]) {
+                    query.confidenceScore = levelRanges[confidenceLevel];
+                }
+            }
+
+            if (storeId && reviewController._isValidObjectId(storeId)) {
+                query.storeId = new ObjectId(storeId);
+            }
+
+            console.log('Query:', JSON.stringify(query, null, 2));
+
+            // Count total items first
+            const totalCount = await db.collection('menuMappings').countDocuments(query);
+            console.log('Total items matching query:', totalCount);
+
+            if (totalCount === 0) {
+                console.log('No items to approve - returning early');
+                return res.status(200).json({
+                    message: 'No items to approve matching criteria',
+                    results: { approved: 0, total: 0 }
+                });
+            }
+
+            // Process in batches for memory efficiency
+            const BATCH_SIZE = 500;
+            let processed = 0;
+            let approved = 0;
+            let failed = 0;
+
+            // Get all unique master codes needed first
+            console.log('Fetching mappings...');
+            const allMappings = await db.collection('menuMappings')
+                .find(query)
+                .limit(limit)
+                .project({ 
+                    _id: 1, 
+                    menuName: 1,
+                    normalizedName: 1, 
+                    storeId: 1,
+                    suggestedMappings: 1
+                })
+                .toArray();
+
+            console.log('Fetched mappings:', allMappings.length);
+            
+            // Debug: Log first few mappings to understand the data structure
+            if (allMappings.length > 0) {
+                console.log('Sample mapping structure (first 3):');
+                allMappings.slice(0, 3).forEach((m, idx) => {
+                    console.log(`  [${idx}] menuName: ${m.menuName}`);
+                    console.log(`       suggestedMappings:`, JSON.stringify(m.suggestedMappings, null, 2));
+                });
+            }
+
+            const masterCodes = [...new Set(
+                allMappings
+                    .filter(m => m.suggestedMappings?.[0]?.masterMenuCode)
+                    .map(m => m.suggestedMappings[0].masterMenuCode)
+            )];
+
+            console.log('Unique master codes needed:', masterCodes.length);
+            
+            // If no master codes found, check alternative field names
+            if (masterCodes.length === 0 && allMappings.length > 0) {
+                const sample = allMappings[0].suggestedMappings?.[0];
+                console.log('No masterMenuCode found. Available fields in suggestedMappings[0]:', 
+                    sample ? Object.keys(sample) : 'suggestedMappings is empty/undefined');
+            }
+
+            // Fetch all master menus in one query
+            const masterMenus = await db.collection('masterMenus')
+                .find({ code: { $in: masterCodes }, isDeleted: false })
+                .toArray();
+            
+            console.log('Master menus found:', masterMenus.length);
+            
+            const masterMenuMap = new Map(masterMenus.map(m => [m.code, m]));
+
+            // Process in batches
+            for (let i = 0; i < allMappings.length; i += BATCH_SIZE) {
+                const batch = allMappings.slice(i, i + BATCH_SIZE);
+                const bulkOps = [];
+                const decisionOps = [];
+
+                for (const mapping of batch) {
+                    const codeToUse = mapping.suggestedMappings?.[0]?.masterMenuCode;
+                    const masterMenu = codeToUse ? masterMenuMap.get(codeToUse) : null;
+
+                    if (!masterMenu) {
+                        failed++;
+                        continue;
+                    }
+
+                    bulkOps.push({
+                        updateOne: {
+                            filter: { _id: mapping._id },
+                            update: {
+                                $set: {
+                                    masterMenuCode: codeToUse,
+                                    masterMenuName: masterMenu.name,
+                                    masterMenuName_en: masterMenu.name_en,
+                                    mappingStatus: 'approved',
+                                    approvedBy,
+                                    approvedAt: now,
+                                    notes: notes || `Bulk approved (${confidenceLevel} confidence)`,
+                                    updatedAt: now
+                                }
+                            }
+                        }
+                    });
+
+                    decisionOps.push({
+                        updateOne: {
+                            filter: { entityType: 'menu', normalizedName: mapping.normalizedName },
+                            update: {
+                                $set: {
+                                    entityType: 'menu',
+                                    originalName: mapping.menuName,
+                                    normalizedName: mapping.normalizedName,
+                                    masterCode: codeToUse,
+                                    masterName: masterMenu.name,
+                                    masterName_en: masterMenu.name_en,
+                                    decisionType: 'approved',
+                                    decisionBy: approvedBy,
+                                    decisionAt: now,
+                                    updatedAt: now
+                                },
+                                $setOnInsert: { timesApplied: 0, createdAt: now },
+                                $addToSet: { storeIds: mapping.storeId }
+                            },
+                            upsert: true
+                        }
+                    });
+
+                    approved++;
+                }
+
+                // Execute batch operations
+                console.log(`Batch ${Math.floor(i/BATCH_SIZE) + 1}: ${bulkOps.length} operations`);
+                
+                if (bulkOps.length > 0) {
+                    const result = await db.collection('menuMappings').bulkWrite(bulkOps, { ordered: false });
+                    console.log(`  - menuMappings updated: ${result.modifiedCount}`);
+                }
+                if (decisionOps.length > 0) {
+                    const result = await db.collection('mappingDecisions').bulkWrite(decisionOps, { ordered: false });
+                    console.log(`  - mappingDecisions upserted: ${result.upsertedCount + result.modifiedCount}`);
+                }
+
+                processed += batch.length;
+            }
+
+            console.log('========== QUICK WIN COMPLETE ==========');
+            console.log(`Results: approved=${approved}, failed=${failed}, processed=${processed}`);
+
+            res.status(200).json({
+                message: `Quick Win completed: ${approved} items approved`,
+                results: { 
+                    approved, 
+                    failed, 
+                    totalMatched: totalCount,
+                    processed
+                }
+            });
+        } catch (error) {
+            console.error('========== QUICK WIN ERROR ==========');
+            console.error('Error bulk approving menus by confidence:', error);
+            res.status(500).json({ error: 'Failed to bulk approve by confidence' });
+        }
+    },
+
+    /**
+     * Bulk approve category mappings (by IDs) - HIGH PERFORMANCE
      */
     bulkApproveCategoryMappings: async (req, res, db) => {
         try {
@@ -1080,46 +1307,65 @@ const reviewController = {
                 return res.status(400).json({ error: 'ids array is required' });
             }
 
+            // Validate and convert IDs
+            const validIds = ids
+                .filter(id => reviewController._isValidObjectId(id))
+                .map(id => new ObjectId(id));
+
+            if (validIds.length === 0) {
+                return res.status(400).json({ error: 'No valid IDs provided' });
+            }
+
             const now = new Date();
-            const results = {
-                approved: 0,
-                failed: 0,
-                errors: []
-            };
 
-            for (const id of ids) {
-                try {
-                    const mapping = await db.collection('categoryMappings').findOne({
-                        _id: new ObjectId(id)
-                    });
+            // Get all mappings in one query
+            const mappings = await db.collection('categoryMappings')
+                .find({ 
+                    _id: { $in: validIds },
+                    mappingStatus: 'suggested'
+                })
+                .toArray();
 
-                    if (!mapping) {
-                        results.failed++;
-                        results.errors.push({ id, error: 'Not found' });
-                        continue;
-                    }
+            if (mappings.length === 0) {
+                return res.status(200).json({
+                    message: 'No mappings to approve',
+                    results: { approved: 0, failed: 0, skipped: ids.length }
+                });
+            }
 
-                    const codeToUse = mapping.suggestedMappings?.[0]?.masterCategoryCode;
-                    if (!codeToUse) {
-                        results.failed++;
-                        results.errors.push({ id, error: 'No suggestion available' });
-                        continue;
-                    }
+            // Get all master category codes needed
+            const masterCodes = [...new Set(
+                mappings
+                    .filter(m => m.suggestedMappings?.[0]?.masterCategoryCode)
+                    .map(m => m.suggestedMappings[0].masterCategoryCode)
+            )];
 
-                    const masterCategory = await db.collection('masterCategories').findOne({
-                        code: codeToUse,
-                        isDeleted: false
-                    });
+            // Fetch all master categories in one query
+            const masterCategories = await db.collection('masterCategories')
+                .find({ code: { $in: masterCodes }, isDeleted: false })
+                .toArray();
+            
+            const masterCategoryMap = new Map(masterCategories.map(m => [m.code, m]));
 
-                    if (!masterCategory) {
-                        results.failed++;
-                        results.errors.push({ id, error: 'Master category not found' });
-                        continue;
-                    }
+            // Build bulk operations
+            const bulkOps = [];
+            const decisionOps = [];
+            let approved = 0;
+            let failed = 0;
 
-                    await db.collection('categoryMappings').updateOne(
-                        { _id: new ObjectId(id) },
-                        {
+            for (const mapping of mappings) {
+                const codeToUse = mapping.suggestedMappings?.[0]?.masterCategoryCode;
+                const masterCategory = codeToUse ? masterCategoryMap.get(codeToUse) : null;
+
+                if (!masterCategory) {
+                    failed++;
+                    continue;
+                }
+
+                bulkOps.push({
+                    updateOne: {
+                        filter: { _id: mapping._id },
+                        update: {
                             $set: {
                                 masterCategoryCode: codeToUse,
                                 masterCategoryName: masterCategory.name,
@@ -1131,14 +1377,13 @@ const reviewController = {
                                 updatedAt: now
                             }
                         }
-                    );
+                    }
+                });
 
-                    await db.collection('mappingDecisions').updateOne(
-                        {
-                            entityType: 'category',
-                            normalizedName: mapping.normalizedName
-                        },
-                        {
+                decisionOps.push({
+                    updateOne: {
+                        filter: { entityType: 'category', normalizedName: mapping.normalizedName },
+                        update: {
                             $set: {
                                 entityType: 'category',
                                 originalName: mapping.categoryName,
@@ -1151,32 +1396,226 @@ const reviewController = {
                                 decisionAt: now,
                                 updatedAt: now
                             },
-                            $setOnInsert: {
-                                timesApplied: 0,
-                                storeIds: [],
-                                createdAt: now
-                            },
+                            $setOnInsert: { timesApplied: 0, createdAt: now },
                             $addToSet: { storeIds: mapping.storeId }
                         },
-                        { upsert: true }
-                    );
+                        upsert: true
+                    }
+                });
 
-                    results.approved++;
-                } catch (err) {
-                    results.failed++;
-                    results.errors.push({ id, error: err.message });
-                }
+                approved++;
             }
 
-            await reviewController._updateMappingStats(db, 'category');
+            // Execute bulk operations
+            if (bulkOps.length > 0) {
+                await db.collection('categoryMappings').bulkWrite(bulkOps, { ordered: false });
+            }
+            if (decisionOps.length > 0) {
+                await db.collection('mappingDecisions').bulkWrite(decisionOps, { ordered: false });
+            }
 
             res.status(200).json({
-                message: `Bulk approval completed: ${results.approved} approved, ${results.failed} failed`,
-                results
+                message: `Bulk approval completed: ${approved} approved, ${failed} failed`,
+                results: { approved, failed, total: mappings.length }
             });
         } catch (error) {
             console.error('Error bulk approving category mappings:', error);
             res.status(500).json({ error: 'Failed to bulk approve mappings' });
+        }
+    },
+
+    /**
+     * HIGH-PERFORMANCE: Bulk approve ALL category mappings by confidence level
+     */
+    bulkApproveCategoriesByConfidence: async (req, res, db) => {
+        console.log('\n========== QUICK WIN: CATEGORIES ==========');
+        console.log('Request body:', JSON.stringify(req.body, null, 2));
+        
+        try {
+            const { 
+                confidenceLevel = 'high',
+                minConfidence,
+                storeId,
+                approvedBy = 'admin',
+                notes = '',
+                limit = 10000
+            } = req.body;
+
+            console.log('Parameters:', { confidenceLevel, minConfidence, storeId, approvedBy, limit });
+
+            const now = new Date();
+
+            // Build query
+            const query = { 
+                mappingStatus: 'suggested',
+                'suggestedMappings.0': { $exists: true }
+            };
+
+            if (minConfidence !== undefined) {
+                query.confidenceScore = { $gte: parseFloat(minConfidence) };
+            } else {
+                const levelRanges = {
+                    'high': { $gte: 95 },
+                    'medium': { $gte: 60, $lt: 95 },
+                    'low': { $gte: 1, $lt: 60 }
+                };
+                if (levelRanges[confidenceLevel]) {
+                    query.confidenceScore = levelRanges[confidenceLevel];
+                }
+            }
+
+            if (storeId && reviewController._isValidObjectId(storeId)) {
+                query.storeId = new ObjectId(storeId);
+            }
+
+            console.log('Query:', JSON.stringify(query, null, 2));
+
+            const totalCount = await db.collection('categoryMappings').countDocuments(query);
+            console.log('Total items matching query:', totalCount);
+
+            if (totalCount === 0) {
+                console.log('No items to approve - returning early');
+                return res.status(200).json({
+                    message: 'No items to approve matching criteria',
+                    results: { approved: 0, total: 0 }
+                });
+            }
+
+            const BATCH_SIZE = 500;
+            let approved = 0;
+            let failed = 0;
+            let processed = 0;
+
+            console.log('Fetching mappings...');
+            const allMappings = await db.collection('categoryMappings')
+                .find(query)
+                .limit(limit)
+                .project({ 
+                    _id: 1, 
+                    categoryName: 1,
+                    normalizedName: 1, 
+                    storeId: 1,
+                    suggestedMappings: 1
+                })
+                .toArray();
+
+            console.log('Fetched mappings:', allMappings.length);
+            
+            // Debug: Log first few mappings to understand the data structure
+            if (allMappings.length > 0) {
+                console.log('Sample mapping structure (first 3):');
+                allMappings.slice(0, 3).forEach((m, idx) => {
+                    console.log(`  [${idx}] categoryName: ${m.categoryName}`);
+                    console.log(`       suggestedMappings:`, JSON.stringify(m.suggestedMappings, null, 2));
+                });
+            }
+
+            const masterCodes = [...new Set(
+                allMappings
+                    .filter(m => m.suggestedMappings?.[0]?.masterCategoryCode)
+                    .map(m => m.suggestedMappings[0].masterCategoryCode)
+            )];
+
+            console.log('Unique master codes needed:', masterCodes.length);
+            
+            // If no master codes found, check alternative field names
+            if (masterCodes.length === 0 && allMappings.length > 0) {
+                const sample = allMappings[0].suggestedMappings?.[0];
+                console.log('No masterCategoryCode found. Available fields in suggestedMappings[0]:', 
+                    sample ? Object.keys(sample) : 'suggestedMappings is empty/undefined');
+            }
+
+            const masterCategories = await db.collection('masterCategories')
+                .find({ code: { $in: masterCodes }, isDeleted: false })
+                .toArray();
+            
+            console.log('Master categories found:', masterCategories.length);
+            
+            const masterCategoryMap = new Map(masterCategories.map(m => [m.code, m]));
+
+            for (let i = 0; i < allMappings.length; i += BATCH_SIZE) {
+                const batch = allMappings.slice(i, i + BATCH_SIZE);
+                const bulkOps = [];
+                const decisionOps = [];
+
+                for (const mapping of batch) {
+                    const codeToUse = mapping.suggestedMappings?.[0]?.masterCategoryCode;
+                    const masterCategory = codeToUse ? masterCategoryMap.get(codeToUse) : null;
+
+                    if (!masterCategory) {
+                        failed++;
+                        continue;
+                    }
+
+                    bulkOps.push({
+                        updateOne: {
+                            filter: { _id: mapping._id },
+                            update: {
+                                $set: {
+                                    masterCategoryCode: codeToUse,
+                                    masterCategoryName: masterCategory.name,
+                                    masterCategoryName_en: masterCategory.name_en,
+                                    mappingStatus: 'approved',
+                                    approvedBy,
+                                    approvedAt: now,
+                                    notes: notes || `Bulk approved (${confidenceLevel} confidence)`,
+                                    updatedAt: now
+                                }
+                            }
+                        }
+                    });
+
+                    decisionOps.push({
+                        updateOne: {
+                            filter: { entityType: 'category', normalizedName: mapping.normalizedName },
+                            update: {
+                                $set: {
+                                    entityType: 'category',
+                                    originalName: mapping.categoryName,
+                                    normalizedName: mapping.normalizedName,
+                                    masterCode: codeToUse,
+                                    masterName: masterCategory.name,
+                                    masterName_en: masterCategory.name_en,
+                                    decisionType: 'approved',
+                                    decisionBy: approvedBy,
+                                    decisionAt: now,
+                                    updatedAt: now
+                                },
+                                $setOnInsert: { timesApplied: 0, createdAt: now },
+                                $addToSet: { storeIds: mapping.storeId }
+                            },
+                            upsert: true
+                        }
+                    });
+
+                    approved++;
+                }
+
+                console.log(`Batch ${Math.floor(i/BATCH_SIZE) + 1}: ${bulkOps.length} operations`);
+                
+                if (bulkOps.length > 0) {
+                    const result = await db.collection('categoryMappings').bulkWrite(bulkOps, { ordered: false });
+                    console.log(`  - categoryMappings updated: ${result.modifiedCount}`);
+                }
+                if (decisionOps.length > 0) {
+                    const result = await db.collection('mappingDecisions').bulkWrite(decisionOps, { ordered: false });
+                    console.log(`  - mappingDecisions upserted: ${result.upsertedCount + result.modifiedCount}`);
+                }
+                
+                processed += batch.length;
+            }
+
+            console.log('========== QUICK WIN COMPLETE (CATEGORIES) ==========');
+            console.log(`Results: approved=${approved}, failed=${failed}, processed=${processed}`);
+
+            res.status(200).json({
+                message: `Quick Win completed: ${approved} items approved`,
+                results: { approved, failed, totalMatched: totalCount, processed }
+            });
+        } catch (error) {
+            console.error('========== QUICK WIN ERROR (CATEGORIES) ==========');
+            console.error('Error bulk approving categories by confidence:', error);
+            res.status(500).json({ error: 'Failed to bulk approve by confidence' });
         }
     },
 

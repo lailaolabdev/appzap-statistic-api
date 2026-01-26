@@ -26,10 +26,29 @@ MongoClient.connect(process.env.MONGODB_URI, {
     app.use(helmet()); // Set various HTTP headers for security
     app.use(express.json()); // Parse JSON request bodies
 
+    // Request logging middleware
+    app.use((req, res, next) => {
+        const start = Date.now();
+        console.log(`\n[${new Date().toISOString()}] --> ${req.method} ${req.url}`);
+        if (req.method === 'POST' || req.method === 'PUT') {
+            console.log('Body:', JSON.stringify(req.body, null, 2).substring(0, 500));
+        }
+        
+        // Log response
+        const originalSend = res.send;
+        res.send = function(data) {
+            const duration = Date.now() - start;
+            console.log(`[${new Date().toISOString()}] <-- ${req.method} ${req.url} ${res.statusCode} (${duration}ms)`);
+            return originalSend.call(this, data);
+        };
+        
+        next();
+    });
+
     // Rate limiting middleware
     const limiter = rateLimit({
         windowMs: 15 * 60 * 1000, // 15 minutes
-        max: 100 // Limit each IP to 100 requests per windowMs
+        max: 1000 // Increased limit for bulk operations
     });
     app.use(limiter);
 

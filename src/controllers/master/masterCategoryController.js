@@ -12,10 +12,14 @@ const COLLECTION_NAME = 'masterCategories';
 const masterCategoryController = {
     /**
      * Create a new master category
+     * - name (Lao) is required
+     * - name_en is optional
+     * - code is optional (auto-generated if not provided)
      */
     create: async (req, res, db) => {
         try {
             const {
+                code: providedCode,
                 name,
                 name_en = '',
                 name_th = '',
@@ -23,15 +27,50 @@ const masterCategoryController = {
                 name_kr = '',
                 keywords = [],
                 description = '',
+                description_en = '',
                 icon = '',
-                sortOrder = 0
+                sortOrder = 0,
+                displayOrder = 0,
+                isActive = true
             } = req.body;
 
             if (!name) {
-                return res.status(400).json({ error: 'Name is required' });
+                return res.status(400).json({ error: 'Name (Lao) is required' });
             }
 
-            const code = generateMasterCategoryCode();
+            // Handle code: use provided code or auto-generate
+            let code;
+            if (providedCode && providedCode.trim()) {
+                // Validate uniqueness of provided code
+                const existingWithCode = await db.collection(COLLECTION_NAME).findOne({ 
+                    code: providedCode.trim().toUpperCase(),
+                    isDeleted: false 
+                });
+                
+                if (existingWithCode) {
+                    return res.status(400).json({ 
+                        error: 'Code already exists. Please use a different code.',
+                        existingCode: providedCode 
+                    });
+                }
+                code = providedCode.trim().toUpperCase();
+            } else {
+                // Auto-generate unique code
+                let attempts = 0;
+                const maxAttempts = 10;
+                
+                do {
+                    code = generateMasterCategoryCode();
+                    const existing = await db.collection(COLLECTION_NAME).findOne({ code });
+                    if (!existing) break;
+                    attempts++;
+                } while (attempts < maxAttempts);
+                
+                if (attempts >= maxAttempts) {
+                    return res.status(500).json({ error: 'Failed to generate unique code. Please try again.' });
+                }
+            }
+
             const now = new Date();
 
             const document = {
@@ -41,11 +80,13 @@ const masterCategoryController = {
                 name_th,
                 name_cn,
                 name_kr,
-                keywords,
+                keywords: Array.isArray(keywords) ? keywords : [],
                 description,
+                description_en,
                 icon,
-                sortOrder,
-                isActive: true,
+                sortOrder: sortOrder || displayOrder || 0,
+                displayOrder: displayOrder || sortOrder || 0,
+                isActive,
                 isDeleted: false,
                 createdAt: now,
                 updatedAt: now
@@ -285,6 +326,58 @@ const masterCategoryController = {
         } catch (error) {
             console.error('Error finding category matches:', error);
             res.status(500).json({ error: 'Failed to find matches' });
+        }
+    },
+
+    /**
+     * Get statistics for a master category
+     * Returns linked menu count and sample menus
+     */
+    getStats: async (req, res, db) => {
+        try {
+            const { code } = req.params;
+            const { includeMenus = 'true', menuLimit = 10 } = req.query;
+
+            // Verify category exists
+            const category = await db.collection(COLLECTION_NAME).findOne({ 
+                code, 
+                isDeleted: false 
+            });
+
+            if (!category) {
+                return res.status(404).json({ error: 'Master category not found' });
+            }
+
+            // Count linked menus
+            const menuCount = await db.collection('masterMenus').countDocuments({
+                masterCategoryCode: code,
+                isDeleted: false
+            });
+
+            const result = {
+                categoryCode: code,
+                categoryName: category.name,
+                categoryName_en: category.name_en,
+                linkedMenuCount: menuCount,
+                canSafelyDelete: menuCount === 0
+            };
+
+            // Optionally include sample linked menus
+            if (includeMenus === 'true' && menuCount > 0) {
+                const linkedMenus = await db.collection('masterMenus')
+                    .find({ masterCategoryCode: code, isDeleted: false })
+                    .project({ code: 1, name: 1, name_en: 1, isActive: 1 })
+                    .limit(parseInt(menuLimit))
+                    .toArray();
+
+                result.linkedMenus = linkedMenus;
+                result.hasMoreMenus = menuCount > parseInt(menuLimit);
+            }
+
+            res.status(200).json({ data: result });
+        } catch (error) {
+            console.error('Error getting category stats:', error);
+            res.status(500).json({ error: 'Failed to get category statistics' });
         }
     }
 };

@@ -41,6 +41,10 @@ module.exports = (db) => {
     router.get('/categories', (req, res) => 
         masterCategoryController.getAll(req, res, db));
     
+    // Get category statistics (linked menus count)
+    router.get('/categories/:code/stats', (req, res) => 
+        masterCategoryController.getStats(req, res, db));
+    
     // Get single master category
     router.get('/categories/:code', (req, res) => 
         masterCategoryController.getByCode(req, res, db));
@@ -76,6 +80,10 @@ module.exports = (db) => {
     // Get all master menus
     router.get('/menus', (req, res) => 
         masterMenuController.getAll(req, res, db));
+    
+    // Get mapping statistics for a master menu
+    router.get('/menus/:code/mapping-stats', (req, res) => 
+        masterMenuController.getMappingStats(req, res, db));
     
     // Get single master menu
     router.get('/menus/:code', (req, res) => 
@@ -356,9 +364,13 @@ module.exports = (db) => {
     router.post('/reviews/menus/:id/not-applicable', (req, res) => 
         reviewController.markMenuNotApplicable(req, res, db));
     
-    // Bulk approve menu mappings
+    // Bulk approve menu mappings (by IDs)
     router.post('/reviews/menus/bulk/approve', (req, res) => 
         reviewController.bulkApproveMenuMappings(req, res, db));
+    
+    // Bulk approve ALL menus by confidence level (Quick Win feature)
+    router.post('/reviews/menus/bulk/approve-by-confidence', (req, res) => 
+        reviewController.bulkApproveMenusByConfidence(req, res, db));
     
     // Bulk reject menu mappings
     router.post('/reviews/menus/bulk/reject', (req, res) => 
@@ -390,9 +402,13 @@ module.exports = (db) => {
     router.post('/reviews/categories/:id/not-applicable', (req, res) => 
         reviewController.markCategoryNotApplicable(req, res, db));
     
-    // Bulk approve category mappings
+    // Bulk approve category mappings (by IDs)
     router.post('/reviews/categories/bulk/approve', (req, res) => 
         reviewController.bulkApproveCategoryMappings(req, res, db));
+    
+    // Bulk approve ALL categories by confidence level (Quick Win feature)
+    router.post('/reviews/categories/bulk/approve-by-confidence', (req, res) => 
+        reviewController.bulkApproveCategoriesByConfidence(req, res, db));
     
     // Bulk reject category mappings
     router.post('/reviews/categories/bulk/reject', (req, res) => 

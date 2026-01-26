@@ -12,11 +12,16 @@ const COLLECTION_NAME = 'masterMenus';
 const masterMenuController = {
     /**
      * Create a new master menu
+     * - name (Lao) is required
+     * - name_en is optional
+     * - code is optional (auto-generated if not provided)
+     * - masterCategoryCode is optional
      */
     create: async (req, res, db) => {
         try {
             const {
-                masterCategoryCode,
+                code: providedCode,
+                masterCategoryCode = '',
                 name,
                 name_en = '',
                 name_th = '',
@@ -24,6 +29,7 @@ const masterMenuController = {
                 name_kr = '',
                 keywords = [],
                 description = '',
+                description_en = '',
                 imageUrl = '',
                 allergens = [],
                 isVegetarian = false,
@@ -32,28 +38,59 @@ const masterMenuController = {
                 isGlutenFree = false,
                 spiceLevel = 0,
                 prepTimeMinutes = 0,
-                sortOrder = 0
+                sortOrder = 0,
+                isActive = true
             } = req.body;
 
             if (!name) {
-                return res.status(400).json({ error: 'Name is required' });
+                return res.status(400).json({ error: 'Name (Lao) is required' });
             }
 
-            if (!masterCategoryCode) {
-                return res.status(400).json({ error: 'Master category code is required' });
+            // If masterCategoryCode provided, verify it exists
+            if (masterCategoryCode) {
+                const category = await db.collection('masterCategories').findOne({ 
+                    code: masterCategoryCode, 
+                    isDeleted: false 
+                });
+
+                if (!category) {
+                    return res.status(400).json({ error: 'Invalid master category code' });
+                }
             }
 
-            // Verify category exists
-            const category = await db.collection('masterCategories').findOne({ 
-                code: masterCategoryCode, 
-                isDeleted: false 
-            });
-
-            if (!category) {
-                return res.status(400).json({ error: 'Invalid master category code' });
+            // Handle code: use provided code or auto-generate
+            let code;
+            if (providedCode && providedCode.trim()) {
+                // Validate uniqueness of provided code
+                const existingWithCode = await db.collection(COLLECTION_NAME).findOne({ 
+                    code: providedCode.trim().toUpperCase(),
+                    isDeleted: false 
+                });
+                
+                if (existingWithCode) {
+                    return res.status(400).json({ 
+                        error: 'Code already exists. Please use a different code.',
+                        existingCode: providedCode 
+                    });
+                }
+                code = providedCode.trim().toUpperCase();
+            } else {
+                // Auto-generate unique code
+                let attempts = 0;
+                const maxAttempts = 10;
+                
+                do {
+                    code = generateMasterMenuCode();
+                    const existing = await db.collection(COLLECTION_NAME).findOne({ code });
+                    if (!existing) break;
+                    attempts++;
+                } while (attempts < maxAttempts);
+                
+                if (attempts >= maxAttempts) {
+                    return res.status(500).json({ error: 'Failed to generate unique code. Please try again.' });
+                }
             }
 
-            const code = generateMasterMenuCode();
             const now = new Date();
 
             const document = {
@@ -64,8 +101,9 @@ const masterMenuController = {
                 name_th,
                 name_cn,
                 name_kr,
-                keywords,
+                keywords: Array.isArray(keywords) ? keywords : [],
                 description,
+                description_en,
                 imageUrl,
                 allergens,
                 isVegetarian,
@@ -75,7 +113,7 @@ const masterMenuController = {
                 spiceLevel,
                 prepTimeMinutes,
                 sortOrder,
-                isActive: true,
+                isActive,
                 isDeleted: false,
                 createdAt: now,
                 updatedAt: now
@@ -415,6 +453,192 @@ const masterMenuController = {
         } catch (error) {
             console.error('Error fetching grouped menus:', error);
             res.status(500).json({ error: 'Failed to fetch grouped menus' });
+        }
+    },
+
+    /**
+     * Get mapping statistics for a master menu
+     * Shows how many store menus are mapped to this master menu,
+     * from how many restaurants, with optional details
+     */
+    getMappingStats: async (req, res, db) => {
+        try {
+            const { code } = req.params;
+            const { 
+                includeMappings = 'true', 
+                mappingLimit = 50,
+                mappingSkip = 0,
+                mappingSearch = '',
+                includePotentialMatches = 'true',
+                potentialLimit = 50,
+                potentialSkip = 0,
+                potentialSearch = ''
+            } = req.query;
+
+            // Verify master menu exists
+            const masterMenu = await db.collection(COLLECTION_NAME).findOne({ 
+                code, 
+                isDeleted: false 
+            });
+
+            if (!masterMenu) {
+                return res.status(404).json({ error: 'Master menu not found' });
+            }
+
+            // Get total unique stores in the system (for coverage calculation)
+            const totalStoresInSystem = await db.collection('menuMappings').aggregate([
+                { $group: { _id: '$storeId' } },
+                { $count: 'total' }
+            ]).toArray();
+            const totalRestaurantsInSystem = totalStoresInSystem[0]?.total || 0;
+
+            // Get mapping statistics - count only
+            const mappingCountStats = await db.collection('menuMappings').aggregate([
+                { 
+                    $match: { 
+                        masterMenuCode: code,
+                        mappingStatus: 'approved'
+                    } 
+                },
+                {
+                    $group: {
+                        _id: null,
+                        totalMappings: { $sum: 1 },
+                        uniqueStores: { $addToSet: '$storeId' }
+                    }
+                }
+            ]).toArray();
+
+            const countStats = mappingCountStats[0] || { totalMappings: 0, uniqueStores: [] };
+
+            const result = {
+                masterMenuCode: code,
+                masterMenuName: masterMenu.name,
+                masterMenuName_en: masterMenu.name_en,
+                masterCategoryCode: masterMenu.masterCategoryCode,
+                totalMappedItems: countStats.totalMappings,
+                restaurantCount: countStats.uniqueStores.length,
+                totalRestaurantsInSystem,
+                coveragePercentage: totalRestaurantsInSystem > 0 
+                    ? Math.round((countStats.uniqueStores.length / totalRestaurantsInSystem) * 100) 
+                    : 0,
+                canSafelyDelete: countStats.totalMappings === 0
+            };
+
+            // Include detailed mappings with pagination and search
+            if (includeMappings === 'true') {
+                const mappingQuery = {
+                    masterMenuCode: code,
+                    mappingStatus: 'approved'
+                };
+
+                // Add search filter
+                if (mappingSearch) {
+                    mappingQuery.$or = [
+                        { menuName: { $regex: mappingSearch, $options: 'i' } },
+                        { originalName: { $regex: mappingSearch, $options: 'i' } },
+                        { storeName: { $regex: mappingSearch, $options: 'i' } }
+                    ];
+                }
+
+                const [mappings, mappingTotal] = await Promise.all([
+                    db.collection('menuMappings')
+                        .find(mappingQuery)
+                        .sort({ approvedAt: -1 })
+                        .skip(parseInt(mappingSkip))
+                        .limit(parseInt(mappingLimit))
+                        .toArray(),
+                    db.collection('menuMappings').countDocuments(mappingQuery)
+                ]);
+
+                result.mappings = mappings.map(m => ({
+                    id: m._id,
+                    storeId: m.storeId,
+                    storeName: m.storeName || 'Unknown Store',
+                    menuItemName: m.menuName || m.originalName || m.normalizedName,
+                    menuItemName_en: m.menuName_en,
+                    confidence: m.confidenceScore || m.confidence,
+                    approvedAt: m.approvedAt || m.updatedAt,
+                    approvedBy: m.approvedBy
+                }));
+
+                result.mappingsPagination = {
+                    total: mappingTotal,
+                    limit: parseInt(mappingLimit),
+                    skip: parseInt(mappingSkip),
+                    hasMore: parseInt(mappingSkip) + mappings.length < mappingTotal
+                };
+            }
+
+            // Find potential unmapped items with pagination and search
+            if (includePotentialMatches === 'true') {
+                const searchTerms = [
+                    masterMenu.name,
+                    masterMenu.name_en,
+                    ...(masterMenu.keywords || [])
+                ].filter(Boolean);
+
+                if (searchTerms.length > 0) {
+                    // Build regex pattern for searching
+                    const searchPattern = searchTerms
+                        .map(term => term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+                        .join('|');
+
+                    const potentialQuery = {
+                        mappingStatus: 'suggested',
+                        $or: [
+                            { menuName: { $regex: searchPattern, $options: 'i' } },
+                            { originalName: { $regex: searchPattern, $options: 'i' } },
+                            { normalizedName: { $regex: searchPattern, $options: 'i' } }
+                        ]
+                    };
+
+                    // Add additional search filter if provided
+                    if (potentialSearch) {
+                        potentialQuery.$and = [
+                            { $or: potentialQuery.$or },
+                            {
+                                $or: [
+                                    { menuName: { $regex: potentialSearch, $options: 'i' } },
+                                    { storeName: { $regex: potentialSearch, $options: 'i' } }
+                                ]
+                            }
+                        ];
+                        delete potentialQuery.$or;
+                    }
+
+                    const [potentialMatches, potentialTotal] = await Promise.all([
+                        db.collection('menuMappings')
+                            .find(potentialQuery)
+                            .sort({ confidenceScore: -1 })
+                            .skip(parseInt(potentialSkip))
+                            .limit(parseInt(potentialLimit))
+                            .toArray(),
+                        db.collection('menuMappings').countDocuments(potentialQuery)
+                    ]);
+
+                    result.potentialUnmapped = potentialMatches.map(m => ({
+                        id: m._id,
+                        storeId: m.storeId,
+                        storeName: m.storeName || 'Unknown Store',
+                        menuItemName: m.menuName || m.originalName || m.normalizedName,
+                        confidence: m.confidenceScore || m.confidence,
+                        suggestedMasterCode: m.suggestedMasterMenuCode || (m.suggestedMappings?.[0]?.masterMenuCode)
+                    }));
+
+                    result.potentialPagination = {
+                        total: potentialTotal,
+                        limit: parseInt(potentialLimit),
+                        skip: parseInt(potentialSkip),
+                        hasMore: parseInt(potentialSkip) + potentialMatches.length < potentialTotal
+                    };
+                }
+            }
+
+            res.status(200).json({ data: result });
+        } catch (error) {
+            console.error('Error getting menu mapping stats:', error);
+            res.status(500).json({ error: 'Failed to get mapping statistics' });
         }
     }
 };
