@@ -1,11 +1,16 @@
 {
   "name": "appzap_statistic",
   "version": "1.0.0",
-  "description": "",
+  "description": "AppZap Statistics and Master Data Management System",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "seed:master": "node src/seeds/masterDataSeeds.js",
+    "migration:init": "node src/migration/migrationInit.js",
+    "migration:analyze": "node src/migration/migrationAnalyze.js",
+    "migration:analyze:menus": "node src/migration/migrationAnalyze.js --menus-only",
+    "migration:analyze:categories": "node src/migration/migrationAnalyze.js --categories-only"
   },
   "keywords": [],
   "author": "",

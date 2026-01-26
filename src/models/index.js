@@ -14,6 +14,8 @@ const masterRecipe = require('./masterRecipe');
 const masterRestaurantCategory = require('./masterRestaurantCategory');
 const menuMapping = require('./menuMapping');
 const categoryMapping = require('./categoryMapping');
+const mappingDecision = require('./mappingDecision');
+const mappingStats = require('./mappingStats');
 
 module.exports = {
     masterCategory,
@@ -25,6 +27,8 @@ module.exports = {
     masterRestaurantCategory,
     menuMapping,
     categoryMapping,
+    mappingDecision,
+    mappingStats,
     
     // List of all collections for initialization
     allCollections: [
@@ -36,6 +40,8 @@ module.exports = {
         masterRecipe,
         masterRestaurantCategory,
         menuMapping,
-        categoryMapping
+        categoryMapping,
+        mappingDecision,
+        mappingStats
     ]
 };
