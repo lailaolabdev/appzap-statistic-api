@@ -786,6 +786,7 @@ const orderBasedMappingController = {
                         orderCount: 1,
                         totalRevenue: { $round: ['$totalRevenue', 0] },
                         storeCount: { $size: '$uniqueStores' },
+                        uniqueStores: 1, // ✅ Keep this for summary calculation!
                         avgPrice: { $round: ['$avgPrice', 0] }
                     }
                 },
@@ -1264,6 +1265,176 @@ const orderBasedMappingController = {
             clearInterval(pingInterval);
             removeSSEClient(jobId, res);
         });
+    },
+
+    /**
+     * Get store details for a specific master menu item
+     * Shows which stores sell this product and their performance metrics
+     * Useful for identifying top-performing stores for targeted marketing
+     */
+    getStoreDetailsByMenuItem: async (req, res, db) => {
+        try {
+            const { masterMenuCode } = req.params;
+            const {
+                startDate,
+                endDate,
+                search = '',
+                limit = 100,
+                skip = 0
+            } = req.query;
+
+            if (!masterMenuCode) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Missing masterMenuCode'
+                });
+            }
+
+            const end = endDate ? new Date(endDate) : new Date();
+            const start = startDate ? new Date(startDate) : new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+            console.log(`[Store Details] Fetching stores for ${masterMenuCode} from ${start.toISOString()} to ${end.toISOString()}`);
+
+            // Get master menu info first
+            const masterMenu = await db.collection('masterMenus').findOne({ code: masterMenuCode });
+            if (!masterMenu) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'Master menu not found'
+                });
+            }
+
+            // Build match stage
+            const matchStage = {
+                createdAt: { $gte: start, $lte: end },
+                masterMenuCode: masterMenuCode,
+                isMapped: true
+            };
+
+            // Aggregation pipeline
+            const pipeline = [
+                { $match: matchStage },
+                // Group by store
+                {
+                    $group: {
+                        _id: '$storeId',
+                        totalRevenue: { $sum: '$revenue' },
+                        totalQuantity: { $sum: '$quantity' },
+                        orderCount: { $sum: 1 },
+                        avgPrice: { $avg: '$price' }
+                    }
+                },
+                // Lookup store details
+                {
+                    $lookup: {
+                        from: 'stores',
+                        localField: '_id',
+                        foreignField: '_id',
+                        as: 'store'
+                    }
+                },
+                { $unwind: { path: '$store', preserveNullAndEmptyArrays: true } },
+                // Add store name for searching
+                {
+                    $addFields: {
+                        storeName: '$store.name',
+                        storeId: '$_id'
+                    }
+                }
+            ];
+
+            // Add search filter
+            if (search && search.trim()) {
+                pipeline.push({
+                    $match: {
+                        storeName: { $regex: search.trim(), $options: 'i' }
+                    }
+                });
+            }
+
+            // Sort by revenue (highest first)
+            pipeline.push({ $sort: { totalRevenue: -1 } });
+
+            // Facet for items + summary
+            pipeline.push({
+                $facet: {
+                    items: [
+                        { $skip: parseInt(skip) },
+                        { $limit: parseInt(limit) }
+                    ],
+                    total: [{ $count: 'count' }],
+                    summary: [
+                        {
+                            $group: {
+                                _id: null,
+                                totalRevenue: { $sum: '$totalRevenue' },
+                                totalQuantity: { $sum: '$totalQuantity' },
+                                totalOrders: { $sum: '$orderCount' },
+                                totalStores: { $sum: 1 }
+                            }
+                        }
+                    ]
+                }
+            });
+
+            const startTime = Date.now();
+            const [result] = await db.collection('orderAnalytics').aggregate(pipeline).toArray();
+            const queryTime = Date.now() - startTime;
+
+            console.log(`[Store Details] Query completed in ${queryTime}ms`);
+
+            // Format items with rank
+            const items = (result.items || []).map((item, index) => ({
+                rank: parseInt(skip) + index + 1,
+                storeId: item.storeId,
+                storeName: item.storeName || 'Unknown Store',
+                totalRevenue: Math.round(item.totalRevenue || 0),
+                totalQuantity: item.totalQuantity || 0,
+                orderCount: item.orderCount || 0,
+                avgPrice: Math.round(item.avgPrice || 0)
+            }));
+
+            const summary = result.summary[0] || {
+                totalRevenue: 0,
+                totalQuantity: 0,
+                totalOrders: 0,
+                totalStores: 0
+            };
+
+            res.status(200).json({
+                success: true,
+                data: {
+                    masterMenuCode: masterMenu.code,
+                    masterMenuName: masterMenu.name,
+                    masterMenuName_en: masterMenu.name_en,
+                    stores: items,
+                    pagination: {
+                        total: result.total[0]?.count || 0,
+                        limit: parseInt(limit),
+                        skip: parseInt(skip),
+                        hasMore: parseInt(skip) + items.length < (result.total[0]?.count || 0)
+                    },
+                    summary: {
+                        ...summary,
+                        dateRange: {
+                            start: start.toISOString(),
+                            end: end.toISOString()
+                        }
+                    },
+                    performance: {
+                        queryTimeMs: queryTime
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error('[Store Details] Error:', error);
+            res.status(500).json({
+                success: false,
+                error: 'Failed to get store details',
+                message: error.message
+            });
+        }
     },
 
     /**

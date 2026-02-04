@@ -480,6 +480,10 @@ module.exports = (db) => {
     router.get('/order-mapping/top-selling', (req, res) =>
         orderBasedMappingController.getTopSellingByMasterMenu(req, res, db));
 
+    // Get store details for a specific master menu item
+    router.get('/order-mapping/menu-item/:masterMenuCode/stores', (req, res) =>
+        orderBasedMappingController.getStoreDetailsByMenuItem(req, res, db));
+
     // ============================================
     // ANALYTICS BUILDER (Materialized View)
     // ============================================
