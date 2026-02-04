@@ -8,8 +8,9 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
 // Job queue imports
-const { initializeQueues, closeQueues, getAnalysisQueue } = require('./src/utils/jobQueue');
+const { initializeQueues, closeQueues, getAnalysisQueue, getAnalyticsBuilderQueue } = require('./src/utils/jobQueue');
 const { initializeAnalysisWorker } = require('./src/workers/analysisWorker');
+const { initializeAnalyticsBuilderWorker } = require('./src/workers/analyticsBuilderWorker');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,6 +31,7 @@ MongoClient.connect(process.env.MONGODB_URI, {
             initializeQueues();
             const analysisQueue = getAnalysisQueue();
             initializeAnalysisWorker(analysisQueue, db);
+            initializeAnalyticsBuilderWorker(db);
             console.log("Job queues initialized");
         } catch (error) {
             console.error("Warning: Job queue initialization failed:", error.message);

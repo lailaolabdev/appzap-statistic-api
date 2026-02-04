@@ -13,6 +13,7 @@ const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 // Job queues
 let analysisQueue = null;
 let enrichQueue = null;
+let analyticsBuilderQueue = null;
 
 // Active SSE clients for progress updates
 const sseClients = new Map();
@@ -64,6 +65,21 @@ function initializeQueues() {
         }
     });
 
+    // Analytics Builder queue - for building analytics materialized views
+    analyticsBuilderQueue = new Queue('analytics-builder', REDIS_URL, {
+        redis: redisOptions,
+        defaultJobOptions: {
+            attempts: 2,
+            backoff: {
+                type: 'exponential',
+                delay: 3000
+            },
+            removeOnComplete: 50,
+            removeOnFail: 25,
+            timeout: 1800000  // 30 minutes max (for large datasets)
+        }
+    });
+
     // Queue event handlers for analysis queue
     analysisQueue.on('error', (error) => {
         console.error('[JobQueue] Analysis queue error:', error);
@@ -111,8 +127,54 @@ function initializeQueues() {
         });
     });
 
+    // Analytics Builder queue event handlers
+    analyticsBuilderQueue.on('error', (error) => {
+        console.error('[JobQueue] Analytics Builder queue error:', error);
+    });
+
+    analyticsBuilderQueue.on('active', (job) => {
+        console.log(`[JobQueue] Analytics Builder job ${job.id} started`);
+        broadcastProgress(job.id, {
+            type: 'progress',
+            status: 'active',
+            progress: 0,
+            message: 'Starting analytics build...'
+        });
+    });
+
+    analyticsBuilderQueue.on('progress', (job, progress) => {
+        console.log(`[JobQueue] Analytics Builder job ${job.id} progress:`, progress);
+        broadcastProgress(job.id, {
+            type: 'progress',
+            status: 'active',
+            ...progress
+        });
+    });
+
+    analyticsBuilderQueue.on('completed', (job, result) => {
+        console.log(`[JobQueue] Analytics Builder job ${job.id} completed`);
+        broadcastProgress(job.id, {
+            type: 'status',
+            status: 'completed',
+            progress: 100,
+            result
+        });
+        setTimeout(() => {
+            sseClients.delete(job.id);
+        }, 5000);
+    });
+
+    analyticsBuilderQueue.on('failed', (job, error) => {
+        console.error(`[JobQueue] Analytics Builder job ${job.id} failed:`, error.message);
+        broadcastProgress(job.id, {
+            type: 'status',
+            status: 'failed',
+            error: error.message
+        });
+    });
+
     console.log('[JobQueue] Queues initialized');
-    return { analysisQueue, enrichQueue };
+    return { analysisQueue, enrichQueue, analyticsBuilderQueue };
 }
 
 /**
@@ -133,6 +195,16 @@ function getEnrichQueue() {
         throw new Error('Job queues not initialized. Call initializeQueues() first.');
     }
     return enrichQueue;
+}
+
+/**
+ * Get the analytics builder queue instance
+ */
+function getAnalyticsBuilderQueue() {
+    if (!analyticsBuilderQueue) {
+        throw new Error('Job queues not initialized. Call initializeQueues() first.');
+    }
+    return analyticsBuilderQueue;
 }
 
 /**
@@ -186,12 +258,30 @@ function broadcastProgress(jobId, data) {
 
 /**
  * Get job by ID
+ * Checks all queues to find the job
  * @param {string} jobId - The job ID
  * @returns {Promise<Object|null>} Job object or null
  */
 async function getJob(jobId) {
-    if (!analysisQueue) return null;
-    return await analysisQueue.getJob(jobId);
+    // Check analytics builder queue first (if job ID starts with "analytics-build")
+    if (jobId.startsWith('analytics-build') && analyticsBuilderQueue) {
+        const job = await analyticsBuilderQueue.getJob(jobId);
+        if (job) return job;
+    }
+    
+    // Check analysis queue
+    if (analysisQueue) {
+        const job = await analysisQueue.getJob(jobId);
+        if (job) return job;
+    }
+    
+    // Check enrich queue
+    if (enrichQueue) {
+        const job = await enrichQueue.getJob(jobId);
+        if (job) return job;
+    }
+    
+    return null;
 }
 
 /**
@@ -239,6 +329,9 @@ async function closeQueues() {
     if (enrichQueue) {
         await enrichQueue.close();
     }
+    if (analyticsBuilderQueue) {
+        await analyticsBuilderQueue.close();
+    }
     
     console.log('[JobQueue] All queues closed');
 }
@@ -247,6 +340,7 @@ module.exports = {
     initializeQueues,
     getAnalysisQueue,
     getEnrichQueue,
+    getAnalyticsBuilderQueue,
     addSSEClient,
     removeSSEClient,
     broadcastProgress,

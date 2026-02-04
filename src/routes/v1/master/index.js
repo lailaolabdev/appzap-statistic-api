@@ -18,6 +18,7 @@ const {
     reviewController,
     orderBasedMappingController
 } = require('../../../controllers/master');
+const analyticsBuilderController = require('../../../controllers/analytics/analyticsBuilderController');
 
 module.exports = (db) => {
     const router = express.Router();
@@ -478,6 +479,42 @@ module.exports = (db) => {
     // Get top selling items by master menu code
     router.get('/order-mapping/top-selling', (req, res) =>
         orderBasedMappingController.getTopSellingByMasterMenu(req, res, db));
+
+    // ============================================
+    // ANALYTICS BUILDER (Materialized View)
+    // ============================================
+
+    // Start analytics build job (returns jobId immediately - async/background)
+    router.post('/analytics/build-job', (req, res) =>
+        analyticsBuilderController.startBuildJob(req, res, db));
+
+    // Get analytics build job status
+    router.get('/analytics/job/:jobId/status', (req, res) =>
+        analyticsBuilderController.getJobStatusById(req, res, db));
+
+    // Stream analytics build job progress (SSE)
+    router.get('/analytics/job/:jobId/stream', (req, res) =>
+        analyticsBuilderController.streamJobProgress(req, res, db));
+
+    // Consolidate duplicate Heineken variants
+    router.post('/analytics/consolidate-heineken', (req, res) =>
+        analyticsBuilderController.consolidateHeinekenVariants(req, res, db));
+
+    // Fix generic Heineken (map to specific variant)
+    router.post('/analytics/fix-generic-heineken', (req, res) =>
+        analyticsBuilderController.fixGenericHeineken(req, res, db));
+
+    // Clean failed jobs from queue
+    router.post('/analytics/clean-failed', (req, res) =>
+        analyticsBuilderController.cleanFailedJobs(req, res, db));
+
+    // Get analytics collection status (record counts, last built time)
+    router.get('/analytics/status', (req, res) =>
+        analyticsBuilderController.getAnalyticsStatus(req, res, db));
+
+    // LEGACY: Synchronous build endpoint (kept for backwards compatibility, but not recommended)
+    router.post('/analytics/build', (req, res) =>
+        analyticsBuilderController.buildAnalytics(req, res, db));
 
     // JOB-BASED ANALYSIS (Background Processing with Redis/Bull)
 

@@ -719,52 +719,57 @@ const orderBasedMappingController = {
                 storeId,
                 limit = 50,
                 skip = 0,
-                masterCategoryCode
+                masterCategoryCode,
+                search = '', // Search by menu name
+                baseProduct // Filter by base product (e.g., "heineken")
             } = req.query;
 
             const end = endDate ? new Date(endDate) : new Date();
             const start = startDate ? new Date(startDate) : new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-            // Flat schema: masterMenuCode is directly on the document
+            console.log('[Top Selling] Query from orderAnalytics collection (read-only, fast!)');
+            console.log('[Top Selling] Date range:', start, 'to', end);
+
+            // Query the orderAnalytics collection (pre-joined, fast!)
+            // This is a READ-ONLY query - original orders are never modified
             const matchStage = {
                 createdAt: { $gte: start, $lte: end },
-                masterMenuCode: { $exists: true, $ne: null }
+                isMapped: true // Only mapped orders
             };
 
             if (storeId) {
-                matchStage.storeId = new ObjectId(storeId);
+                matchStage.storeId = storeId;
+            }
+
+            if (masterCategoryCode) {
+                matchStage.masterCategoryCode = masterCategoryCode;
+            }
+
+            if (baseProduct) {
+                matchStage.baseProduct = baseProduct;
+            }
+
+            // Search by menu name (Lao or English)
+            if (search) {
+                matchStage.$or = [
+                    { masterMenuName: { $regex: search, $options: 'i' } },
+                    { masterMenuName_en: { $regex: search, $options: 'i' } }
+                ];
             }
 
             const pipeline = [
-                { $match: matchStage }
-                // No $unwind needed - flat schema
-            ];
-
-            // Add category filter if provided
-            if (masterCategoryCode) {
-                // Look up master menu to get category (flat schema)
-                pipeline.push({
-                    $lookup: {
-                        from: 'masterMenus',
-                        localField: 'masterMenuCode',
-                        foreignField: 'code',
-                        as: 'masterMenu'
-                    }
-                });
-                pipeline.push({ $unwind: '$masterMenu' });
-                pipeline.push({ $match: { 'masterMenu.masterCategoryCode': masterCategoryCode } });
-            }
-
-            // Flat schema: fields are directly on the document
-            pipeline.push(
+                { $match: matchStage },
                 {
                     $group: {
                         _id: '$masterMenuCode',
                         masterMenuName: { $first: '$masterMenuName' },
                         masterMenuName_en: { $first: '$masterMenuName_en' },
+                        masterCategoryCode: { $first: '$masterCategoryCode' },
+                        baseProduct: { $first: '$baseProduct' },
+                        sizeVariant: { $first: '$sizeVariant' },
                         totalQuantity: { $sum: '$quantity' },
                         orderCount: { $sum: 1 },
-                        totalRevenue: { $sum: { $multiply: ['$price', '$quantity'] } },
+                        totalRevenue: { $sum: '$revenue' },
                         uniqueStores: { $addToSet: '$storeId' },
                         avgPrice: { $avg: '$price' }
                     }
@@ -774,6 +779,9 @@ const orderBasedMappingController = {
                         masterMenuCode: '$_id',
                         masterMenuName: 1,
                         masterMenuName_en: 1,
+                        masterCategoryCode: 1,
+                        baseProduct: 1,
+                        sizeVariant: 1,
                         totalQuantity: 1,
                         orderCount: 1,
                         totalRevenue: { $round: ['$totalRevenue', 0] },
@@ -795,15 +803,46 @@ const orderBasedMappingController = {
                                     _id: null,
                                     totalRevenue: { $sum: '$totalRevenue' },
                                     totalQuantity: { $sum: '$totalQuantity' },
-                                    uniqueMenus: { $sum: 1 }
+                                    totalOrders: { $sum: '$orderCount' },
+                                    uniqueMenus: { $sum: 1 },
+                                    storeArrays: { $push: '$uniqueStores' }
+                                }
+                            },
+                            {
+                                $addFields: {
+                                    allStoresFlat: {
+                                        $reduce: {
+                                            input: '$storeArrays',
+                                            initialValue: [],
+                                            in: { $concatArrays: ['$$value', '$$this'] }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                $addFields: {
+                                    uniqueStoresSet: { $setUnion: ['$allStoresFlat', []] }
+                                }
+                            },
+                            {
+                                $project: {
+                                    totalRevenue: 1,
+                                    totalQuantity: 1,
+                                    totalOrders: 1,
+                                    uniqueMenus: 1,
+                                    uniqueStores: { $size: '$uniqueStoresSet' }
                                 }
                             }
                         ]
                     }
                 }
-            );
+            ];
 
-            const [result] = await db.collection('orders').aggregate(pipeline).toArray();
+            const startTime = Date.now();
+            const [result] = await db.collection('orderAnalytics').aggregate(pipeline).toArray();
+            const queryTime = Date.now() - startTime;
+
+            console.log(`[Top Selling] Query completed in ${queryTime}ms (fast materialized view!)`);
 
             res.status(200).json({
                 data: result.items || [],
@@ -816,16 +855,23 @@ const orderBasedMappingController = {
                 summary: {
                     totalRevenue: result.summary[0]?.totalRevenue || 0,
                     totalQuantity: result.summary[0]?.totalQuantity || 0,
+                    totalOrders: result.summary[0]?.totalOrders || 0,
                     uniqueMenus: result.summary[0]?.uniqueMenus || 0,
+                    uniqueStores: result.summary[0]?.uniqueStores || 0,
                     dateRange: {
                         start: start.toISOString(),
                         end: end.toISOString()
-                    }
+                    },
+                    hasFilters: !!(search || baseProduct || masterCategoryCode || storeId)
+                },
+                performance: {
+                    queryTimeMs: queryTime,
+                    source: 'orderAnalytics' // Shows we're using the fast materialized view
                 }
             });
         } catch (error) {
-            console.error('Error getting top selling by master menu:', error);
-            res.status(500).json({ error: 'Failed to get top selling items' });
+            console.error('[Top Selling] Error:', error);
+            res.status(500).json({ error: 'Failed to get top selling items', message: error.message });
         }
     },
 
