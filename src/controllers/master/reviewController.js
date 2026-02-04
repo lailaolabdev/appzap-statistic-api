@@ -327,6 +327,32 @@ const reviewController = {
             // Update stats
             await reviewController._updateMappingStats(db, 'menu');
 
+            // LEARN: Add the original menu name as a keyword to the master menu
+            // This improves future auto-matching
+            if (mapping.menuName && mapping.menuName.trim().length >= 2) {
+                const normalizedKeyword = mapping.menuName.trim();
+                
+                // Check if keyword already exists
+                const existingKeywords = [
+                    ...(masterMenu.keywords || []),
+                    ...(masterMenu.learnedKeywords || [])
+                ].map(k => k.toLowerCase());
+
+                if (!existingKeywords.includes(normalizedKeyword.toLowerCase()) &&
+                    normalizedKeyword.toLowerCase() !== masterMenu.name?.toLowerCase() &&
+                    normalizedKeyword.toLowerCase() !== masterMenu.name_en?.toLowerCase()) {
+                    
+                    await db.collection('masterMenus').updateOne(
+                        { code: codeToUse },
+                        {
+                            $addToSet: { learnedKeywords: normalizedKeyword },
+                            $set: { updatedAt: now }
+                        }
+                    );
+                    console.log(`[Learn] Added keyword "${normalizedKeyword}" to master menu ${codeToUse}`);
+                }
+            }
+
             res.status(200).json({
                 message: 'Menu mapping approved successfully',
                 data: result
@@ -675,6 +701,33 @@ const reviewController = {
 
             await reviewController._updateMappingStats(db, 'menu');
 
+            // LEARN: Add the original menu name as a keyword to the master menu
+            // This is especially important for manual mappings as they often contain
+            // unique variations that the system couldn't auto-match
+            if (mapping.menuName && mapping.menuName.trim().length >= 2) {
+                const normalizedKeyword = mapping.menuName.trim();
+                
+                // Check if keyword already exists
+                const existingKeywords = [
+                    ...(masterMenu.keywords || []),
+                    ...(masterMenu.learnedKeywords || [])
+                ].map(k => k.toLowerCase());
+
+                if (!existingKeywords.includes(normalizedKeyword.toLowerCase()) &&
+                    normalizedKeyword.toLowerCase() !== masterMenu.name?.toLowerCase() &&
+                    normalizedKeyword.toLowerCase() !== masterMenu.name_en?.toLowerCase()) {
+                    
+                    await db.collection('masterMenus').updateOne(
+                        { code: masterMenuCode },
+                        {
+                            $addToSet: { learnedKeywords: normalizedKeyword },
+                            $set: { updatedAt: now }
+                        }
+                    );
+                    console.log(`[Learn] Added keyword "${normalizedKeyword}" to master menu ${masterMenuCode}`);
+                }
+            }
+
             res.status(200).json({
                 message: 'Menu manually mapped successfully',
                 data: result
@@ -1014,13 +1067,13 @@ const reviewController = {
             let failed = 0;
 
             for (const mapping of mappings) {
-                const codeToUse = mapping.suggestedMappings?.[0]?.masterMenuCode;
+                    const codeToUse = mapping.suggestedMappings?.[0]?.masterMenuCode;
                 const masterMenu = codeToUse ? masterMenuMap.get(codeToUse) : null;
 
                 if (!masterMenu) {
                     failed++;
-                    continue;
-                }
+                        continue;
+                    }
 
                 bulkOps.push({
                     updateOne: {
@@ -1218,17 +1271,17 @@ const reviewController = {
                         updateOne: {
                             filter: { _id: mapping._id },
                             update: {
-                                $set: {
-                                    masterMenuCode: codeToUse,
-                                    masterMenuName: masterMenu.name,
-                                    masterMenuName_en: masterMenu.name_en,
-                                    mappingStatus: 'approved',
-                                    approvedBy,
-                                    approvedAt: now,
+                            $set: {
+                                masterMenuCode: codeToUse,
+                                masterMenuName: masterMenu.name,
+                                masterMenuName_en: masterMenu.name_en,
+                                mappingStatus: 'approved',
+                                approvedBy,
+                                approvedAt: now,
                                     notes: notes || `Bulk approved (${confidenceLevel} confidence)`,
-                                    updatedAt: now
-                                }
+                                updatedAt: now
                             }
+                        }
                         }
                     });
 
@@ -1236,21 +1289,21 @@ const reviewController = {
                         updateOne: {
                             filter: { entityType: 'menu', normalizedName: mapping.normalizedName },
                             update: {
-                                $set: {
-                                    entityType: 'menu',
-                                    originalName: mapping.menuName,
-                                    normalizedName: mapping.normalizedName,
-                                    masterCode: codeToUse,
-                                    masterName: masterMenu.name,
-                                    masterName_en: masterMenu.name_en,
-                                    decisionType: 'approved',
-                                    decisionBy: approvedBy,
-                                    decisionAt: now,
-                                    updatedAt: now
-                                },
-                                $setOnInsert: { timesApplied: 0, createdAt: now },
-                                $addToSet: { storeIds: mapping.storeId }
+                            $set: {
+                                entityType: 'menu',
+                                originalName: mapping.menuName,
+                                normalizedName: mapping.normalizedName,
+                                masterCode: codeToUse,
+                                masterName: masterMenu.name,
+                                masterName_en: masterMenu.name_en,
+                                decisionType: 'approved',
+                                decisionBy: approvedBy,
+                                decisionAt: now,
+                                updatedAt: now
                             },
+                                $setOnInsert: { timesApplied: 0, createdAt: now },
+                            $addToSet: { storeIds: mapping.storeId }
+                        },
                             upsert: true
                         }
                     });
@@ -1354,13 +1407,13 @@ const reviewController = {
             let failed = 0;
 
             for (const mapping of mappings) {
-                const codeToUse = mapping.suggestedMappings?.[0]?.masterCategoryCode;
+                    const codeToUse = mapping.suggestedMappings?.[0]?.masterCategoryCode;
                 const masterCategory = codeToUse ? masterCategoryMap.get(codeToUse) : null;
 
                 if (!masterCategory) {
                     failed++;
-                    continue;
-                }
+                        continue;
+                    }
 
                 bulkOps.push({
                     updateOne: {
@@ -1551,17 +1604,17 @@ const reviewController = {
                         updateOne: {
                             filter: { _id: mapping._id },
                             update: {
-                                $set: {
-                                    masterCategoryCode: codeToUse,
-                                    masterCategoryName: masterCategory.name,
-                                    masterCategoryName_en: masterCategory.name_en,
-                                    mappingStatus: 'approved',
-                                    approvedBy,
-                                    approvedAt: now,
+                            $set: {
+                                masterCategoryCode: codeToUse,
+                                masterCategoryName: masterCategory.name,
+                                masterCategoryName_en: masterCategory.name_en,
+                                mappingStatus: 'approved',
+                                approvedBy,
+                                approvedAt: now,
                                     notes: notes || `Bulk approved (${confidenceLevel} confidence)`,
-                                    updatedAt: now
-                                }
+                                updatedAt: now
                             }
+                        }
                         }
                     });
 
@@ -1569,21 +1622,21 @@ const reviewController = {
                         updateOne: {
                             filter: { entityType: 'category', normalizedName: mapping.normalizedName },
                             update: {
-                                $set: {
-                                    entityType: 'category',
-                                    originalName: mapping.categoryName,
-                                    normalizedName: mapping.normalizedName,
-                                    masterCode: codeToUse,
-                                    masterName: masterCategory.name,
-                                    masterName_en: masterCategory.name_en,
-                                    decisionType: 'approved',
-                                    decisionBy: approvedBy,
-                                    decisionAt: now,
-                                    updatedAt: now
-                                },
-                                $setOnInsert: { timesApplied: 0, createdAt: now },
-                                $addToSet: { storeIds: mapping.storeId }
+                            $set: {
+                                entityType: 'category',
+                                originalName: mapping.categoryName,
+                                normalizedName: mapping.normalizedName,
+                                masterCode: codeToUse,
+                                masterName: masterCategory.name,
+                                masterName_en: masterCategory.name_en,
+                                decisionType: 'approved',
+                                decisionBy: approvedBy,
+                                decisionAt: now,
+                                updatedAt: now
                             },
+                                $setOnInsert: { timesApplied: 0, createdAt: now },
+                            $addToSet: { storeIds: mapping.storeId }
+                        },
                             upsert: true
                         }
                     });
