@@ -1471,6 +1471,197 @@ const orderBasedMappingController = {
     },
 
     /**
+     * Get top restaurants by revenue
+     * Aggregates order data grouped by storeId for restaurant analytics
+     * 
+     * This is a READ-ONLY query on the orderAnalytics collection
+     */
+    getTopRestaurants: async (req, res, db) => {
+        try {
+            const {
+                startDate,
+                endDate,
+                province,
+                district,
+                search = '',
+                limit = 50,
+                skip = 0
+            } = req.query;
+
+            const end = endDate ? new Date(endDate) : new Date();
+            const start = startDate ? new Date(startDate) : new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+            console.log('[Top Restaurants] Query from orderAnalytics collection (read-only)');
+            console.log('[Top Restaurants] Date range:', start, 'to', end);
+
+            // Build match stage for orderAnalytics
+            const matchStage = {
+                createdAt: { $gte: start, $lte: end }
+            };
+
+            // First aggregate to get revenue by store
+            const pipeline = [
+                { $match: matchStage },
+                {
+                    $group: {
+                        _id: '$storeId',
+                        storeName: { $first: '$storeName' },
+                        totalRevenue: { $sum: '$revenue' },
+                        totalQuantity: { $sum: '$quantity' },
+                        orderCount: { $sum: 1 },
+                        uniqueMenus: { $addToSet: '$masterMenuCode' },
+                        avgOrderValue: { $avg: '$revenue' }
+                    }
+                },
+                // Lookup store details for location, province, district
+                {
+                    $lookup: {
+                        from: 'stores',
+                        localField: '_id',
+                        foreignField: '_id',
+                        as: 'storeInfo'
+                    }
+                },
+                { $unwind: { path: '$storeInfo', preserveNullAndEmptyArrays: true } },
+                // Add store details
+                {
+                    $addFields: {
+                        storeName: { $ifNull: ['$storeName', '$storeInfo.name'] },
+                        province: '$storeInfo.address.province',
+                        district: '$storeInfo.address.district',
+                        address: '$storeInfo.address.detail',
+                        location: '$storeInfo.location',
+                        storeId: '$_id'
+                    }
+                }
+            ];
+
+            // Add province filter
+            if (province && province.trim()) {
+                pipeline.push({
+                    $match: {
+                        province: { $regex: province.trim(), $options: 'i' }
+                    }
+                });
+            }
+
+            // Add district filter
+            if (district && district.trim()) {
+                pipeline.push({
+                    $match: {
+                        district: { $regex: district.trim(), $options: 'i' }
+                    }
+                });
+            }
+
+            // Add search filter (store name)
+            if (search && search.trim()) {
+                pipeline.push({
+                    $match: {
+                        storeName: { $regex: search.trim(), $options: 'i' }
+                    }
+                });
+            }
+
+            // Sort by revenue
+            pipeline.push({ $sort: { totalRevenue: -1 } });
+
+            // Facet for pagination and summary
+            pipeline.push({
+                $facet: {
+                    items: [
+                        { $skip: parseInt(skip) },
+                        { $limit: parseInt(limit) },
+                        {
+                            $project: {
+                                storeId: 1,
+                                storeName: 1,
+                                province: 1,
+                                district: 1,
+                                address: 1,
+                                location: 1,
+                                totalRevenue: { $round: ['$totalRevenue', 0] },
+                                totalQuantity: 1,
+                                orderCount: 1,
+                                uniqueMenuCount: { $size: '$uniqueMenus' },
+                                avgOrderValue: { $round: ['$avgOrderValue', 0] }
+                            }
+                        }
+                    ],
+                    total: [{ $count: 'count' }],
+                    summary: [
+                        {
+                            $group: {
+                                _id: null,
+                                totalRevenue: { $sum: '$totalRevenue' },
+                                totalQuantity: { $sum: '$totalQuantity' },
+                                totalOrders: { $sum: '$orderCount' },
+                                totalRestaurants: { $sum: 1 }
+                            }
+                        }
+                    ],
+                    provinceStats: [
+                        {
+                            $group: {
+                                _id: '$province',
+                                revenue: { $sum: '$totalRevenue' },
+                                storeCount: { $sum: 1 }
+                            }
+                        },
+                        { $sort: { revenue: -1 } }
+                    ]
+                }
+            });
+
+            const startTime = Date.now();
+            const [result] = await db.collection('orderAnalytics').aggregate(pipeline, { allowDiskUse: true }).toArray();
+            const queryTime = Date.now() - startTime;
+
+            console.log(`[Top Restaurants] Query completed in ${queryTime}ms`);
+
+            // Format items with rank
+            const items = (result.items || []).map((item, index) => ({
+                rank: parseInt(skip) + index + 1,
+                ...item
+            }));
+
+            res.status(200).json({
+                success: true,
+                data: items,
+                pagination: {
+                    total: result.total[0]?.count || 0,
+                    limit: parseInt(limit),
+                    skip: parseInt(skip),
+                    hasMore: parseInt(skip) + items.length < (result.total[0]?.count || 0)
+                },
+                summary: {
+                    totalRevenue: result.summary[0]?.totalRevenue || 0,
+                    totalQuantity: result.summary[0]?.totalQuantity || 0,
+                    totalOrders: result.summary[0]?.totalOrders || 0,
+                    totalRestaurants: result.summary[0]?.totalRestaurants || 0,
+                    dateRange: {
+                        start: start.toISOString(),
+                        end: end.toISOString()
+                    }
+                },
+                provinceStats: result.provinceStats || [],
+                performance: {
+                    queryTimeMs: queryTime,
+                    source: 'orderAnalytics'
+                }
+            });
+
+        } catch (error) {
+            console.error('[Top Restaurants] Error:', error);
+            res.status(500).json({
+                success: false,
+                error: 'Failed to get top restaurants',
+                message: error.message
+            });
+        }
+    },
+
+    /**
      * Approve an order-based mapping
      * Updates the mapping status from 'suggested' or 'pending' to 'approved'
      * Also adds the original menu name as a learned keyword
