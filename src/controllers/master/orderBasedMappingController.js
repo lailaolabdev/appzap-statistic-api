@@ -1523,14 +1523,20 @@ const orderBasedMappingController = {
                     }
                 },
                 { $unwind: { path: '$storeInfo', preserveNullAndEmptyArrays: true } },
-                // Add store details
+                // Add store details - fields are at root level in stores collection
                 {
                     $addFields: {
                         storeName: { $ifNull: ['$storeName', '$storeInfo.name'] },
-                        province: '$storeInfo.address.province',
-                        district: '$storeInfo.address.district',
-                        address: '$storeInfo.address.detail',
+                        province: '$storeInfo.province',
+                        district: '$storeInfo.district',
+                        village: '$storeInfo.village',
                         location: '$storeInfo.location',
+                        phone: { $ifNull: ['$storeInfo.phone', '$storeInfo.whatsapp'] },
+                        whatsapp: '$storeInfo.whatsapp',
+                        subscriptionStartDate: '$storeInfo.startDate',
+                        subscriptionEndDate: '$storeInfo.endDate',
+                        subscriptionPeriod: '$storeInfo.period',
+                        storeType: '$storeInfo.type',
                         storeId: '$_id'
                     }
                 }
@@ -1576,15 +1582,21 @@ const orderBasedMappingController = {
                             $project: {
                                 storeId: 1,
                                 storeName: 1,
-                                province: 1,
-                                district: 1,
-                                address: 1,
-                                location: 1,
                                 totalRevenue: { $round: ['$totalRevenue', 0] },
-                                totalQuantity: 1,
                                 orderCount: 1,
+                                totalQuantity: 1,
+                                avgOrderValue: { $round: ['$avgOrderValue', 0] },
                                 uniqueMenuCount: { $size: '$uniqueMenus' },
-                                avgOrderValue: { $round: ['$avgOrderValue', 0] }
+                                phone: 1,
+                                whatsapp: 1,
+                                subscriptionStartDate: 1,
+                                subscriptionEndDate: 1,
+                                subscriptionPeriod: 1,
+                                storeType: 1,
+                                location: 1,
+                                village: 1,
+                                province: 1,
+                                district: 1
                             }
                         }
                     ],
