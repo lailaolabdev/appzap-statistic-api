@@ -36,17 +36,26 @@ function initializeQueues() {
     };
 
     // Analysis queue - for menu analysis jobs
+    // IMPORTANT: Extended timeouts for large datasets (32K+ menus = ~20-30 min processing)
     analysisQueue = new Queue('menu-analysis', REDIS_URL, {
         redis: redisOptions,
+        settings: {
+            lockDuration: 2400000,      // 40 minutes - max time job can run
+            lockRenewTime: 15000,       // 15 seconds - how often to renew lock (keep job alive)
+            stalledInterval: 30000,     // 30 seconds - how often to check for stalled jobs
+            maxStalledCount: 1,         // Only allow 1 restart attempt (prevent infinite loops)
+            guardInterval: 5000,        // 5 seconds - check lock health
+            retryProcessDelay: 5000     // 5 seconds - delay before retry
+        },
         defaultJobOptions: {
-            attempts: 3,
+            attempts: 2,                // Reduced attempts (with proper timeout, shouldn't need many)
             backoff: {
                 type: 'exponential',
-                delay: 2000
+                delay: 5000             // Increased backoff delay
             },
-            removeOnComplete: 100, // Keep last 100 completed jobs
-            removeOnFail: 50,      // Keep last 50 failed jobs
-            timeout: 600000        // 10 minutes max
+            removeOnComplete: 100,      // Keep last 100 completed jobs
+            removeOnFail: 50,           // Keep last 50 failed jobs
+            timeout: 2400000            // 40 minutes max (matches lockDuration)
         }
     });
 
@@ -173,7 +182,8 @@ function initializeQueues() {
         });
     });
 
-    console.log('[JobQueue] Queues initialized');
+    console.log('[JobQueue] Queues initialized with extended timeouts');
+    console.log('[JobQueue] Analysis queue: 40min max runtime, prevents job stalling');
     return { analysisQueue, enrichQueue, analyticsBuilderQueue };
 }
 

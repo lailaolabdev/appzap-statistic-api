@@ -19,6 +19,7 @@ const {
     orderBasedMappingController
 } = require('../../../controllers/master');
 const analyticsBuilderController = require('../../../controllers/analytics/analyticsBuilderController');
+const indexManagementController = require('../../../controllers/admin/indexManagementController');
 
 module.exports = (db) => {
     const router = express.Router();
@@ -533,6 +534,30 @@ module.exports = (db) => {
     // Stream job progress via SSE (real-time updates)
     router.get('/order-mapping/job/:jobId/progress', (req, res) =>
         orderBasedMappingController.streamJobProgress(req, res, db));
+
+    // ============================================
+    // INDEX MANAGEMENT (Performance Optimization)
+    // ============================================
+
+    // Create all performance indexes (orders + menuMappings)
+    router.post('/admin/indexes/create-all', (req, res) =>
+        indexManagementController.createAllIndexes(req, res, db));
+
+    // Create orders indexes only
+    router.post('/admin/indexes/orders', (req, res) =>
+        indexManagementController.createOrderIndexes(req, res, db));
+
+    // Create menuMappings indexes only
+    router.post('/admin/indexes/mappings', (req, res) =>
+        indexManagementController.createMappingIndexes(req, res, db));
+
+    // List all indexes (read-only)
+    router.get('/admin/indexes/list', (req, res) =>
+        indexManagementController.listIndexes(req, res, db));
+
+    // Get index statistics (read-only)
+    router.get('/admin/indexes/stats', (req, res) =>
+        indexManagementController.getIndexStats(req, res, db));
 
     return router;
 };

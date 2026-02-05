@@ -1144,6 +1144,39 @@ const orderBasedMappingController = {
             const { getAnalysisQueue } = require('../../utils/jobQueue');
             const queue = getAnalysisQueue();
 
+            // PREVENT DUPLICATE JOBS: Check if analysis job already running
+            const [activeJobs, waitingJobs] = await Promise.all([
+                queue.getActive(),
+                queue.getWaiting()
+            ]);
+
+            if (activeJobs.length > 0) {
+                console.log(`[Analysis Job] Job already in progress: ${activeJobs[0].id}`);
+                return res.status(409).json({
+                    success: false,
+                    error: 'Analysis already in progress',
+                    message: 'Please wait for the current analysis to complete',
+                    existingJobId: activeJobs[0].id
+                });
+            }
+
+            if (waitingJobs.length > 0) {
+                console.log(`[Analysis Job] Job already queued: ${waitingJobs[0].id}`);
+                return res.status(409).json({
+                    success: false,
+                    error: 'Analysis already queued',
+                    message: 'Analysis job is waiting to start',
+                    existingJobId: waitingJobs[0].id
+                });
+            }
+
+            // CLEANUP OLD JOBS: Remove completed/failed jobs before starting new one
+            console.log('[Analysis Job] Cleaning up old jobs...');
+            await Promise.all([
+                queue.clean(3600000, 'completed'),  // Remove completed jobs older than 1 hour
+                queue.clean(3600000, 'failed')      // Remove failed jobs older than 1 hour
+            ]);
+
             // Generate a readable job ID
             const timestamp = Date.now();
             const jobId = `analysis-${timestamp}`;

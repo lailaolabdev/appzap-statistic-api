@@ -13,9 +13,11 @@ const { ObjectId } = require('mongodb');
  * @param {Db} db - MongoDB database instance
  */
 function initializeAnalysisWorker(queue, db) {
-    console.log('[AnalysisWorker] Initializing worker...');
+    console.log('[AnalysisWorker] Initializing worker with extended timeout (40 min)...');
 
-    queue.process('analyze-menus', async (job) => {
+    // Process with concurrency = 1 to prevent multiple jobs running simultaneously
+    // Timeout is configured in queue settings (40 minutes)
+    queue.process('analyze-menus', 1, async (job) => {
         const startTime = Date.now();
         const { startDate, endDate, storeId, minOrderCount = 1 } = job.data;
 
