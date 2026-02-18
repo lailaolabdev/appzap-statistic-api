@@ -7,6 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon index.js",
     "seed:master": "node src/seeds/masterDataSeeds.js",
+    "seed:subscription": "node src/seeds/subscriptionSeeds.js",
+    "seed:finance": "node src/seeds/financeSeeds.js",
     "migration:init": "node src/migration/migrationInit.js",
     "migration:analyze": "node src/migration/migrationAnalyze.js",
     "migration:analyze:menus": "node src/migration/migrationAnalyze.js --menus-only",
@@ -27,6 +29,9 @@
     "ioredis": "^5.3.2",
     "mongodb": "^6.10.0",
     "mongoose": "^8.8.0",
-    "rate-limit": "^0.1.1"
+    "multer": "^1.4.5-lts.1",
+    "rate-limit": "^0.1.1",
+    "twilio": "^5.12.2",
+    "xlsx": "^0.18.5"
   }
 }

@@ -12,6 +12,9 @@ const { initializeQueues, closeQueues, getAnalysisQueue, getAnalyticsBuilderQueu
 const { initializeAnalysisWorker } = require('./src/workers/analysisWorker');
 const { initializeAnalyticsBuilderWorker } = require('./src/workers/analyticsBuilderWorker');
 
+// Multi-database connection for subscription management
+const { connectAllDatabases, closeAllConnections } = require('./src/utils/multiDbConnection');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 let db;
@@ -25,6 +28,15 @@ MongoClient.connect(process.env.MONGODB_URI, {
         // db = client.db('DataBackup'); // specify your DB name
         db = client.db('AppZap'); // specify your DB name
         console.log("MongoDB connected");
+
+        // Connect to additional databases (POS v1, v2) for subscription management
+        try {
+            await connectAllDatabases();
+            console.log("Multi-database connections established");
+        } catch (error) {
+            console.error("Warning: Multi-database connection failed:", error.message);
+            console.error("Subscription management features may not work properly.");
+        }
 
         // Initialize job queues (Redis/Bull)
         try {
@@ -83,6 +95,14 @@ MongoClient.connect(process.env.MONGODB_URI, {
         const masterRouter = require('./src/routes/v1/master')(db);
         app.use('/api/v1/master', masterRouter);
 
+        // Subscription Management Routes (Invoices, Devices, WhatsApp)
+        const subscriptionRouter = require('./src/routes/v1/subscription')(db);
+        app.use('/api/v1/subscription', subscriptionRouter);
+
+        // Finance Routes (P&L, Cash Flow, Expenses, Budgets)
+        const financeRouter = require('./src/routes/v1/finance')(db);
+        app.use('/api/v1/finance', financeRouter);
+
         // Error handling middleware
         app.use((err, req, res, next) => {
             console.error(err.stack);
@@ -113,6 +133,13 @@ MongoClient.connect(process.env.MONGODB_URI, {
                     console.log('MongoDB connection closed');
                 } catch (error) {
                     console.error('Error closing MongoDB:', error);
+                }
+
+                try {
+                    await closeAllConnections();
+                    console.log('Multi-database connections closed');
+                } catch (error) {
+                    console.error('Error closing multi-database connections:', error);
                 }
 
                 process.exit(0);

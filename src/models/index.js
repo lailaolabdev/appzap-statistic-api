@@ -17,6 +17,22 @@ const categoryMapping = require('./categoryMapping');
 const mappingDecision = require('./mappingDecision');
 const mappingStats = require('./mappingStats');
 
+// New models for subscription management
+const invoice = require('./invoice');
+const device = require('./device');
+const subscriptionPackage = require('./subscriptionPackage');
+const whatsappTemplate = require('./whatsappTemplate');
+const whatsappBroadcast = require('./whatsappBroadcast');
+
+// Finance models
+const expense = require('./expense');
+const expenseCategory = require('./expenseCategory');
+const financialTransaction = require('./financialTransaction');
+const bankAccount = require('./bankAccount');
+const budget = require('./budget');
+const financialPeriod = require('./financialPeriod');
+const income = require('./income');
+
 module.exports = {
     masterCategory,
     masterMenu,
@@ -30,6 +46,22 @@ module.exports = {
     mappingDecision,
     mappingStats,
     
+    // Subscription management models
+    invoice,
+    device,
+    subscriptionPackage,
+    whatsappTemplate,
+    whatsappBroadcast,
+    
+    // Finance models
+    expense,
+    expenseCategory,
+    financialTransaction,
+    bankAccount,
+    budget,
+    financialPeriod,
+    income,
+    
     // List of all collections for initialization
     allCollections: [
         masterCategory,
@@ -42,6 +74,20 @@ module.exports = {
         menuMapping,
         categoryMapping,
         mappingDecision,
-        mappingStats
+        mappingStats,
+        // Subscription collections
+        invoice,
+        device,
+        subscriptionPackage,
+        whatsappTemplate,
+        whatsappBroadcast,
+        // Finance collections
+        expense,
+        expenseCategory,
+        financialTransaction,
+        bankAccount,
+        budget,
+        financialPeriod,
+        income,
     ]
 };
