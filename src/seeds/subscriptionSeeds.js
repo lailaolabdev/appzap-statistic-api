@@ -337,6 +337,69 @@ AppZap Team`,
         createdAt: new Date(),
         updatedAt: new Date(),
     },
+    // TOR 2: System outage templates (for 300+ restaurants quick broadcast)
+    {
+        name: 'system_outage',
+        category: 'emergency',
+        icon: '🔴',
+        subject: 'ແຈ້ງລະບົບຂາດການເຮັດວຽກ',
+        messageLao: `🔴 ແຈ້ງການສຳຄັນ
+
+ເຖິງລູກຄ້າທີ່ນັບຖື,
+
+ລະບົບ AppZap ຂາດການເຮັດວຽກຊົ່ວຄາວ
+ທີມງານກຳລັງເຮັດການກູ້ຄືນຢ່າງໄວວາ
+
+ຂໍອະໄພໃນຄວາມບໍ່ສະດວກ
+AppZap Team 🙏`,
+        messageEnglish: `🔴 Important Notice
+
+Dear valued customer,
+
+AppZap system is temporarily down.
+Our team is working to restore service quickly.
+
+We apologize for any inconvenience.
+AppZap Team 🙏`,
+        variables: [],
+        quickResponses: [{ textLao: 'ຮັບຊາບແລ້ວ', textEnglish: 'Acknowledged' }],
+        isActive: true,
+        usageCount: 0,
+        lastUsedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    },
+    {
+        name: 'system_recovered',
+        category: 'emergency',
+        icon: '🟢',
+        subject: 'ລະບົບກັບມາໃຊ້ງານໄດ້ແລ້ວ',
+        messageLao: `🟢 ແຈ້ງການສຳຄັນ
+
+ເຖິງລູກຄ້າທີ່ນັບຖື,
+
+ລະບົບ AppZap ກັບມາໃຊ້ງານໄດ້ປົກກະຕິແລ້ວ
+ກະລຸນາລອງເຊັນອິນໃໝ່ ຫຼື ກວດສອບການຊິ້ງຂໍ້ມູນ
+
+ຂອບໃຈທີ່ອົດທົນຮັບລໍຖ້າ
+AppZap Team 🙏`,
+        messageEnglish: `🟢 Important Notice
+
+Dear valued customer,
+
+AppZap system is back online and operating normally.
+Please try signing in again or check your data sync.
+
+Thank you for your patience.
+AppZap Team 🙏`,
+        variables: [],
+        quickResponses: [{ textLao: 'ຮັບຊາບແລ້ວ', textEnglish: 'Acknowledged' }],
+        isActive: true,
+        usageCount: 0,
+        lastUsedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    },
 ];
 
 async function seedSubscriptionData() {

@@ -5,6 +5,7 @@
  */
 
 const { ObjectId } = require('mongodb');
+const { getUnifiedRestaurants } = require('../utils/multiDbConnection');
 
 const financeController = {
     // ==================== DASHBOARD ====================
@@ -190,6 +191,32 @@ const financeController = {
             const operatingProfit = grossProfit - totalExpenses;
             const netProfit = operatingProfit;
 
+            // TOR 7: Support export format
+            const format = req.query.format;
+            if (format === 'csv' || format === 'excel') {
+                const rows = [
+                    ['P&L Statement', periodLabel],
+                    [],
+                    ['Revenue', ''],
+                    ['Subscriptions', revenue.breakdown?.subscriptions || 0],
+                    ['Device Sales', revenue.breakdown?.deviceSales || 0],
+                    ['Services', revenue.breakdown?.services || 0],
+                    ['Other', revenue.breakdown?.other || 0],
+                    ['Total Revenue', revenue.total],
+                    [],
+                    ['Operating Expenses', ''],
+                    ...expensesByCategory.map(c => [c._id || 'Uncategorized', c.total]),
+                    ['Total Expenses', totalExpenses],
+                    [],
+                    ['Net Profit', netProfit],
+                    ['Net Margin %', revenue.total > 0 ? ((netProfit / revenue.total) * 100).toFixed(2) : 0],
+                ];
+                const csv = rows.map(r => r.join(',')).join('\n');
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', `attachment; filename="pnl-${periodLabel}.csv"`);
+                return res.send(csv);
+            }
+
             res.json({
                 success: true,
                 data: {
@@ -372,7 +399,7 @@ const financeController = {
             const { months = 6 } = req.query;
             const numMonths = parseInt(months);
 
-            // Get active subscription info from invoices
+            // Get active subscription info from invoices + V1/V2 stores (TOR 5)
             const now = new Date();
             
             // Calculate MRR from recent paid invoices with subscriptions
@@ -398,10 +425,28 @@ const financeController = {
                 }
             });
 
-            // Calculate current MRR
+            // Calculate current MRR from invoices
             const activeSubscriptions = Object.values(restaurantSubscriptions)
                 .filter(sub => !sub.endDate || new Date(sub.endDate) > now);
-            const currentMRR = activeSubscriptions.reduce((sum, sub) => sum + sub.monthlyRate, 0);
+            let currentMRR = activeSubscriptions.reduce((sum, sub) => sum + sub.monthlyRate, 0);
+
+            // TOR 5: Supplement with V1+V2 stores (restaurants without invoice in system)
+            try {
+                const unified = await getUnifiedRestaurants({ limit: 10000, skip: 0 });
+                const invoiceKeys = new Set(Object.keys(restaurantSubscriptions));
+                const defaultRate = 500000;
+                unified.data.forEach(r => {
+                    if (!r.endDate) return;
+                    const endDate = new Date(r.endDate);
+                    if (endDate <= now) return;
+                    const key = `${r.posVersion}-${r.restaurantId}`;
+                    if (invoiceKeys.has(key)) return; // Already in invoices
+                    const rate = r.packageLevel === 'premium' ? 800000 : r.packageLevel === 'enterprise' ? 1200000 : defaultRate;
+                    currentMRR += rate;
+                });
+            } catch (e) {
+                console.warn('[Finance] V1/V2 supplement:', e.message);
+            }
 
             // Get historical revenue for trend analysis
             const historicalRevenue = await getMonthlyTrend(db, 6);
@@ -470,6 +515,44 @@ const financeController = {
             });
         } catch (error) {
             console.error('[Finance] Error getting predictions:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    },
+
+    // ==================== MRR/ARR (TOR 5) ====================
+
+    /**
+     * Get MRR/ARR from V1+V2 with breakdown by package/version
+     */
+    getMRRARR: async (req, res, db) => {
+        try {
+            const now = new Date();
+            const unified = await getUnifiedRestaurants({ limit: 10000, skip: 0 });
+            const defaultRate = 500000;
+            let mrrV1 = 0, mrrV2 = 0;
+            const byPackage = {};
+            unified.data.forEach(r => {
+                if (!r.endDate) return;
+                const endDate = new Date(r.endDate);
+                if (endDate <= now) return;
+                const rate = r.packageLevel === 'premium' ? 800000 : r.packageLevel === 'enterprise' ? 1200000 : defaultRate;
+                if (r.posVersion === 'v1') mrrV1 += rate;
+                else mrrV2 += rate;
+                const pkg = r.packageLevel || 'basic';
+                byPackage[pkg] = (byPackage[pkg] || 0) + rate;
+            });
+            const totalMRR = mrrV1 + mrrV2;
+            res.json({
+                success: true,
+                data: {
+                    mrr: totalMRR,
+                    arr: totalMRR * 12,
+                    byVersion: { v1: mrrV1, v2: mrrV2 },
+                    byPackage,
+                },
+            });
+        } catch (error) {
+            console.error('[Finance] Error getMRRARR:', error);
             res.status(500).json({ success: false, error: error.message });
         }
     },

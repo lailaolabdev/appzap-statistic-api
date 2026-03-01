@@ -18,8 +18,11 @@ module.exports = (db) => {
     // Get financial dashboard overview
     router.get('/dashboard', (req, res) => financeController.getDashboard(req, res, db));
     
-    // Get Profit & Loss statement
+    // Get Profit & Loss statement (format=csv for export)
     router.get('/profit-loss', (req, res) => financeController.getProfitLoss(req, res, db));
+    
+    // TOR 5: MRR/ARR from V1+V2
+    router.get('/mrr-arr', (req, res) => financeController.getMRRARR(req, res, db));
     
     // Get Cash Flow statement
     router.get('/cash-flow', (req, res) => financeController.getCashFlow(req, res, db));
@@ -52,6 +55,9 @@ module.exports = (db) => {
     
     // Get expense summary by category
     router.get('/expenses-summary', (req, res) => expenseController.getSummaryByCategory(req, res, db));
+    
+    // TOR 6: Process recurring expenses (cron calls this)
+    router.post('/expenses/process-recurring', (req, res) => expenseController.processRecurringExpenses(req, res, db));
 
     // ==================== EXPENSE CATEGORIES ====================
     

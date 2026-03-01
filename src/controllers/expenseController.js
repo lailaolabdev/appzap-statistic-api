@@ -778,6 +778,65 @@ const expenseController = {
             res.status(500).json({ success: false, error: error.message });
         }
     },
+
+    /**
+     * TOR 6: Process recurring expenses - creates next occurrence
+     * Call via cron daily
+     */
+    processRecurringExpenses: async (req, res, db) => {
+        try {
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            const recurring = await db.collection('expenses').find({
+                isRecurring: true,
+                'recurrence.nextDate': { $lte: now },
+                $or: [
+                    { 'recurrence.endDate': { $exists: false } },
+                    { 'recurrence.endDate': null },
+                    { 'recurrence.endDate': { $gte: now } },
+                ],
+            }).toArray();
+
+            let created = 0;
+            for (const exp of recurring) {
+                const rec = exp.recurrence || {};
+                const nextDate = new Date(rec.nextDate);
+                const freq = rec.frequency || 'monthly';
+
+                const newExpense = {
+                    ...exp,
+                    _id: undefined,
+                    expenseDate: nextDate,
+                    paymentDate: null,
+                    paymentStatus: 'pending',
+                    isRecurring: false,  // Instance, not template - parent stays as template
+                    recurrence: null,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                };
+                delete newExpense._id;
+
+                let nextNext = new Date(nextDate);
+                if (freq === 'monthly') nextNext.setMonth(nextNext.getMonth() + 1);
+                else if (freq === 'quarterly') nextNext.setMonth(nextNext.getMonth() + 3);
+                else if (freq === 'yearly') nextNext.setFullYear(nextNext.getFullYear() + 1);
+
+                if (rec.endDate && nextNext > new Date(rec.endDate)) continue;
+
+                await db.collection('expenses').insertOne(newExpense);
+                await db.collection('expenses').updateOne(
+                    { _id: exp._id },
+                    { $set: { 'recurrence.nextDate': nextNext, updatedAt: new Date() } }
+                );
+                created++;
+            }
+
+            res.json({ success: true, created });
+        } catch (error) {
+            console.error('[Expense] Error processing recurring:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    },
 };
 
 // Helper function to create financial transaction for expense

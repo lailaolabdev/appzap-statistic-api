@@ -348,6 +348,11 @@ const invoiceController = {
             const { id } = req.params;
             const { paymentStatus, paymentMethod, paymentDate, transactionId } = req.body;
 
+            const invoice = await db.collection('invoices').findOne({ _id: new ObjectId(id) });
+            if (!invoice) {
+                return res.status(404).json({ success: false, error: 'Invoice not found' });
+            }
+
             const updates = {
                 paymentStatus,
                 updatedAt: new Date(),
@@ -358,6 +363,34 @@ const invoiceController = {
                 updates.paymentMethod = paymentMethod || 'bank_transfer';
                 updates.paymentDate = paymentDate ? new Date(paymentDate) : new Date();
                 updates['paymentDetails.transactionId'] = transactionId || null;
+
+                // TOR 4: Auto-create Income record when invoice is paid
+                const incomeDoc = {
+                    title: `Invoice ${invoice.invoiceNumber} - ${invoice.restaurant?.name || 'Unknown'}`,
+                    description: `Payment received for invoice ${invoice.invoiceNumber}`,
+                    category: 'subscription',
+                    amount: invoice.total || 0,
+                    currency: invoice.currency || 'LAK',
+                    incomeDate: updates.paymentDate,
+                    receivedDate: updates.paymentDate,
+                    paymentStatus: 'received',
+                    paymentMethod: updates.paymentMethod,
+                    paymentReference: transactionId || invoice.invoiceNumber,
+                    source: {
+                        type: 'restaurant',
+                        id: invoice.restaurant?.id,
+                        posVersion: invoice.restaurant?.posVersion,
+                        name: invoice.restaurant?.name,
+                        contact: invoice.restaurant?.phone,
+                    },
+                    invoiceId: id,
+                    invoiceNumber: invoice.invoiceNumber,
+                    isRecurring: false,
+                    createdBy: req.user?.id || 'system',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                };
+                await db.collection('incomes').insertOne(incomeDoc);
             }
 
             const result = await db.collection('invoices').updateOne(
@@ -366,10 +399,7 @@ const invoiceController = {
             );
 
             if (result.matchedCount === 0) {
-                return res.status(404).json({ 
-                    success: false, 
-                    error: 'Invoice not found' 
-                });
+                return res.status(404).json({ success: false, error: 'Invoice not found' });
             }
 
             res.json({

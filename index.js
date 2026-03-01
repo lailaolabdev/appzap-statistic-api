@@ -103,6 +103,10 @@ MongoClient.connect(process.env.MONGODB_URI, {
         const financeRouter = require('./src/routes/v1/finance')(db);
         app.use('/api/v1/finance', financeRouter);
 
+        // Support / Case Management Routes (TOR 3)
+        const supportRouter = require('./src/routes/v1/support')(db);
+        app.use('/api/v1/support', supportRouter);
+
         // Error handling middleware
         app.use((err, req, res, next) => {
             console.error(err.stack);

@@ -127,7 +127,7 @@ async function closeAllConnections() {
  * Returns restaurants with subscription info
  */
 async function getUnifiedRestaurants(options = {}) {
-    const { search, province, district, posVersion, subscriptionStatus, limit = 50, skip = 0 } = options;
+    const { search, province, district, posVersion, subscriptionStatus, startDate, endDate, limit = 50, skip = 0 } = options;
     const results = [];
 
     // Get from POS v1 (stores collection)
@@ -241,8 +241,8 @@ async function getUnifiedRestaurants(options = {}) {
         const now = new Date();
         filteredResults = results.filter(r => {
             if (!r.endDate) return subscriptionStatus === 'no_subscription';
-            const endDate = new Date(r.endDate);
-            const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+            const rEndDate = new Date(r.endDate);
+            const daysLeft = Math.ceil((rEndDate - now) / (1000 * 60 * 60 * 24));
             
             switch (subscriptionStatus) {
                 case 'expired': return daysLeft < 0;
@@ -251,6 +251,19 @@ async function getUnifiedRestaurants(options = {}) {
                 case 'active': return daysLeft > 90;
                 default: return true;
             }
+        });
+    }
+
+    // TOR 1: Filter by date range (endDate within startDate-endDate)
+    if (startDate || endDate) {
+        const rangeStart = startDate ? new Date(startDate) : null;
+        const rangeEnd = endDate ? new Date(endDate + 'T23:59:59.999Z') : null;
+        filteredResults = filteredResults.filter(r => {
+            if (!r.endDate) return false;
+            const rEnd = new Date(r.endDate);
+            if (rangeStart && rEnd < rangeStart) return false;
+            if (rangeEnd && rEnd > rangeEnd) return false;
+            return true;
         });
     }
 
@@ -326,6 +339,42 @@ async function updateRestaurantSubscription(restaurantId, posVersion, subscripti
     return { modifiedCount: 0 };
 }
 
+/**
+ * TOR 1: Get system health summary (online/offline counts)
+ * Uses systemHealth collection in Main DB - populated by cron or POS heartbeat
+ */
+async function getSystemHealthSummary(mainDb) {
+    if (!mainDb) return { online: 0, offline: 0, total: 0, byVersion: { v1: { online: 0, offline: 0 }, v2: { online: 0, offline: 0 } } };
+    
+    try {
+        const healthRecords = await mainDb.collection('systemHealth').find({}).toArray();
+        const now = new Date();
+        const OFFLINE_THRESHOLD_MINUTES = 30; // Consider offline if no heartbeat in 30 min
+        
+        let online = 0, offline = 0;
+        const byVersion = { v1: { online: 0, offline: 0 }, v2: { online: 0, offline: 0 } };
+        
+        healthRecords.forEach(r => {
+            const lastSeen = r.lastHeartbeat || r.lastSyncAt || r.updatedAt;
+            const isOnline = lastSeen && (now - new Date(lastSeen)) < OFFLINE_THRESHOLD_MINUTES * 60 * 1000 && r.status !== 'offline';
+            
+            if (isOnline) {
+                online++;
+                if (r.posVersion === 'v1') byVersion.v1.online++;
+                else byVersion.v2.online++;
+            } else {
+                offline++;
+                if (r.posVersion === 'v1') byVersion.v1.offline++;
+                else byVersion.v2.offline++;
+            }
+        });
+        
+        return { online, offline, total: online + offline, byVersion };
+    } catch (e) {
+        return { online: 0, offline: 0, total: 0, byVersion: { v1: { online: 0, offline: 0 }, v2: { online: 0, offline: 0 } } };
+    }
+}
+
 module.exports = {
     connectAllDatabases,
     getMainDb,
@@ -336,4 +385,5 @@ module.exports = {
     getUnifiedRestaurants,
     getRestaurantById,
     updateRestaurantSubscription,
+    getSystemHealthSummary,
 };

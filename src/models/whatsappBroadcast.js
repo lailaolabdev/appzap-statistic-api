@@ -49,6 +49,10 @@ const schema = {
         failed: Number,
     },
     
+    // TOR 2: Urgency level (low/medium/high - high sends both SMS + WhatsApp)
+    urgency: String,            // "low" | "medium" | "high"
+    sendSms: Boolean,           // If true, also send via SMS (for high urgency)
+    
     // Schedule
     status: String,             // "draft" | "scheduled" | "sending" | "completed" | "cancelled"
     scheduledAt: Date,          // When to send (null = immediate)

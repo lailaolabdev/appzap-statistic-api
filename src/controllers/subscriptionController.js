@@ -10,6 +10,7 @@ const {
     getUnifiedRestaurants, 
     getRestaurantById,
     updateRestaurantSubscription,
+    getSystemHealthSummary,
     getPosV1Db,
     getPosV2Db 
 } = require('../utils/multiDbConnection');
@@ -27,6 +28,8 @@ const subscriptionController = {
                 district,
                 posVersion,
                 subscriptionStatus, // "expired" | "expiring_soon" | "expiring_3months" | "active"
+                startDate,
+                endDate,
                 limit = 50,
                 skip = 0,
             } = req.query;
@@ -37,6 +40,8 @@ const subscriptionController = {
                 district,
                 posVersion,
                 subscriptionStatus,
+                startDate,
+                endDate,
                 limit: parseInt(limit),
                 skip: parseInt(skip),
             });
@@ -79,11 +84,25 @@ const subscriptionController = {
     },
 
     /**
+     * TOR 1: Get system health summary (online/offline counts)
+     */
+    getSystemHealth: async (req, res, db) => {
+        try {
+            const summary = await getSystemHealthSummary(db);
+            res.json({ success: true, data: summary });
+        } catch (error) {
+            console.error('[Subscription] Error getting system health:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    },
+
+    /**
      * Get subscription expiry statistics
      */
     getExpiryStats: async (req, res, db) => {
         try {
-            const result = await getUnifiedRestaurants({ limit: 10000, skip: 0 });
+            const { startDate, endDate } = req.query;
+            const result = await getUnifiedRestaurants({ limit: 10000, skip: 0, startDate, endDate });
             const now = new Date();
 
             const stats = {

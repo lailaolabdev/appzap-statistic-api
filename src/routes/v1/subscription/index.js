@@ -11,6 +11,7 @@ const invoiceController = require('../../../controllers/invoiceController');
 const deviceController = require('../../../controllers/deviceController');
 const whatsappController = require('../../../controllers/whatsappController');
 const excelImportController = require('../../../controllers/excelImportController');
+const restaurantAssignmentController = require('../../../controllers/restaurantAssignmentController');
 
 module.exports = (db) => {
     const router = express.Router();
@@ -20,6 +21,10 @@ module.exports = (db) => {
     // Get unified restaurant list (from both POS v1 and v2)
     router.get('/restaurants', (req, res) => 
         subscriptionController.getUnifiedRestaurants(req, res, db));
+
+    // TOR 1: System health (online/offline)
+    router.get('/system-health', (req, res) => 
+        subscriptionController.getSystemHealth(req, res, db));
 
     // Get subscription expiry statistics
     router.get('/expiry-stats', (req, res) => 
@@ -181,6 +186,78 @@ module.exports = (db) => {
     // Execute import
     router.post('/import/execute', (req, res) => 
         excelImportController.executeImport(req, res, db));
+
+    // ==================== SUBSCRIPTION PACKAGES CRUD ====================
+
+    router.get('/packages', (req, res) => {
+        const limit = parseInt(req.query.limit) || 50;
+        const page = parseInt(req.query.page) || 1;
+        const skip = (page - 1) * limit;
+        db.collection('subscriptionPackages')
+            .find({})
+            .sort({ sortOrder: 1 })
+            .skip(skip)
+            .limit(limit)
+            .toArray()
+            .then(async (packages) => {
+                const total = await db.collection('subscriptionPackages').countDocuments({});
+                res.json({ results: packages, page, limit, totalPages: Math.ceil(total / limit), totalCount: total });
+            })
+            .catch((err) => res.status(500).json({ error: err.message }));
+    });
+
+    router.get('/packages/:id', (req, res) => {
+        const { ObjectId } = require('mongodb');
+        db.collection('subscriptionPackages').findOne({ _id: new ObjectId(req.params.id) })
+            .then((pkg) => pkg ? res.json(pkg) : res.status(404).json({ error: 'Not found' }))
+            .catch((err) => res.status(500).json({ error: err.message }));
+    });
+
+    router.post('/packages', (req, res) => {
+        const data = { ...req.body, createdAt: new Date(), updatedAt: new Date() };
+        db.collection('subscriptionPackages').insertOne(data)
+            .then((result) => res.status(201).json({ ...data, _id: result.insertedId }))
+            .catch((err) => res.status(500).json({ error: err.message }));
+    });
+
+    router.put('/packages/:id', (req, res) => {
+        const { ObjectId } = require('mongodb');
+        const updates = { ...req.body, updatedAt: new Date() };
+        delete updates._id;
+        db.collection('subscriptionPackages').findOneAndUpdate(
+            { _id: new ObjectId(req.params.id) },
+            { $set: updates },
+            { returnDocument: 'after' }
+        )
+            .then((result) => res.json(result))
+            .catch((err) => res.status(500).json({ error: err.message }));
+    });
+
+    router.delete('/packages/:id', (req, res) => {
+        const { ObjectId } = require('mongodb');
+        db.collection('subscriptionPackages').deleteOne({ _id: new ObjectId(req.params.id) })
+            .then(() => res.json({ success: true }))
+            .catch((err) => res.status(500).json({ error: err.message }));
+    });
+
+    router.patch('/packages/:id/toggle', (req, res) => {
+        const { ObjectId } = require('mongodb');
+        const { isActive } = req.body;
+        db.collection('subscriptionPackages').findOneAndUpdate(
+            { _id: new ObjectId(req.params.id) },
+            { $set: { isActive, updatedAt: new Date() } },
+            { returnDocument: 'after' }
+        )
+            .then((result) => res.json(result))
+            .catch((err) => res.status(500).json({ error: err.message }));
+    });
+
+    // ==================== STAFF ASSIGNMENT (TOR 1) ====================
+
+    router.get('/assignments', (req, res) => restaurantAssignmentController.getAll(req, res, db));
+    router.get('/assignments/:restaurantId/:posVersion', (req, res) => restaurantAssignmentController.getByRestaurant(req, res, db));
+    router.put('/assignments', (req, res) => restaurantAssignmentController.createOrUpdate(req, res, db));
+    router.delete('/assignments/:restaurantId/:posVersion', (req, res) => restaurantAssignmentController.remove(req, res, db));
 
     return router;
 };

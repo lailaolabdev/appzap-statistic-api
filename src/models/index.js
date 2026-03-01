@@ -32,6 +32,10 @@ const bankAccount = require('./bankAccount');
 const budget = require('./budget');
 const financialPeriod = require('./financialPeriod');
 const income = require('./income');
+const restaurantAssignment = require('./restaurantAssignment');
+const supportTicket = require('./supportTicket');
+const systemHealth = require('./systemHealth');
+const notificationPreference = require('./notificationPreference');
 
 module.exports = {
     masterCategory,
@@ -61,6 +65,10 @@ module.exports = {
     budget,
     financialPeriod,
     income,
+    restaurantAssignment,
+    supportTicket,
+    systemHealth,
+    notificationPreference,
     
     // List of all collections for initialization
     allCollections: [
@@ -89,5 +97,9 @@ module.exports = {
         budget,
         financialPeriod,
         income,
+        restaurantAssignment,
+        supportTicket,
+        systemHealth,
+        notificationPreference,
     ]
 };
