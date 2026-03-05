@@ -44,7 +44,7 @@ Instead of mapping ALL menus (56,900+), we focus on menus that are **actually be
 
 ## Pre-Migration Checklist
 
-- [ ] Backup database: `mongodump --uri="$MONGODB_URI" --out=./backup_$(date +%Y%m%d_%H%M%S)`
+- [ ] Backup database: `mongodump --uri="$MONGODB_URI_POS_V2" --out=./backup_$(date +%Y%m%d_%H%M%S)`
 - [ ] Verify master data CSV/JSON files are complete
 - [ ] Test on staging/dev environment first
 - [ ] Have rollback plan ready
@@ -384,7 +384,7 @@ Check:
 
 ### Rollback Master Data
 ```bash
-mongo $MONGODB_URI --eval "
+mongo $MONGODB_URI_POS_V2 --eval "
   db.masterCategories.drop();
   db.masterMenus.drop();
   // ... other master collections
@@ -393,7 +393,7 @@ mongo $MONGODB_URI --eval "
 
 ### Rollback Mapping Collections
 ```bash
-mongo $MONGODB_URI --eval "
+mongo $MONGODB_URI_POS_V2 --eval "
   db.menuMappings.drop();
   db.categoryMappings.drop();
   db.mappingDecisions.drop();
@@ -404,7 +404,7 @@ mongo $MONGODB_URI --eval "
 ### Rollback Order Enrichment
 ```bash
 # Remove masterMenuCode from orders
-mongo $MONGODB_URI --eval "
+mongo $MONGODB_URI_POS_V2 --eval "
   db.orders.updateMany(
     { 'items.masterMenuCode': { \$exists: true } },
     { \$unset: { 'items.\$[].masterMenuCode': '', 'items.\$[].masterMenuName': '', 'items.\$[].masterMenuName_en': '', enrichedAt: '' } }
@@ -414,7 +414,7 @@ mongo $MONGODB_URI --eval "
 
 ### Restore from Backup
 ```bash
-mongorestore --uri="$MONGODB_URI" --drop ./backup_YYYYMMDD_HHMMSS
+mongorestore --uri="$MONGODB_URI_POS_V2" --drop ./backup_YYYYMMDD_HHMMSS
 ```
 
 ---

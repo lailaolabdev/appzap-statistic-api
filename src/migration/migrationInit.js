@@ -18,22 +18,22 @@ const {
 
 async function initMigrationCollections() {
     let client;
-    
+
     try {
         console.log('========================================');
         console.log('Migration Initialization');
         console.log('========================================\n');
-        
+
         // Connect to MongoDB
         console.log('Connecting to MongoDB...');
-        client = await MongoClient.connect(process.env.MONGODB_URI);
+        client = await MongoClient.connect(process.env.MONGODB_URI_POS_V2);
         const db = client.db('AppZap');
         console.log('Connected successfully!\n');
-        
+
         // Get list of existing collections
         const existingCollections = await db.listCollections().toArray();
         const existingNames = existingCollections.map(c => c.name);
-        
+
         // Collections to create
         const collectionsToCreate = [
             { model: menuMapping, name: 'menuMappings' },
@@ -41,10 +41,10 @@ async function initMigrationCollections() {
             { model: mappingDecision, name: 'mappingDecisions' },
             { model: mappingStats, name: 'mappingStats' }
         ];
-        
+
         for (const { model, name } of collectionsToCreate) {
             console.log(`\n--- ${name} ---`);
-            
+
             // Check if collection exists
             if (existingNames.includes(name)) {
                 console.log(`  Collection already exists`);
@@ -52,7 +52,7 @@ async function initMigrationCollections() {
                 await db.createCollection(name);
                 console.log(`  Created collection`);
             }
-            
+
             // Create indexes
             console.log('  Creating indexes...');
             for (const index of model.indexes) {
@@ -60,7 +60,7 @@ async function initMigrationCollections() {
                     const options = { ...index };
                     const key = options.key;
                     delete options.key;
-                    
+
                     await db.collection(name).createIndex(key, options);
                     console.log(`    ✓ Index: ${JSON.stringify(key)}`);
                 } catch (indexError) {
@@ -73,12 +73,12 @@ async function initMigrationCollections() {
                 }
             }
         }
-        
+
         // Initialize stats documents
         console.log('\n--- Initializing Stats ---');
-        
+
         const statsCollection = db.collection('mappingStats');
-        
+
         for (const entityType of ['menu', 'category']) {
             const existing = await statsCollection.findOne({ entityType });
             if (!existing) {
@@ -108,7 +108,7 @@ async function initMigrationCollections() {
                 console.log(`  Stats document exists for: ${entityType}`);
             }
         }
-        
+
         // Summary
         console.log('\n========================================');
         console.log('Migration Initialization Complete');
@@ -120,7 +120,7 @@ async function initMigrationCollections() {
         console.log('  - mappingStats');
         console.log('\nNext step: Run "npm run migration:analyze" to generate suggestions');
         console.log('========================================\n');
-        
+
     } catch (error) {
         console.error('\nError during initialization:', error);
         process.exit(1);

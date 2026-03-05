@@ -37,9 +37,9 @@ async function connectAllDatabases() {
     console.log('Connecting to multiple databases...');
 
     // Connect to main stats database
-    if (process.env.MONGODB_URI) {
+    if (process.env.MONGODB_URI_POS_V2) {
         try {
-            connections.main = await MongoClient.connect(process.env.MONGODB_URI, connectionOptions);
+            connections.main = await MongoClient.connect(process.env.MONGODB_URI_POS_V2, connectionOptions);
             databases.main = connections.main.db('AppZap');
             console.log('✓ Main Stats DB connected');
         } catch (error) {
@@ -107,7 +107,7 @@ function getAllDatabases() {
  */
 async function closeAllConnections() {
     console.log('Closing all database connections...');
-    
+
     if (connections.main) {
         await connections.main.close();
         console.log('✓ Main DB closed');
@@ -134,7 +134,7 @@ async function getUnifiedRestaurants(options = {}) {
     if (databases.posV1 && (!posVersion || posVersion === 'v1' || posVersion === 'both')) {
         try {
             const v1Query = { isDeleted: { $ne: true } };
-            
+
             if (search) {
                 v1Query.$or = [
                     { name: { $regex: search, $options: 'i' } },
@@ -188,7 +188,7 @@ async function getUnifiedRestaurants(options = {}) {
     if (databases.posV2 && (!posVersion || posVersion === 'v2' || posVersion === 'both')) {
         try {
             const v2Query = { isDeleted: { $ne: true } };
-            
+
             if (search) {
                 v2Query.$or = [
                     { name: { $regex: search, $options: 'i' } },
@@ -213,10 +213,10 @@ async function getUnifiedRestaurants(options = {}) {
                 .toArray();
 
             v2Restaurants.forEach(restaurant => {
-                const daysLeft = restaurant.packageInfo?.endDate 
+                const daysLeft = restaurant.packageInfo?.endDate
                     ? Math.ceil((new Date(restaurant.packageInfo.endDate) - new Date()) / (1000 * 60 * 60 * 24))
                     : null;
-                    
+
                 results.push({
                     ...restaurant,
                     posVersion: 'v2',
@@ -243,7 +243,7 @@ async function getUnifiedRestaurants(options = {}) {
             if (!r.endDate) return subscriptionStatus === 'no_subscription';
             const endDate = new Date(r.endDate);
             const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
-            
+
             switch (subscriptionStatus) {
                 case 'expired': return daysLeft < 0;
                 case 'expiring_soon': return daysLeft >= 0 && daysLeft <= 30;
@@ -273,18 +273,18 @@ async function getUnifiedRestaurants(options = {}) {
 async function getRestaurantById(restaurantId, posVersion) {
     if (posVersion === 'v1' && databases.posV1) {
         const { ObjectId } = require('mongodb');
-        return await databases.posV1.collection('stores').findOne({ 
-            _id: new ObjectId(restaurantId) 
+        return await databases.posV1.collection('stores').findOne({
+            _id: new ObjectId(restaurantId)
         });
     }
-    
+
     if (posVersion === 'v2' && databases.posV2) {
         const { ObjectId } = require('mongodb');
-        return await databases.posV2.collection('restaurants').findOne({ 
-            _id: new ObjectId(restaurantId) 
+        return await databases.posV2.collection('restaurants').findOne({
+            _id: new ObjectId(restaurantId)
         });
     }
-    
+
     return null;
 }
 
@@ -295,12 +295,12 @@ async function getRestaurantById(restaurantId, posVersion) {
 async function updateRestaurantSubscription(restaurantId, posVersion, subscriptionData) {
     const { startDate, endDate, period } = subscriptionData;
     const { ObjectId } = require('mongodb');
-    
+
     if (posVersion === 'v1' && databases.posV1) {
         return await databases.posV1.collection('stores').updateOne(
             { _id: new ObjectId(restaurantId) },
-            { 
-                $set: { 
+            {
+                $set: {
                     startDate: startDate ? new Date(startDate) : null,
                     endDate: endDate ? new Date(endDate) : null,
                     period: period || null,
@@ -309,12 +309,12 @@ async function updateRestaurantSubscription(restaurantId, posVersion, subscripti
             }
         );
     }
-    
+
     if (posVersion === 'v2' && databases.posV2) {
         return await databases.posV2.collection('restaurants').updateOne(
             { _id: new ObjectId(restaurantId) },
-            { 
-                $set: { 
+            {
+                $set: {
                     'packageInfo.startDate': startDate ? new Date(startDate) : null,
                     'packageInfo.endDate': endDate ? new Date(endDate) : null,
                     updatedAt: new Date(),
@@ -322,7 +322,7 @@ async function updateRestaurantSubscription(restaurantId, posVersion, subscripti
             }
         );
     }
-    
+
     return { modifiedCount: 0 };
 }
 

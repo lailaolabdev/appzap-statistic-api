@@ -20,7 +20,7 @@ const PORT = process.env.PORT || 3000;
 let db;
 
 // Connect to MongoDB
-MongoClient.connect(process.env.MONGODB_URI, {
+MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })

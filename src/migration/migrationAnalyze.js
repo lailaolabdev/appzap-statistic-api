@@ -25,11 +25,11 @@
 
 require('dotenv').config();
 const { MongoClient, ObjectId } = require('mongodb');
-const { 
-    normalizeText, 
-    findBestMatches, 
+const {
+    normalizeText,
+    findBestMatches,
     detectCategory,
-    calculateMultiStrategyScore 
+    calculateMultiStrategyScore
 } = require('../utils/textSimilarity');
 
 // Parse command line arguments
@@ -68,13 +68,13 @@ function verboseLog(...args) {
  */
 async function clearMappings(db) {
     console.log('\n--- Clearing Existing Mappings ---');
-    
+
     const menuResult = await db.collection('menuMappings').deleteMany({});
     console.log(`  Deleted ${menuResult.deletedCount} menu mappings`);
-    
+
     const categoryResult = await db.collection('categoryMappings').deleteMany({});
     console.log(`  Deleted ${categoryResult.deletedCount} category mappings`);
-    
+
     console.log('  Mappings cleared successfully\n');
 }
 
@@ -85,23 +85,23 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
     console.log('\n========================================');
     console.log('Analyzing Menus (Improved Algorithm)');
     console.log('========================================\n');
-    
+
     const startTime = Date.now();
-    
+
     // Build query
     const query = {};
     if (storeId) {
         query.storeId = new ObjectId(storeId);
     }
-    
+
     // Get total count
     const totalMenus = await db.collection('menus').countDocuments(query);
     console.log(`Total menus to analyze: ${totalMenus}`);
-    
+
     if (limit) {
         console.log(`Limiting to: ${limit} menus`);
     }
-    
+
     // Get existing mappings to avoid duplicates (only if not clearing)
     let existingMenuIds = new Set();
     if (!clearExisting) {
@@ -111,16 +111,16 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
         existingMenuIds = new Set(existingMappings.map(m => m.menuId.toString()));
         console.log(`Existing mappings: ${existingMenuIds.size}`);
     }
-    
+
     // Fetch menus
     let menusCursor = db.collection('menus').find(query);
     if (limit) {
         menusCursor = menusCursor.limit(limit);
     }
-    
+
     const menus = await menusCursor.toArray();
     console.log(`Fetched ${menus.length} menus for analysis\n`);
-    
+
     // Statistics
     const stats = {
         total: menus.length,
@@ -141,44 +141,44 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
         },
         byCategory: {}
     };
-    
+
     // Process menus in batches
     const batchSize = 100;
     const mappingsToInsert = [];
-    
+
     for (let i = 0; i < menus.length; i++) {
         const menu = menus[i];
-        
+
         // Skip if already has mapping (and not clearing)
         if (!clearExisting && existingMenuIds.has(menu._id.toString())) {
             stats.skipped++;
             continue;
         }
-        
+
         // Get menu name (try various fields)
         const menuName = menu.name || menu.title || '';
         const menuName_en = menu.name_en || menu.title_en || '';
         const normalizedName = normalizeText(menuName);
-        
+
         if (!normalizedName) {
             stats.skipped++;
             continue;
         }
-        
+
         // Detect category of menu item
         const detectedCategory = detectCategory(menuName);
-        
+
         // Track category stats
         if (!stats.byCategory[detectedCategory.category]) {
             stats.byCategory[detectedCategory.category] = 0;
         }
         stats.byCategory[detectedCategory.category]++;
-        
+
         // Check if we have a learned decision for this name
         const learnedDecision = learnedDecisions.get(normalizedName);
-        
+
         let mapping;
-        
+
         if (learnedDecision && learnedDecision.decisionType === 'approved') {
             // Use learned decision
             mapping = {
@@ -212,7 +212,7 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
             stats.learned++;
             stats.highConfidence++;
             stats.byMatchType.exact++;
-            
+
         } else if (learnedDecision && learnedDecision.decisionType === 'not-applicable') {
             // Learned that this should not be mapped
             mapping = {
@@ -241,11 +241,11 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
             stats.learned++;
             stats.noMatch++;
             stats.byMatchType.none++;
-            
+
         } else {
             // Find best matches using improved multi-strategy algorithm
             const matches = findBestMatches(menuName, masterMenus, 0.5, 5);
-            
+
             // Also try English name if available
             if (menuName_en) {
                 const enMatches = findBestMatches(menuName_en, masterMenus, 0.5, 5);
@@ -262,7 +262,7 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
                 // Re-sort by score
                 matches.sort((a, b) => b.score - a.score);
             }
-            
+
             // Convert matches to suggested mappings
             const suggestedMappings = matches.slice(0, 5).map(match => ({
                 masterMenuCode: match.candidate.code,
@@ -272,11 +272,11 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
                 matchType: match.matchType,
                 matchDetails: match.details
             }));
-            
+
             const topMatch = suggestedMappings.length > 0 ? suggestedMappings[0] : null;
             const topScore = topMatch ? topMatch.confidenceScore : 0;
             const confidenceLevel = getConfidenceLevel(topScore);
-            
+
             mapping = {
                 menuId: menu._id,
                 storeId: menu.storeId || menu.store_id,
@@ -300,7 +300,7 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
                 createdAt: new Date(),
                 updatedAt: new Date()
             };
-            
+
             // Update stats
             switch (confidenceLevel) {
                 case 'high': stats.highConfidence++; break;
@@ -308,7 +308,7 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
                 case 'low': stats.lowConfidence++; break;
                 default: stats.noMatch++; break;
             }
-            
+
             // Track match type
             const matchType = topMatch ? topMatch.matchType : 'none';
             if (stats.byMatchType[matchType] !== undefined) {
@@ -316,13 +316,13 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
             } else {
                 stats.byMatchType[matchType] = 1;
             }
-            
+
             // Verbose logging for debugging
-            verboseLog(`  [${i+1}] "${menuName}" -> ${topMatch ? topMatch.masterMenuCode : 'NO MATCH'} (${topScore}% ${topMatch?.matchType || 'none'})`);
+            verboseLog(`  [${i + 1}] "${menuName}" -> ${topMatch ? topMatch.masterMenuCode : 'NO MATCH'} (${topScore}% ${topMatch?.matchType || 'none'})`);
         }
-        
+
         mappingsToInsert.push(mapping);
-        
+
         // Insert in batches
         if (mappingsToInsert.length >= batchSize) {
             await db.collection('menuMappings').insertMany(mappingsToInsert);
@@ -331,15 +331,15 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
             mappingsToInsert.length = 0;
         }
     }
-    
+
     // Insert remaining
     if (mappingsToInsert.length > 0) {
         await db.collection('menuMappings').insertMany(mappingsToInsert);
         stats.created += mappingsToInsert.length;
     }
-    
+
     const duration = Date.now() - startTime;
-    
+
     // Update stats collection
     await db.collection('mappingStats').updateOne(
         { entityType: 'menu' },
@@ -359,7 +359,7 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
         },
         { upsert: true }
     );
-    
+
     console.log('\n--- Menu Analysis Complete ---');
     console.log(`Total processed: ${stats.total}`);
     console.log(`Skipped (existing): ${stats.skipped}`);
@@ -381,7 +381,7 @@ async function analyzeMenus(db, masterMenus, learnedDecisions) {
         console.log(`  - ${category}: ${count}`);
     }
     console.log(`\nDuration: ${(duration / 1000).toFixed(2)}s`);
-    
+
     return stats;
 }
 
@@ -392,23 +392,23 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
     console.log('\n========================================');
     console.log('Analyzing Categories (Improved Algorithm)');
     console.log('========================================\n');
-    
+
     const startTime = Date.now();
-    
+
     // Build query
     const query = {};
     if (storeId) {
         query.storeId = new ObjectId(storeId);
     }
-    
+
     // Get total count
     const totalCategories = await db.collection('categories').countDocuments(query);
     console.log(`Total categories to analyze: ${totalCategories}`);
-    
+
     if (limit) {
         console.log(`Limiting to: ${limit} categories`);
     }
-    
+
     // Get existing mappings to avoid duplicates (only if not clearing)
     let existingCategoryIds = new Set();
     if (!clearExisting) {
@@ -418,16 +418,16 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
         existingCategoryIds = new Set(existingMappings.map(m => m.categoryId.toString()));
         console.log(`Existing mappings: ${existingCategoryIds.size}`);
     }
-    
+
     // Fetch categories
     let categoriesCursor = db.collection('categories').find(query);
     if (limit) {
         categoriesCursor = categoriesCursor.limit(limit);
     }
-    
+
     const categories = await categoriesCursor.toArray();
     console.log(`Fetched ${categories.length} categories for analysis\n`);
-    
+
     // Statistics
     const stats = {
         total: categories.length,
@@ -440,35 +440,35 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
         learned: 0,
         byMatchType: {}
     };
-    
+
     // Process categories in batches
     const batchSize = 100;
     const mappingsToInsert = [];
-    
+
     for (let i = 0; i < categories.length; i++) {
         const category = categories[i];
-        
+
         // Skip if already has mapping (and not clearing)
         if (!clearExisting && existingCategoryIds.has(category._id.toString())) {
             stats.skipped++;
             continue;
         }
-        
+
         // Get category name (try various fields)
         const categoryName = category.name || category.title || '';
         const categoryName_en = category.name_en || category.title_en || '';
         const normalizedName = normalizeText(categoryName);
-        
+
         if (!normalizedName) {
             stats.skipped++;
             continue;
         }
-        
+
         // Check if we have a learned decision for this name
         const learnedDecision = learnedDecisions.get(normalizedName);
-        
+
         let mapping;
-        
+
         if (learnedDecision && learnedDecision.decisionType === 'approved') {
             // Use learned decision
             mapping = {
@@ -498,7 +498,7 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
             };
             stats.learned++;
             stats.highConfidence++;
-            
+
         } else if (learnedDecision && learnedDecision.decisionType === 'not-applicable') {
             // Learned that this should not be mapped
             mapping = {
@@ -522,11 +522,11 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
             };
             stats.learned++;
             stats.noMatch++;
-            
+
         } else {
             // Find best matches using improved multi-strategy algorithm
             const matches = findBestMatches(categoryName, masterCategories, 0.5, 5);
-            
+
             // Also try English name if available
             if (categoryName_en) {
                 const enMatches = findBestMatches(categoryName_en, masterCategories, 0.5, 5);
@@ -542,7 +542,7 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
                 // Re-sort by score
                 matches.sort((a, b) => b.score - a.score);
             }
-            
+
             // Convert matches to suggested mappings
             const suggestedMappings = matches.slice(0, 5).map(match => ({
                 masterCategoryCode: match.candidate.code,
@@ -552,11 +552,11 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
                 matchType: match.matchType,
                 matchDetails: match.details
             }));
-            
+
             const topMatch = suggestedMappings.length > 0 ? suggestedMappings[0] : null;
             const topScore = topMatch ? topMatch.confidenceScore : 0;
             const confidenceLevel = getConfidenceLevel(topScore);
-            
+
             mapping = {
                 categoryId: category._id,
                 storeId: category.storeId || category.store_id,
@@ -577,7 +577,7 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
                 createdAt: new Date(),
                 updatedAt: new Date()
             };
-            
+
             // Update stats
             switch (confidenceLevel) {
                 case 'high': stats.highConfidence++; break;
@@ -585,7 +585,7 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
                 case 'low': stats.lowConfidence++; break;
                 default: stats.noMatch++; break;
             }
-            
+
             // Track match type
             const matchType = topMatch ? topMatch.matchType : 'none';
             if (stats.byMatchType[matchType] !== undefined) {
@@ -593,12 +593,12 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
             } else {
                 stats.byMatchType[matchType] = 1;
             }
-            
-            verboseLog(`  [${i+1}] "${categoryName}" -> ${topMatch ? topMatch.masterCategoryCode : 'NO MATCH'} (${topScore}%)`);
+
+            verboseLog(`  [${i + 1}] "${categoryName}" -> ${topMatch ? topMatch.masterCategoryCode : 'NO MATCH'} (${topScore}%)`);
         }
-        
+
         mappingsToInsert.push(mapping);
-        
+
         // Insert in batches
         if (mappingsToInsert.length >= batchSize) {
             await db.collection('categoryMappings').insertMany(mappingsToInsert);
@@ -607,15 +607,15 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
             mappingsToInsert.length = 0;
         }
     }
-    
+
     // Insert remaining
     if (mappingsToInsert.length > 0) {
         await db.collection('categoryMappings').insertMany(mappingsToInsert);
         stats.created += mappingsToInsert.length;
     }
-    
+
     const duration = Date.now() - startTime;
-    
+
     // Update stats collection
     await db.collection('mappingStats').updateOne(
         { entityType: 'category' },
@@ -635,7 +635,7 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
         },
         { upsert: true }
     );
-    
+
     console.log('\n--- Category Analysis Complete ---');
     console.log(`Total processed: ${stats.total}`);
     console.log(`Skipped (existing): ${stats.skipped}`);
@@ -653,7 +653,7 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
         }
     }
     console.log(`\nDuration: ${(duration / 1000).toFixed(2)}s`);
-    
+
     return stats;
 }
 
@@ -662,30 +662,30 @@ async function analyzeCategories(db, masterCategories, learnedDecisions) {
  */
 async function runAnalysis() {
     let client;
-    
+
     try {
         console.log('========================================');
         console.log('Migration Analysis (IMPROVED ALGORITHM)');
         console.log('========================================\n');
-        
+
         console.log('Options:');
         if (storeId) console.log(`  Store: ${storeId}`);
         if (limit) console.log(`  Limit: ${limit} items`);
         if (clearExisting) console.log(`  Clear existing: YES`);
         if (verbose) console.log(`  Verbose: YES`);
         console.log('');
-        
+
         // Connect to MongoDB
         console.log('Connecting to MongoDB...');
-        client = await MongoClient.connect(process.env.MONGODB_URI);
+        client = await MongoClient.connect(process.env.MONGODB_URI_POS_V2);
         const db = client.db('AppZap');
         console.log('Connected successfully!');
-        
+
         // Clear existing mappings if requested
         if (clearExisting) {
             await clearMappings(db);
         }
-        
+
         // Load master data
         console.log('\nLoading master data...');
         const masterMenus = await db.collection('masterMenus')
@@ -694,10 +694,10 @@ async function runAnalysis() {
         const masterCategories = await db.collection('masterCategories')
             .find({ isActive: true, isDeleted: false })
             .toArray();
-        
+
         console.log(`  Master menus: ${masterMenus.length}`);
         console.log(`  Master categories: ${masterCategories.length}`);
-        
+
         // Load learned decisions
         console.log('\nLoading learned decisions...');
         const menuDecisions = await db.collection('mappingDecisions')
@@ -706,37 +706,37 @@ async function runAnalysis() {
         const categoryDecisions = await db.collection('mappingDecisions')
             .find({ entityType: 'category', isActive: true })
             .toArray();
-        
+
         const menuDecisionsMap = new Map();
         for (const d of menuDecisions) {
             menuDecisionsMap.set(d.normalizedName, d);
         }
-        
+
         const categoryDecisionsMap = new Map();
         for (const d of categoryDecisions) {
             categoryDecisionsMap.set(d.normalizedName, d);
         }
-        
+
         console.log(`  Menu decisions: ${menuDecisions.length}`);
         console.log(`  Category decisions: ${categoryDecisions.length}`);
-        
+
         // Run analysis
         let menuStats = null;
         let categoryStats = null;
-        
+
         if (!categoriesOnly) {
             menuStats = await analyzeMenus(db, masterMenus, menuDecisionsMap);
         }
-        
+
         if (!menusOnly) {
             categoryStats = await analyzeCategories(db, masterCategories, categoryDecisionsMap);
         }
-        
+
         // Final summary
         console.log('\n========================================');
         console.log('Analysis Complete');
         console.log('========================================');
-        
+
         if (menuStats) {
             const highMedium = menuStats.highConfidence + menuStats.mediumConfidence;
             const reviewPct = menuStats.created > 0 ? Math.round((highMedium / menuStats.created) * 100) : 0;
@@ -745,7 +745,7 @@ async function runAnalysis() {
             console.log(`  Ready for quick review: ${highMedium} (${reviewPct}%)`);
             console.log(`  Needs manual review: ${menuStats.lowConfidence + menuStats.noMatch}`);
         }
-        
+
         if (categoryStats) {
             const highMedium = categoryStats.highConfidence + categoryStats.mediumConfidence;
             const reviewPct = categoryStats.created > 0 ? Math.round((highMedium / categoryStats.created) * 100) : 0;
@@ -754,7 +754,7 @@ async function runAnalysis() {
             console.log(`  Ready for quick review: ${highMedium} (${reviewPct}%)`);
             console.log(`  Needs manual review: ${categoryStats.lowConfidence + categoryStats.noMatch}`);
         }
-        
+
         console.log('\n========================================');
         console.log('Next Steps:');
         console.log('========================================');
@@ -765,7 +765,7 @@ async function runAnalysis() {
         console.log('   - Mark as "not-applicable" for store-specific items');
         console.log('4. Approved decisions are learned for future use');
         console.log('========================================\n');
-        
+
     } catch (error) {
         console.error('\nError during analysis:', error);
         process.exit(1);

@@ -341,10 +341,10 @@ AppZap Team`,
 
 async function seedSubscriptionData() {
     let client;
-    
+
     try {
         console.log('Connecting to MongoDB...');
-        client = await MongoClient.connect(process.env.MONGODB_URI);
+        client = await MongoClient.connect(process.env.MONGODB_URI_POS_V2);
         const db = client.db('AppZap');
         console.log('Connected successfully!\n');
 

@@ -202,10 +202,10 @@ const defaultBankAccounts = [
 
 async function seedFinanceData() {
     let client;
-    
+
     try {
         console.log('Connecting to database...');
-        client = await MongoClient.connect(process.env.MONGODB_URI, {
+        client = await MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
             useNewUrlParser: true,
             useUnifiedTopology: true
         });
@@ -216,11 +216,11 @@ async function seedFinanceData() {
         // Seed expense categories
         console.log('\nSeeding expense categories...');
         const categoryCollection = db.collection('expenseCategories');
-        
+
         for (const category of expenseCategories) {
             await categoryCollection.updateOne(
                 { code: category.code },
-                { 
+                {
                     $set: { ...category, updatedAt: new Date() },
                     $setOnInsert: { createdAt: new Date() }
                 },
@@ -244,7 +244,7 @@ async function seedFinanceData() {
             for (const account of defaultBankAccounts) {
                 await bankCollection.updateOne(
                     { accountNumber: account.accountNumber },
-                    { 
+                    {
                         $set: { ...account, updatedAt: new Date(), lastUpdated: new Date() },
                         $setOnInsert: { createdAt: new Date() }
                     },
@@ -263,7 +263,7 @@ async function seedFinanceData() {
 
         // Create indexes for other finance collections
         console.log('\nCreating indexes for finance collections...');
-        
+
         // Expenses
         const expenseCollection = db.collection('expenses');
         await expenseCollection.createIndex({ expenseDate: -1 });

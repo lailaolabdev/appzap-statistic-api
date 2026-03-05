@@ -15,10 +15,10 @@ const models = require('../models');
 
 async function initializeDatabase() {
     let client;
-    
+
     try {
         console.log('Connecting to MongoDB...');
-        client = await MongoClient.connect(process.env.MONGODB_URI);
+        client = await MongoClient.connect(process.env.MONGODB_URI_POS_V2);
         const db = client.db('AppZap');
         console.log('Connected successfully!\n');
 
@@ -30,10 +30,10 @@ async function initializeDatabase() {
         for (const model of models.allCollections) {
             const collectionName = model.collectionName;
             console.log(`\nProcessing: ${collectionName}`);
-            
+
             // Check if collection exists
             const collections = await db.listCollections({ name: collectionName }).toArray();
-            
+
             if (collections.length === 0) {
                 // Create the collection
                 await db.createCollection(collectionName);
@@ -47,7 +47,7 @@ async function initializeDatabase() {
                 for (const indexSpec of model.indexes) {
                     try {
                         await db.collection(collectionName).createIndex(
-                            indexSpec.key, 
+                            indexSpec.key,
                             { unique: indexSpec.unique || false }
                         );
                         const indexKeys = Object.keys(indexSpec.key).join(', ');

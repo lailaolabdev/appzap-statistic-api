@@ -8,7 +8,7 @@
 require('dotenv').config();
 const { MongoClient } = require('mongodb');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/appzap_statistic';
+const MONGODB_URI_POS_V2 = process.env.MONGODB_URI_POS_V2 || 'mongodb://localhost:27017/appzap_statistic';
 
 // Product definitions with size variants
 const PRODUCTS = {
@@ -141,7 +141,7 @@ function generateCode(productId, variantId) {
 }
 
 async function seedBeerMasterMenus() {
-    const client = new MongoClient(MONGODB_URI);
+    const client = new MongoClient(MONGODB_URI_POS_V2);
 
     try {
         await client.connect();

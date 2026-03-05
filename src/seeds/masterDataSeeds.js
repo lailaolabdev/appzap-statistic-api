@@ -72,19 +72,19 @@ function mergeAIData(baseData, aiData, code) {
  */
 async function seedMasterData() {
     let client;
-    
+
     try {
         // Load data from CSV files
         console.log('Loading data from CSV files...');
         const dataDir = path.join(__dirname, '..', 'data');
         const data = loadAllMasterData(dataDir);
-        
+
         // Load AI enrichment data
         console.log('Loading AI enrichment data...');
         const menuAIData = loadAIData(dataDir, 'masterMenusAI.json');
         const categoryAIData = loadAIData(dataDir, 'masterCategoriesAI.json');
         const restCategoryAIData = loadAIData(dataDir, 'masterRestaurantCategoriesAI.json');
-        
+
         console.log(`Loaded:`);
         console.log(`  - ${data.masterCategories.length} master categories`);
         console.log(`  - ${data.masterMenus.length} master menus`);
@@ -95,10 +95,10 @@ async function seedMasterData() {
         console.log(`  - ${Object.keys(menuAIData).length} menu AI enrichments`);
         console.log(`  - ${Object.keys(categoryAIData).length} category AI enrichments`);
         console.log(`  - ${Object.keys(restCategoryAIData).length} restaurant category AI enrichments`);
-        
+
         // Connect to MongoDB
         console.log('\nConnecting to MongoDB...');
-        client = await MongoClient.connect(process.env.MONGODB_URI);
+        client = await MongoClient.connect(process.env.MONGODB_URI_POS_V2);
         const db = client.db('AppZap');
         console.log('Connected successfully!');
 
@@ -109,14 +109,14 @@ async function seedMasterData() {
         // ============================================
         console.log('\n1. Seeding Master Categories...');
         const existingCategories = await db.collection('masterCategories').countDocuments();
-        
+
         if (existingCategories > 0) {
             console.log(`   Skipping: ${existingCategories} categories already exist`);
         } else {
             const categoryDocs = data.masterCategories.map(cat => {
                 const code = cat.code || generateMasterCategoryCode();
                 const aiEnrichment = categoryAIData[code] || {};
-                
+
                 return {
                     code,
                     name: cat.name,
@@ -142,7 +142,7 @@ async function seedMasterData() {
                     updatedAt: now
                 };
             });
-            
+
             const result = await db.collection('masterCategories').insertMany(categoryDocs);
             console.log(`   Created ${result.insertedCount} master categories`);
         }
@@ -162,14 +162,14 @@ async function seedMasterData() {
         // ============================================
         console.log('\n2. Seeding Master Menus...');
         const existingMenus = await db.collection('masterMenus').countDocuments();
-        
+
         if (existingMenus > 0) {
             console.log(`   Skipping: ${existingMenus} menus already exist`);
         } else {
             const menuDocs = data.masterMenus.map(menu => {
                 const code = menu.code || generateMasterMenuCode();
                 const aiEnrichment = menuAIData[code] || {};
-                
+
                 return {
                     code,
                     masterCategoryCode: categoryCodeMap[menu.categoryIndex] || categoryCodeMap[0],
@@ -212,7 +212,7 @@ async function seedMasterData() {
                     updatedAt: now
                 };
             });
-            
+
             const result = await db.collection('masterMenus').insertMany(menuDocs);
             console.log(`   Created ${result.insertedCount} master menus`);
         }
@@ -222,7 +222,7 @@ async function seedMasterData() {
         // ============================================
         console.log('\n3. Seeding Master Restaurant Categories...');
         const existingRestCats = await db.collection('masterRestaurantCategories').countDocuments();
-        
+
         if (existingRestCats > 0) {
             console.log(`   Skipping: ${existingRestCats} restaurant categories already exist`);
         } else {
@@ -230,7 +230,7 @@ async function seedMasterData() {
             const restCatDocs = data.masterRestaurantCategories.map(cat => {
                 const code = cat.code;
                 const aiEnrichment = restCategoryAIData[code] || {};
-                
+
                 return {
                     code, // Use readable code from CSV instead of auto-generating
                     name: cat.name,
@@ -273,7 +273,7 @@ async function seedMasterData() {
                     updatedAt: now
                 };
             });
-            
+
             const result = await db.collection('masterRestaurantCategories').insertMany(restCatDocs);
             console.log(`   Created ${result.insertedCount} master restaurant categories`);
         }
@@ -283,7 +283,7 @@ async function seedMasterData() {
         // ============================================
         console.log('\n4. Seeding Master Ingredient Categories...');
         const existingIngCats = await db.collection('masterIngredientCategories').countDocuments();
-        
+
         if (existingIngCats > 0) {
             console.log(`   Skipping: ${existingIngCats} ingredient categories already exist`);
         } else {
@@ -309,7 +309,7 @@ async function seedMasterData() {
                 createdAt: now,
                 updatedAt: now
             }));
-            
+
             const result = await db.collection('masterIngredientCategories').insertMany(ingCatDocs);
             console.log(`   Created ${result.insertedCount} master ingredient categories`);
         }
@@ -329,7 +329,7 @@ async function seedMasterData() {
         // ============================================
         console.log('\n5. Seeding Master Ingredients...');
         const existingIngs = await db.collection('masterIngredients').countDocuments();
-        
+
         if (existingIngs > 0) {
             console.log(`   Skipping: ${existingIngs} ingredients already exist`);
         } else {
@@ -367,7 +367,7 @@ async function seedMasterData() {
                 createdAt: now,
                 updatedAt: now
             }));
-            
+
             const result = await db.collection('masterIngredients').insertMany(ingDocs);
             console.log(`   Created ${result.insertedCount} master ingredients`);
         }
@@ -377,7 +377,7 @@ async function seedMasterData() {
         // ============================================
         console.log('\n6. Seeding Master Recipe Categories...');
         const existingRecCats = await db.collection('masterRecipeCategories').countDocuments();
-        
+
         if (existingRecCats > 0) {
             console.log(`   Skipping: ${existingRecCats} recipe categories already exist`);
         } else {
@@ -403,7 +403,7 @@ async function seedMasterData() {
                 createdAt: now,
                 updatedAt: now
             }));
-            
+
             const result = await db.collection('masterRecipeCategories').insertMany(recCatDocs);
             console.log(`   Created ${result.insertedCount} master recipe categories`);
         }
@@ -413,13 +413,13 @@ async function seedMasterData() {
         // ============================================
         console.log('\n7. Seeding Master Recipes...');
         const existingRecipes = await db.collection('masterRecipes').countDocuments();
-        
+
         if (existingRecipes > 0) {
             console.log(`   Skipping: ${existingRecipes} recipes already exist`);
         } else {
             // Load recipes from JSON
             const recipesData = loadRecipesFromJSON(dataDir);
-            
+
             if (recipesData.length === 0) {
                 console.log('   No recipe data found in masterRecipes.json');
             } else {
@@ -427,11 +427,11 @@ async function seedMasterData() {
                 const allMenuCodes = new Set((await db.collection('masterMenus').find({}).toArray()).map(m => m.code));
                 const allRecipeCatCodes = new Set((await db.collection('masterRecipeCategories').find({}).toArray()).map(c => c.code));
                 const allIngredientCodes = new Set((await db.collection('masterIngredients').find({}).toArray()).map(i => i.code));
-                
+
                 // Process each recipe - use codes directly from JSON
                 const recipeDocs = [];
                 let skippedCount = 0;
-                
+
                 for (const recipe of recipesData) {
                     // Use menu code directly from JSON
                     const masterMenuCode = recipe.menuCode;
@@ -445,16 +445,16 @@ async function seedMasterData() {
                         skippedCount++;
                         continue;
                     }
-                    
+
                     // Use recipe category code directly from JSON
                     const masterRecipeCategoryCode = recipe.recipeCategoryCode || null;
                     if (masterRecipeCategoryCode && !allRecipeCatCodes.has(masterRecipeCategoryCode)) {
                         console.log(`   Warning: Recipe category code "${masterRecipeCategoryCode}" not found for recipe "${recipe.name_en}"`);
                     }
-                    
+
                     // Process ingredients - use codes directly from JSON
                     const processedIngredients = [];
-                    
+
                     for (const ing of recipe.ingredients) {
                         const ingredientCode = ing.ingredientCode;
                         if (!ingredientCode) {
@@ -473,7 +473,7 @@ async function seedMasterData() {
                             notes: ing.notes || ''
                         });
                     }
-                    
+
                     // Create recipe document
                     const recipeDoc = {
                         code: generateMasterRecipeCode(),
@@ -525,10 +525,10 @@ async function seedMasterData() {
                         createdAt: now,
                         updatedAt: now
                     };
-                    
+
                     recipeDocs.push(recipeDoc);
                 }
-                
+
                 if (recipeDocs.length > 0) {
                     const result = await db.collection('masterRecipes').insertMany(recipeDocs);
                     console.log(`   Created ${result.insertedCount} master recipes`);
@@ -545,7 +545,7 @@ async function seedMasterData() {
         // 8. Create Indexes
         // ============================================
         console.log('\n8. Creating indexes...');
-        
+
         // Master Categories
         await db.collection('masterCategories').createIndex({ code: 1 }, { unique: true });
         await db.collection('masterCategories').createIndex({ name: 1 });
@@ -553,7 +553,7 @@ async function seedMasterData() {
         await db.collection('masterCategories').createIndex({ recommendedRestaurantTypes: 1 });
         await db.collection('masterCategories').createIndex({ occasions: 1 });
         await db.collection('masterCategories').createIndex({ mealTimes: 1 });
-        
+
         // Master Menus
         await db.collection('masterMenus').createIndex({ code: 1 }, { unique: true });
         await db.collection('masterMenus').createIndex({ masterCategoryCode: 1 });
@@ -571,7 +571,7 @@ async function seedMasterData() {
         await db.collection('masterMenus').createIndex({ mealTimes: 1 });
         await db.collection('masterMenus').createIndex({ bestSeasons: 1 });
         await db.collection('masterMenus').createIndex({ popularityScore: -1 });
-        
+
         // Master Restaurant Categories
         await db.collection('masterRestaurantCategories').createIndex({ code: 1 }, { unique: true });
         await db.collection('masterRestaurantCategories').createIndex({ name: 1 });
@@ -581,33 +581,33 @@ async function seedMasterData() {
         await db.collection('masterRestaurantCategories').createIndex({ typicalOccasions: 1 });
         await db.collection('masterRestaurantCategories').createIndex({ priceTier: 1 });
         await db.collection('masterRestaurantCategories').createIndex({ noiseLevel: 1 });
-        
+
         // Master Ingredient Categories
         await db.collection('masterIngredientCategories').createIndex({ code: 1 }, { unique: true });
         await db.collection('masterIngredientCategories').createIndex({ parentCode: 1 });
-        
+
         // Master Ingredients
         await db.collection('masterIngredients').createIndex({ code: 1 }, { unique: true });
         await db.collection('masterIngredients').createIndex({ masterIngredientCategoryCode: 1 });
         await db.collection('masterIngredients').createIndex({ name: 1 });
-        
+
         // Master Recipe Categories
         await db.collection('masterRecipeCategories').createIndex({ code: 1 }, { unique: true });
         await db.collection('masterRecipeCategories').createIndex({ categoryType: 1 });
-        
+
         // Master Recipes
         await db.collection('masterRecipes').createIndex({ code: 1 }, { unique: true });
         await db.collection('masterRecipes').createIndex({ masterMenuCode: 1 });
-        
+
         // Mappings
         await db.collection('menuMappings').createIndex({ menuId: 1, masterMenuCode: 1 }, { unique: true });
         await db.collection('menuMappings').createIndex({ storeId: 1 });
         await db.collection('menuMappings').createIndex({ masterMenuCode: 1 });
-        
+
         await db.collection('categoryMappings').createIndex({ categoryId: 1, masterCategoryCode: 1 }, { unique: true });
         await db.collection('categoryMappings').createIndex({ storeId: 1 });
         await db.collection('categoryMappings').createIndex({ masterCategoryCode: 1 });
-        
+
         console.log('   Indexes created successfully');
 
         // ============================================
@@ -616,7 +616,7 @@ async function seedMasterData() {
         console.log('\n========================================');
         console.log('SEED COMPLETE - Summary:');
         console.log('========================================');
-        
+
         const counts = await Promise.all([
             db.collection('masterCategories').countDocuments(),
             db.collection('masterMenus').countDocuments(),
@@ -626,7 +626,7 @@ async function seedMasterData() {
             db.collection('masterRecipeCategories').countDocuments(),
             db.collection('masterRecipes').countDocuments()
         ]);
-        
+
         console.log(`Master Categories:            ${counts[0]}`);
         console.log(`Master Menus:                 ${counts[1]}`);
         console.log(`Master Restaurant Categories: ${counts[2]}`);

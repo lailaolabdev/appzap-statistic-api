@@ -9,7 +9,7 @@ require('dotenv').config();
 const { MongoClient } = require('mongodb');
 
 async function createIndexes() {
-    const client = new MongoClient(process.env.MONGODB_URI, {
+    const client = new MongoClient(process.env.MONGODB_URI_POS_V2, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     });
