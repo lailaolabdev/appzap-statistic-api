@@ -114,14 +114,14 @@ const invoiceController = {
         try {
             const { id } = req.params;
 
-            const invoice = await db.collection('invoices').findOne({ 
-                _id: new ObjectId(id) 
+            const invoice = await db.collection('invoices').findOne({
+                _id: new ObjectId(id)
             });
 
             if (!invoice) {
-                return res.status(404).json({ 
-                    success: false, 
-                    error: 'Invoice not found' 
+                return res.status(404).json({
+                    success: false,
+                    error: 'Invoice not found'
                 });
             }
 
@@ -149,22 +149,23 @@ const invoiceController = {
                 subscription,
                 notes,
                 dueDate,
+                coordinator,
             } = req.body;
 
             // Validate required fields
             if (!restaurantId || !posVersion) {
-                return res.status(400).json({ 
-                    success: false, 
-                    error: 'restaurantId and posVersion are required' 
+                return res.status(400).json({
+                    success: false,
+                    error: 'restaurantId and posVersion are required'
                 });
             }
 
             // Get restaurant details
             const restaurant = await getRestaurantById(restaurantId, posVersion);
             if (!restaurant) {
-                return res.status(404).json({ 
-                    success: false, 
-                    error: 'Restaurant not found' 
+                return res.status(404).json({
+                    success: false,
+                    error: 'Restaurant not found'
                 });
             }
 
@@ -200,6 +201,7 @@ const invoiceController = {
                 invoiceNumber,
                 invoiceDate: new Date(),
                 dueDate: dueDate ? new Date(dueDate) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default 7 days
+                coordinator: coordinator || null,
 
                 restaurant: {
                     id: restaurantId,
@@ -207,7 +209,7 @@ const invoiceController = {
                     name: restaurant.name,
                     code: restaurant.code || null,
                     phone: restaurant.phone || restaurant.contactInfo?.phone,
-                    address: posVersion === 'v1' 
+                    address: posVersion === 'v1'
                         ? `${restaurant.village || ''} ${restaurant.district || ''} ${restaurant.province || ''}`
                         : restaurant.address?.fullAddress || '',
                 },
@@ -247,7 +249,7 @@ const invoiceController = {
                 notes: notes || '',
                 terms: [
                     'ລູກຄ້າຕ້ອງຊຳລະບໍ່ໃຫ້ກາຍວັນທີ ກຳນົດ',
-                    'ພາຍຫຼັງຊຳລະແລ້ວ, ຜູ້ຂັດທະນາຈະມອບ ໃບເຈ້ງຮັບເງິນ ໃຫ້ລູກຄ້າ, ເພື່ອໃຊ້ເປັນຫຼັກຖານຢັ້ງຢືນໃນການຊຳລະ.',
+                    'ພາຍຫຼັງຊ າລະແລ ວ, ຜູ ພັດທະນາຈະມອບ ໃບແຈ ງຮັບເງີນ ໃຫ ລູກຄ າ, ເພື່ອໃຊ ເປັນຫຼັກຖານຢັ້ງຢືນໃນການຊ າລະ.',
                 ],
 
                 createdBy: req.user?.id || 'system',
@@ -320,14 +322,14 @@ const invoiceController = {
             );
 
             if (result.matchedCount === 0) {
-                return res.status(404).json({ 
-                    success: false, 
-                    error: 'Invoice not found' 
+                return res.status(404).json({
+                    success: false,
+                    error: 'Invoice not found'
                 });
             }
 
-            const updatedInvoice = await db.collection('invoices').findOne({ 
-                _id: new ObjectId(id) 
+            const updatedInvoice = await db.collection('invoices').findOne({
+                _id: new ObjectId(id)
             });
 
             res.json({
@@ -366,9 +368,9 @@ const invoiceController = {
             );
 
             if (result.matchedCount === 0) {
-                return res.status(404).json({ 
-                    success: false, 
-                    error: 'Invoice not found' 
+                return res.status(404).json({
+                    success: false,
+                    error: 'Invoice not found'
                 });
             }
 
@@ -389,14 +391,14 @@ const invoiceController = {
         try {
             const { id } = req.params;
 
-            const result = await db.collection('invoices').deleteOne({ 
-                _id: new ObjectId(id) 
+            const result = await db.collection('invoices').deleteOne({
+                _id: new ObjectId(id)
             });
 
             if (result.deletedCount === 0) {
-                return res.status(404).json({ 
-                    success: false, 
-                    error: 'Invoice not found' 
+                return res.status(404).json({
+                    success: false,
+                    error: 'Invoice not found'
                 });
             }
 
@@ -418,14 +420,14 @@ const invoiceController = {
         try {
             const { id } = req.params;
 
-            const invoice = await db.collection('invoices').findOne({ 
-                _id: new ObjectId(id) 
+            const invoice = await db.collection('invoices').findOne({
+                _id: new ObjectId(id)
             });
 
             if (!invoice) {
-                return res.status(404).json({ 
-                    success: false, 
-                    error: 'Invoice not found' 
+                return res.status(404).json({
+                    success: false,
+                    error: 'Invoice not found'
                 });
             }
 
@@ -489,7 +491,7 @@ const invoiceController = {
                 // Footer
                 signature: {
                     company: 'ບໍລິສັດ ລາຍລາວແອັບແຊບ ຈຳກັດ',
-                    name: 'ມີກຸ ກໍ່ລວັນປະຈວ',
+                    name: 'ມົວກຸ ກ້າວເຈີປາວ',
                 },
 
                 // QR Code data (for payment)
