@@ -6,12 +6,12 @@
  */
 
 const { ObjectId } = require('mongodb');
-const { 
-    getUnifiedRestaurants, 
+const {
+    getUnifiedRestaurants,
     getRestaurantById,
     updateRestaurantSubscription,
     getPosV1Db,
-    getPosV2Db 
+    getPosV2Db
 } = require('../utils/multiDbConnection');
 
 const subscriptionController = {
@@ -41,36 +41,11 @@ const subscriptionController = {
                 skip: parseInt(skip),
             });
 
-            // Calculate subscription status summary
-            const now = new Date();
-            const summary = {
-                total: result.pagination.total,
-                expired: 0,
-                expiringSoon: 0, // < 1 month
-                expiring3Months: 0, // 1-3 months
-                active: 0, // > 3 months
-                noSubscription: 0,
-            };
-
-            result.data.forEach(r => {
-                if (!r.endDate) {
-                    summary.noSubscription++;
-                } else {
-                    const endDate = new Date(r.endDate);
-                    const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
-                    
-                    if (daysLeft < 0) summary.expired++;
-                    else if (daysLeft <= 30) summary.expiringSoon++;
-                    else if (daysLeft <= 90) summary.expiring3Months++;
-                    else summary.active++;
-                }
-            });
-
             res.json({
                 success: true,
                 data: result.data,
                 pagination: result.pagination,
-                summary,
+                summary: result.summary,
             });
         } catch (error) {
             console.error('[Subscription] Error getting unified restaurants:', error);
@@ -119,7 +94,7 @@ const subscriptionController = {
 
                 const endDate = new Date(r.endDate);
                 const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
-                
+
                 const restaurantInfo = {
                     id: r.restaurantId,
                     posVersion: r.posVersion,
@@ -181,17 +156,17 @@ const subscriptionController = {
             const restaurant = await getRestaurantById(restaurantId, posVersion);
 
             if (!restaurant) {
-                return res.status(404).json({ 
-                    success: false, 
-                    error: 'Restaurant not found' 
+                return res.status(404).json({
+                    success: false,
+                    error: 'Restaurant not found'
                 });
             }
 
             // Get invoices for this restaurant
             const invoices = await db.collection('invoices')
-                .find({ 
+                .find({
                     'restaurant.id': restaurantId,
-                    'restaurant.posVersion': posVersion 
+                    'restaurant.posVersion': posVersion
                 })
                 .sort({ invoiceDate: -1 })
                 .limit(10)
@@ -218,27 +193,37 @@ const subscriptionController = {
     updateSubscription: async (req, res, db) => {
         try {
             const { restaurantId, posVersion } = req.params;
-            const { startDate, endDate, period } = req.body;
+            const {
+                startDate, endDate, period,
+                phone, whatsapp,
+                latitude, longitude, village, province, district,
+                storeType, packageLevel, paymentStatus
+            } = req.body;
 
             // Validate
             if (!restaurantId || !posVersion) {
-                return res.status(400).json({ 
-                    success: false, 
-                    error: 'restaurantId and posVersion are required' 
+                return res.status(400).json({
+                    success: false,
+                    error: 'restaurantId and posVersion are required'
                 });
             }
 
             // Update the subscription
             const result = await updateRestaurantSubscription(
-                restaurantId, 
-                posVersion, 
-                { startDate, endDate, period }
+                restaurantId,
+                posVersion,
+                {
+                    startDate, endDate, period,
+                    phone, whatsapp,
+                    latitude, longitude, village, province, district,
+                    storeType, packageLevel, paymentStatus
+                }
             );
 
             if (result.modifiedCount === 0) {
-                return res.status(404).json({ 
-                    success: false, 
-                    error: 'Restaurant not found or no changes made' 
+                return res.status(404).json({
+                    success: false,
+                    error: 'Restaurant not found or no changes made'
                 });
             }
 
@@ -262,9 +247,9 @@ const subscriptionController = {
             // restaurants: [{ restaurantId, posVersion, startDate, endDate, period, matchBy }]
 
             if (!Array.isArray(restaurants) || restaurants.length === 0) {
-                return res.status(400).json({ 
-                    success: false, 
-                    error: 'restaurants array is required' 
+                return res.status(400).json({
+                    success: false,
+                    error: 'restaurants array is required'
                 });
             }
 
@@ -283,8 +268,8 @@ const subscriptionController = {
                     // If no ID provided, try to match by name/phone
                     if (!restaurantId && (r.name || r.phone)) {
                         const matched = await findRestaurantByNameOrPhone(
-                            r.name, 
-                            r.phone, 
+                            r.name,
+                            r.phone,
                             r.posVersion
                         );
                         if (matched) {

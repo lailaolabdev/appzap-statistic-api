@@ -161,10 +161,13 @@ async function getUnifiedRestaurants(options = {}) {
                     district: 1,
                     village: 1,
                     location: 1,
+                    lat: 1,
+                    lng: 1,
                     startDate: 1,
                     endDate: 1,
                     period: 1,
                     type: 1,
+                    storeType: 1,
                     createdAt: 1,
                 })
                 .toArray();
@@ -177,6 +180,9 @@ async function getUnifiedRestaurants(options = {}) {
                     province: store.province || store.address?.province,
                     district: store.district || store.address?.district,
                     village: store.village || store.address?.village,
+                    latitude: store.location?.lat || store.lat,
+                    longitude: store.location?.lon || store.lng,
+                    storeType: store.storeType || (store.type ? [store.type] : []),
                 });
             });
         } catch (error) {
@@ -208,6 +214,7 @@ async function getUnifiedRestaurants(options = {}) {
                     address: 1,
                     location: 1,
                     packageInfo: 1,
+                    storeType: 1,
                     createdAt: 1,
                 })
                 .toArray();
@@ -228,6 +235,12 @@ async function getUnifiedRestaurants(options = {}) {
                     paymentStatus: restaurant.packageInfo?.paymentStatus,
                     packageLevel: restaurant.packageInfo?.level,
                     daysLeft,
+                    province: restaurant.address?.state,
+                    district: restaurant.address?.city,
+                    village: restaurant.address?.street,
+                    latitude: restaurant.address?.coordinates?.latitude,
+                    longitude: restaurant.address?.coordinates?.longitude,
+                    storeType: restaurant.storeType,
                 });
             });
         } catch (error) {
@@ -257,12 +270,38 @@ async function getUnifiedRestaurants(options = {}) {
     // Sort by name
     filteredResults.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
+    // Calculate subscription status summary on the FULL filtered dataset
+    const now = new Date();
+    const summary = {
+        total: filteredResults.length,
+        expired: 0,
+        expiringSoon: 0, // < 1 month
+        expiring3Months: 0, // 1-3 months
+        active: 0, // > 3 months
+        noSubscription: 0,
+    };
+
+    filteredResults.forEach(r => {
+        if (!r.endDate) {
+            summary.noSubscription++;
+        } else {
+            const endDate = new Date(r.endDate);
+            const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+
+            if (daysLeft < 0) summary.expired++;
+            else if (daysLeft <= 30) summary.expiringSoon++;
+            else if (daysLeft <= 90) summary.expiring3Months++;
+            else summary.active++;
+        }
+    });
+
     // Pagination
     const total = filteredResults.length;
     const paginatedResults = filteredResults.slice(skip, skip + limit);
 
     return {
         data: paginatedResults,
+        summary,
         pagination: { total, limit, skip },
     };
 }
@@ -293,33 +332,84 @@ async function getRestaurantById(restaurantId, posVersion) {
  * Use with caution - this modifies the POS databases
  */
 async function updateRestaurantSubscription(restaurantId, posVersion, subscriptionData) {
-    const { startDate, endDate, period } = subscriptionData;
+    const {
+        startDate, endDate, period,
+        phone, whatsapp,
+        latitude, longitude, village, province, district,
+        storeType, packageLevel, paymentStatus
+    } = subscriptionData;
     const { ObjectId } = require('mongodb');
 
     if (posVersion === 'v1' && databases.posV1) {
+        const setObjV1 = {};
+        if (startDate !== undefined) setObjV1.startDate = startDate ? new Date(startDate) : null;
+        if (endDate !== undefined) setObjV1.endDate = endDate ? new Date(endDate) : null;
+        if (period !== undefined) setObjV1.period = period || null;
+
+        if (phone !== undefined) setObjV1.phone = phone;
+        if (whatsapp !== undefined) setObjV1.whatsapp = whatsapp;
+
+        if (latitude !== undefined) {
+            setObjV1.lat = latitude;
+            setObjV1['location.lat'] = latitude;
+        }
+        if (longitude !== undefined) {
+            setObjV1.lng = longitude;
+            setObjV1['location.lon'] = longitude;
+        }
+        if (village !== undefined) {
+            setObjV1.village = village;
+            setObjV1['address.village'] = village;
+        }
+        if (province !== undefined) {
+            setObjV1.province = province;
+            setObjV1['address.province'] = province;
+        }
+        if (district !== undefined) {
+            setObjV1.district = district;
+            setObjV1['address.district'] = district;
+        }
+        if (storeType !== undefined) {
+            setObjV1.storeType = Array.isArray(storeType) ? storeType :
+                (typeof storeType === 'string' ? storeType.split(',').map(s => s.trim()).filter(Boolean) : []);
+        }
+        if (packageLevel !== undefined) setObjV1.packageLevel = packageLevel;
+        if (paymentStatus !== undefined) setObjV1.paymentStatus = paymentStatus;
+        setObjV1.updatedAt = new Date();
+
         return await databases.posV1.collection('stores').updateOne(
             { _id: new ObjectId(restaurantId) },
-            {
-                $set: {
-                    startDate: startDate ? new Date(startDate) : null,
-                    endDate: endDate ? new Date(endDate) : null,
-                    period: period || null,
-                    updatedAt: new Date(),
-                }
-            }
+            { $set: setObjV1 }
         );
     }
 
     if (posVersion === 'v2' && databases.posV2) {
+        const setObjV2 = {};
+        if (startDate !== undefined) setObjV2['packageInfo.startDate'] = startDate ? new Date(startDate) : null;
+        if (endDate !== undefined) setObjV2['packageInfo.endDate'] = endDate ? new Date(endDate) : null;
+        // period not heavily used in V2 natively
+
+        if (phone !== undefined) setObjV2['contactInfo.phone'] = phone;
+        if (whatsapp !== undefined) setObjV2['contactInfo.whatsapp'] = whatsapp;
+
+        if (latitude !== undefined) setObjV2['address.coordinates.latitude'] = Number(latitude);
+        if (longitude !== undefined) setObjV2['address.coordinates.longitude'] = Number(longitude);
+
+        if (village !== undefined) setObjV2['address.street'] = village;
+        if (district !== undefined) setObjV2['address.city'] = district;
+        if (province !== undefined) setObjV2['address.state'] = province;
+
+        if (storeType !== undefined) {
+            setObjV2.storeType = Array.isArray(storeType) ? storeType :
+                (typeof storeType === 'string' ? storeType.split(',').map(s => s.trim()).filter(Boolean) : []);
+        }
+        if (packageLevel !== undefined) setObjV2['packageInfo.level'] = packageLevel;
+        if (paymentStatus !== undefined) setObjV2['packageInfo.paymentStatus'] = paymentStatus;
+        setObjV2.updatedAt = new Date();
+
         return await databases.posV2.collection('restaurants').updateOne(
             { _id: new ObjectId(restaurantId) },
-            {
-                $set: {
-                    'packageInfo.startDate': startDate ? new Date(startDate) : null,
-                    'packageInfo.endDate': endDate ? new Date(endDate) : null,
-                    updatedAt: new Date(),
-                }
-            }
+            { $set: setObjV2 }
         );
     }
 
