@@ -127,7 +127,7 @@ async function closeAllConnections() {
  * Returns restaurants with subscription info
  */
 async function getUnifiedRestaurants(options = {}) {
-    const { search, province, district, posVersion, subscriptionStatus, limit = 50, skip = 0 } = options;
+    const { search, province, district, posVersion, subscriptionStatus, paymentStatus, expireMonth, sortField = 'createdAt', sortDirection = 'desc', limit = 50, skip = 0 } = options;
     const results = [];
 
     // Get from POS v1 (stores collection)
@@ -141,6 +141,21 @@ async function getUnifiedRestaurants(options = {}) {
                     { phone: { $regex: search, $options: 'i' } },
                     { nameForSearch: { $regex: search, $options: 'i' } },
                 ];
+            }
+            if (paymentStatus) {
+                if (paymentStatus.toLowerCase() !== 'all') {
+                    v1Query.paymentStatus = paymentStatus.toLowerCase();
+                }
+            }
+            if (expireMonth) {
+                const [year, month] = expireMonth.split('-');
+                const startOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, 1, 0, 0, 0, 0));
+                const endOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month), 0, 23, 59, 59, 999));
+
+                v1Query.endDate = {
+                    $gte: startOfMonth,
+                    $lte: endOfMonth
+                };
             }
             if (province) {
                 v1Query['address.province'] = { $regex: province, $options: 'i' };
@@ -168,6 +183,10 @@ async function getUnifiedRestaurants(options = {}) {
                     period: 1,
                     type: 1,
                     storeType: 1,
+                    packageLevel: 1,
+                    packageId: 1,
+                    packagePrice: 1,
+                    paymentStatus: 1,
                     createdAt: 1,
                 })
                 .toArray();
@@ -201,6 +220,21 @@ async function getUnifiedRestaurants(options = {}) {
                     { code: { $regex: search, $options: 'i' } },
                     { 'contactInfo.phone': { $regex: search, $options: 'i' } },
                 ];
+            }
+            if (paymentStatus) {
+                if (paymentStatus.toLowerCase() !== 'all') {
+                    v2Query['packageInfo.paymentStatus'] = paymentStatus.toLowerCase();
+                }
+            }
+            if (expireMonth) {
+                const [year, month] = expireMonth.split('-');
+                const startOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, 1, 0, 0, 0, 0));
+                const endOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month), 0, 23, 59, 59, 999));
+
+                v2Query['packageInfo.endDate'] = {
+                    $gte: startOfMonth,
+                    $lte: endOfMonth
+                };
             }
             // Note: POS v2 might have different address structure
 
@@ -262,13 +296,30 @@ async function getUnifiedRestaurants(options = {}) {
                 case 'expiring_soon': return daysLeft >= 0 && daysLeft <= 30;
                 case 'expiring_3months': return daysLeft > 30 && daysLeft <= 90;
                 case 'active': return daysLeft > 90;
+                case 'has_package': return true;
                 default: return true;
             }
         });
     }
 
-    // Sort by name
-    filteredResults.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    // Sort logic
+    filteredResults.sort((a, b) => {
+        let valA = a[sortField];
+        let valB = b[sortField];
+
+        // Handle date fields securely
+        if (sortField === 'createdAt' || sortField === 'startDate' || sortField === 'endDate') {
+            valA = valA ? new Date(valA).getTime() : 0;
+            valB = valB ? new Date(valB).getTime() : 0;
+        } else if (typeof valA === 'string' && typeof valB === 'string') {
+            valA = valA.toLowerCase();
+            valB = valB.toLowerCase();
+        }
+
+        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
 
     // Calculate subscription status summary on the FULL filtered dataset
     const now = new Date();
@@ -336,7 +387,7 @@ async function updateRestaurantSubscription(restaurantId, posVersion, subscripti
         startDate, endDate, period,
         phone, whatsapp,
         latitude, longitude, village, province, district,
-        storeType, packageLevel, paymentStatus
+        storeType, packageLevel, packageId, packagePrice, paymentStatus
     } = subscriptionData;
     const { ObjectId } = require('mongodb');
 
@@ -374,6 +425,8 @@ async function updateRestaurantSubscription(restaurantId, posVersion, subscripti
                 (typeof storeType === 'string' ? storeType.split(',').map(s => s.trim()).filter(Boolean) : []);
         }
         if (packageLevel !== undefined) setObjV1.packageLevel = packageLevel;
+        if (packageId !== undefined) setObjV1.packageId = packageId ? new ObjectId(packageId) : null;
+        if (packagePrice !== undefined) setObjV1.packagePrice = Number(packagePrice);
         if (paymentStatus !== undefined) setObjV1.paymentStatus = paymentStatus;
         setObjV1.updatedAt = new Date();
 
@@ -404,6 +457,8 @@ async function updateRestaurantSubscription(restaurantId, posVersion, subscripti
                 (typeof storeType === 'string' ? storeType.split(',').map(s => s.trim()).filter(Boolean) : []);
         }
         if (packageLevel !== undefined) setObjV2['packageInfo.level'] = packageLevel;
+        if (packageId !== undefined) setObjV2['packageInfo.packageId'] = packageId ? new ObjectId(packageId) : null;
+        if (packagePrice !== undefined) setObjV2['packageInfo.packagePrice'] = Number(packagePrice);
         if (paymentStatus !== undefined) setObjV2['packageInfo.paymentStatus'] = paymentStatus;
         setObjV2.updatedAt = new Date();
 

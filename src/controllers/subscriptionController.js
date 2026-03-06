@@ -26,7 +26,11 @@ const subscriptionController = {
                 province,
                 district,
                 posVersion,
-                subscriptionStatus, // "expired" | "expiring_soon" | "expiring_3months" | "active"
+                subscriptionStatus, // "expired" | "expiring_soon" | "expiring_3months" | "active" | "no_subscription" | "has_package"
+                paymentStatus,      // "paid" | "pending" | "overdue"
+                expireMonth,        // format "YYYY-MM"
+                sortField = 'createdAt',
+                sortDirection = 'desc',
                 limit = 50,
                 skip = 0,
             } = req.query;
@@ -37,6 +41,10 @@ const subscriptionController = {
                 district,
                 posVersion,
                 subscriptionStatus,
+                paymentStatus,
+                expireMonth,
+                sortField,
+                sortDirection,
                 limit: parseInt(limit),
                 skip: parseInt(skip),
             });
@@ -197,7 +205,7 @@ const subscriptionController = {
                 startDate, endDate, period,
                 phone, whatsapp,
                 latitude, longitude, village, province, district,
-                storeType, packageLevel, paymentStatus
+                storeType, packageLevel, packageId, packagePrice, paymentStatus
             } = req.body;
 
             // Validate
@@ -216,7 +224,7 @@ const subscriptionController = {
                     startDate, endDate, period,
                     phone, whatsapp,
                     latitude, longitude, village, province, district,
-                    storeType, packageLevel, paymentStatus
+                    storeType, packageLevel, packageId, packagePrice, paymentStatus
                 }
             );
 
