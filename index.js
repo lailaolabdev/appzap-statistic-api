@@ -103,6 +103,41 @@ MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
         const financeRouter = require('./src/routes/v1/finance')(db);
         app.use('/api/v1/finance', financeRouter);
 
+        // ─── Admin API: Auth, Reviews, Ads, Events ────────────────────────────
+
+        // Admin auth — no JWT required (this is the login endpoint)
+        const adminAuthRouter = require('./src/routes/v1/adminAuth');
+        app.use('/api/v1/admin/auth', adminAuthRouter);
+        // Alias: /api/v1/auth/login-with-userid → same login handler (dashboard compat)
+        app.post('/api/v1/auth/login-with-userid', (req, res, next) => {
+            // Forward to the admin login handler by reusing same logic
+            req.body.userId = req.body.userId || req.body.username;
+            const { signAdminToken } = require('./src/middleware/adminAuth');
+            const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'appzapAdmin';
+            const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'appzapAdmin@V2';
+            const { userId, password } = req.body;
+            if (!userId || !password || userId !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+                return res.status(401).json({ success: false, error: { code: 'INVALID_CREDENTIALS', message: 'Incorrect username or password' } });
+            }
+            const user = { userId: 'admin-001', username: ADMIN_USERNAME, name: 'Admin User', role: 'admin' };
+            const token = signAdminToken(user);
+            const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+            return res.json({ success: true, user, tokens: { access: { token, expires }, refresh: { token, expires } } });
+        });
+
+        // Reviews admin (JWT required — applied inside router)
+        const reviewsRouter = require('./src/routes/v1/reviews');
+        app.use('/api/v1/reviews', reviewsRouter);
+
+        // Ads admin (JWT required — applied inside router)
+        const adsRouter = require('./src/routes/v1/ads');
+        app.use('/api/v1/ads', adsRouter);
+
+        // Live Events admin (JWT required — applied inside router)
+        const eventsRouter = require('./src/routes/v1/events');
+        app.use('/api/v1/discover/events', eventsRouter);
+
+
         // Error handling middleware
         app.use((err, req, res, next) => {
             console.error(err.stack);
