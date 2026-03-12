@@ -9,7 +9,7 @@ env:
   AWS_REGION: ap-southeast-1
   ECR_REPOSITORY: appzap/appzap-statistic-api
   ECS_CLUSTER: appzap-ecs-cluster
-  ECS_SERVICE: appzap-statistic-api-service-5axwOaq
+  ECS_SERVICE: appzap-statistic-api-service-5xaxw0aq
   ECS_TASK_DEFINITION: .aws/task-definition.json
   CONTAINER_NAME: appzap-statistic-api
 
@@ -17,7 +17,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
