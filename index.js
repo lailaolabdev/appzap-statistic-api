@@ -40,11 +40,14 @@ MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
 
         // Initialize job queues (Redis/Bull)
         try {
-            initializeQueues();
-            const analysisQueue = getAnalysisQueue();
-            initializeAnalysisWorker(analysisQueue, db);
-            initializeAnalyticsBuilderWorker(db);
-            console.log("Job queues initialized");
+            const queues = initializeQueues();
+            if (queues && queues.analysisQueue) {
+                initializeAnalysisWorker(queues.analysisQueue, db);
+                initializeAnalyticsBuilderWorker(db);
+                console.log("Job queues and workers initialized");
+            } else {
+                console.warn("Warning: Job queues not initialized. Background workers skipped.");
+            }
         } catch (error) {
             console.error("Warning: Job queue initialization failed:", error.message);
             console.error("Background jobs will not be available. Make sure Redis is running.");

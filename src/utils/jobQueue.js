@@ -23,6 +23,13 @@ const sseClients = new Map();
  * Must be called after environment variables are loaded
  */
 function initializeQueues() {
+    // If REDIS_URL is not provided in environment, disable queues in production
+    // or if explicitly set to 'none'
+    if ((!process.env.REDIS_URL || process.env.REDIS_URL === 'none') && process.env.NODE_ENV === 'production') {
+        console.warn('[JobQueue] REDIS_URL not provided. Background jobs will be disabled.');
+        return null;
+    }
+
     const redisOptions = {
         maxRetriesPerRequest: 3,
         enableReadyCheck: false,
@@ -35,156 +42,160 @@ function initializeQueues() {
         }
     };
 
-    // Analysis queue - for menu analysis jobs
-    // IMPORTANT: Extended timeouts for large datasets (32K+ menus = ~20-30 min processing)
-    analysisQueue = new Queue('menu-analysis', REDIS_URL, {
-        redis: redisOptions,
-        settings: {
-            lockDuration: 2400000,      // 40 minutes - max time job can run
-            lockRenewTime: 15000,       // 15 seconds - how often to renew lock (keep job alive)
-            stalledInterval: 30000,     // 30 seconds - how often to check for stalled jobs
-            maxStalledCount: 1,         // Only allow 1 restart attempt (prevent infinite loops)
-            guardInterval: 5000,        // 5 seconds - check lock health
-            retryProcessDelay: 5000     // 5 seconds - delay before retry
-        },
-        defaultJobOptions: {
-            attempts: 2,                // Reduced attempts (with proper timeout, shouldn't need many)
-            backoff: {
-                type: 'exponential',
-                delay: 5000             // Increased backoff delay
+    try {
+        // Analysis queue - for menu analysis jobs
+        analysisQueue = new Queue('menu-analysis', REDIS_URL, {
+            redis: redisOptions,
+            settings: {
+                lockDuration: 2400000,      // 40 minutes - max time job can run
+                lockRenewTime: 15000,       // 15 seconds - how often to renew lock (keep job alive)
+                stalledInterval: 30000,     // 30 seconds - how often to check for stalled jobs
+                maxStalledCount: 1,         // Only allow 1 restart attempt (prevent infinite loops)
+                guardInterval: 5000,        // 5 seconds - check lock health
+                retryProcessDelay: 5000     // 5 seconds - delay before retry
             },
-            removeOnComplete: 100,      // Keep last 100 completed jobs
-            removeOnFail: 50,           // Keep last 50 failed jobs
-            timeout: 2400000            // 40 minutes max (matches lockDuration)
-        }
-    });
-
-    // Enrich queue - for order enrichment jobs
-    enrichQueue = new Queue('order-enrichment', REDIS_URL, {
-        redis: redisOptions,
-        defaultJobOptions: {
-            attempts: 3,
-            backoff: {
-                type: 'exponential',
-                delay: 2000
-            },
-            removeOnComplete: 100,
-            removeOnFail: 50,
-            timeout: 600000
-        }
-    });
-
-    // Analytics Builder queue - for building analytics materialized views
-    analyticsBuilderQueue = new Queue('analytics-builder', REDIS_URL, {
-        redis: redisOptions,
-        defaultJobOptions: {
-            attempts: 2,
-            backoff: {
-                type: 'exponential',
-                delay: 3000
-            },
-            removeOnComplete: 50,
-            removeOnFail: 25,
-            timeout: 1800000  // 30 minutes max (for large datasets)
-        }
-    });
-
-    // Queue event handlers for analysis queue
-    analysisQueue.on('error', (error) => {
-        console.error('[JobQueue] Analysis queue error:', error);
-    });
-
-    analysisQueue.on('waiting', (jobId) => {
-        console.log(`[JobQueue] Job ${jobId} is waiting`);
-    });
-
-    analysisQueue.on('active', (job) => {
-        console.log(`[JobQueue] Job ${job.id} has started processing`);
-        broadcastProgress(job.id, {
-            status: 'active',
-            progress: 0,
-            message: 'Job started'
+            defaultJobOptions: {
+                attempts: 2,                // Reduced attempts
+                backoff: {
+                    type: 'exponential',
+                    delay: 5000             // Increased backoff delay
+                },
+                removeOnComplete: 100,      // Keep last 100 completed jobs
+                removeOnFail: 50,           // Keep last 50 failed jobs
+                timeout: 2400000            // 40 minutes max
+            }
         });
-    });
 
-    analysisQueue.on('progress', (job, progress) => {
-        console.log(`[JobQueue] Job ${job.id} progress: ${JSON.stringify(progress)}`);
-        broadcastProgress(job.id, {
-            status: 'active',
-            ...progress
+        // Enrich queue - for order enrichment jobs
+        enrichQueue = new Queue('order-enrichment', REDIS_URL, {
+            redis: redisOptions,
+            defaultJobOptions: {
+                attempts: 3,
+                backoff: {
+                    type: 'exponential',
+                    delay: 2000
+                },
+                removeOnComplete: 100,
+                removeOnFail: 50,
+                timeout: 600000
+            }
         });
-    });
 
-    analysisQueue.on('completed', (job, result) => {
-        console.log(`[JobQueue] Job ${job.id} completed`);
-        broadcastProgress(job.id, {
-            status: 'completed',
-            progress: 100,
-            result
+        // Analytics Builder queue - for building analytics materialized views
+        analyticsBuilderQueue = new Queue('analytics-builder', REDIS_URL, {
+            redis: redisOptions,
+            defaultJobOptions: {
+                attempts: 2,
+                backoff: {
+                    type: 'exponential',
+                    delay: 3000
+                },
+                removeOnComplete: 50,
+                removeOnFail: 25,
+                timeout: 1800000  // 30 minutes max
+            }
         });
-        // Clean up SSE clients for this job
-        setTimeout(() => {
-            sseClients.delete(job.id);
-        }, 5000);
-    });
 
-    analysisQueue.on('failed', (job, error) => {
-        console.error(`[JobQueue] Job ${job.id} failed:`, error.message);
-        broadcastProgress(job.id, {
-            status: 'failed',
-            error: error.message
+        // Add error handlers to ALL queues to prevent process crashes
+        const handleQueueError = (name) => (error) => {
+            console.error(`[JobQueue] ${name} error:`, error.message);
+        };
+
+        analysisQueue.on('error', handleQueueError('Analysis queue'));
+        enrichQueue.on('error', handleQueueError('Enrich queue'));
+        analyticsBuilderQueue.on('error', handleQueueError('Analytics Builder queue'));
+
+        // Queue event handlers for analysis queue
+        analysisQueue.on('waiting', (jobId) => {
+            console.log(`[JobQueue] Job ${jobId} is waiting`);
         });
-    });
 
-    // Analytics Builder queue event handlers
-    analyticsBuilderQueue.on('error', (error) => {
-        console.error('[JobQueue] Analytics Builder queue error:', error);
-    });
-
-    analyticsBuilderQueue.on('active', (job) => {
-        console.log(`[JobQueue] Analytics Builder job ${job.id} started`);
-        broadcastProgress(job.id, {
-            type: 'progress',
-            status: 'active',
-            progress: 0,
-            message: 'Starting analytics build...'
+        analysisQueue.on('active', (job) => {
+            console.log(`[JobQueue] Job ${job.id} has started processing`);
+            broadcastProgress(job.id, {
+                status: 'active',
+                progress: 0,
+                message: 'Job started'
+            });
         });
-    });
 
-    analyticsBuilderQueue.on('progress', (job, progress) => {
-        console.log(`[JobQueue] Analytics Builder job ${job.id} progress:`, progress);
-        broadcastProgress(job.id, {
-            type: 'progress',
-            status: 'active',
-            ...progress
+        analysisQueue.on('progress', (job, progress) => {
+            console.log(`[JobQueue] Job ${job.id} progress: ${JSON.stringify(progress)}`);
+            broadcastProgress(job.id, {
+                status: 'active',
+                ...progress
+            });
         });
-    });
 
-    analyticsBuilderQueue.on('completed', (job, result) => {
-        console.log(`[JobQueue] Analytics Builder job ${job.id} completed`);
-        broadcastProgress(job.id, {
-            type: 'status',
-            status: 'completed',
-            progress: 100,
-            result
+        analysisQueue.on('completed', (job, result) => {
+            console.log(`[JobQueue] Job ${job.id} completed`);
+            broadcastProgress(job.id, {
+                status: 'completed',
+                progress: 100,
+                result
+            });
+            setTimeout(() => {
+                sseClients.delete(job.id);
+            }, 5000);
         });
-        setTimeout(() => {
-            sseClients.delete(job.id);
-        }, 5000);
-    });
 
-    analyticsBuilderQueue.on('failed', (job, error) => {
-        console.error(`[JobQueue] Analytics Builder job ${job.id} failed:`, error.message);
-        broadcastProgress(job.id, {
-            type: 'status',
-            status: 'failed',
-            error: error.message
+        analysisQueue.on('failed', (job, error) => {
+            console.error(`[JobQueue] Job ${job.id} failed:`, error.message);
+            broadcastProgress(job.id, {
+                status: 'failed',
+                error: error.message
+            });
         });
-    });
 
-    console.log('[JobQueue] Queues initialized with extended timeouts');
-    console.log('[JobQueue] Analysis queue: 40min max runtime, prevents job stalling');
-    return { analysisQueue, enrichQueue, analyticsBuilderQueue };
+        // Analytics Builder queue event handlers
+        analyticsBuilderQueue.on('active', (job) => {
+            console.log(`[JobQueue] Analytics Builder job ${job.id} started`);
+            broadcastProgress(job.id, {
+                type: 'progress',
+                status: 'active',
+                progress: 0,
+                message: 'Starting analytics build...'
+            });
+        });
+
+        analyticsBuilderQueue.on('progress', (job, progress) => {
+            console.log(`[JobQueue] Analytics Builder job ${job.id} progress:`, progress);
+            broadcastProgress(job.id, {
+                type: 'progress',
+                status: 'active',
+                ...progress
+            });
+        });
+
+        analyticsBuilderQueue.on('completed', (job, result) => {
+            console.log(`[JobQueue] Analytics Builder job ${job.id} completed`);
+            broadcastProgress(job.id, {
+                type: 'status',
+                status: 'completed',
+                progress: 100,
+                result
+            });
+            setTimeout(() => {
+                sseClients.delete(job.id);
+            }, 5000);
+        });
+
+        analyticsBuilderQueue.on('failed', (job, error) => {
+            console.error(`[JobQueue] Analytics Builder job ${job.id} failed:`, error.message);
+            broadcastProgress(job.id, {
+                type: 'status',
+                status: 'failed',
+                error: error.message
+            });
+        });
+
+        console.log('[JobQueue] Queues initialized (Redis-dependent features enabled)');
+        return { analysisQueue, enrichQueue, analyticsBuilderQueue };
+    } catch (error) {
+        console.error('[JobQueue] Failed to initialize queues:', error.message);
+        console.warn('[JobQueue] Background jobs will be unavailable.');
+        return null;
+    }
 }
 
 /**
