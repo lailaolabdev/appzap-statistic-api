@@ -19,6 +19,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 let db;
 
+// Enable trust proxy for AWS ALB/ECS
+app.set('trust proxy', 1);
+
 // Connect to MongoDB
 MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
     useNewUrlParser: true,
@@ -55,10 +58,21 @@ MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
 
         // Middleware
         app.use(cors({
-            origin: true, // Allow all origins (or list specific ones like http://localhost:3000)
+            origin: (origin, callback) => callback(null, true),
             credentials: true,
-            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-            allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With']
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+            allowedHeaders: [
+                'Content-Type',
+                'Authorization',
+                'Accept',
+                'Origin',
+                'X-Requested-With',
+                'X-Token',
+                'x-access-token',
+                'Sentry-Trace',
+                'Baggage'
+            ],
+            optionsSuccessStatus: 204
         }));
 
         app.use(helmet({
