@@ -54,8 +54,17 @@ MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
         }
 
         // Middleware
-        app.use(cors()); // Enable CORS
-        app.use(helmet()); // Set various HTTP headers for security
+        app.use(cors({
+            origin: true, // Allow all origins (or list specific ones like http://localhost:3000)
+            credentials: true,
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+        }));
+
+        app.use(helmet({
+            crossOriginResourcePolicy: { policy: "cross-origin" },
+            contentSecurityPolicy: false, // Disable CSP for now if it causes issues, or configure properly
+        }));
         app.use(express.json()); // Parse JSON request bodies
 
         // Request logging middleware
