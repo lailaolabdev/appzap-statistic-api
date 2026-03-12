@@ -1,6 +1,6 @@
 {
   "name": "appzap_statistic",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "AppZap Statistics and Master Data Management System",
   "main": "index.js",
   "scripts": {
