@@ -58,12 +58,13 @@ MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
             origin: true, // Allow all origins (or list specific ones like http://localhost:3000)
             credentials: true,
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-            allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+            allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With']
         }));
 
         app.use(helmet({
             crossOriginResourcePolicy: { policy: "cross-origin" },
             contentSecurityPolicy: false, // Disable CSP for now if it causes issues, or configure properly
+            referrerPolicy: { policy: "strict-origin-when-cross-origin" },
         }));
         app.use(express.json()); // Parse JSON request bodies
 
