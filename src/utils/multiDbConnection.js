@@ -8,6 +8,7 @@
  */
 
 const { MongoClient } = require('mongodb');
+const { fetchV2Restaurants, fetchV2RestaurantById } = require('./posApiClient');
 
 let connections = {
     main: null,      // Main stats database
@@ -130,155 +131,18 @@ async function getUnifiedRestaurants(options = {}) {
     const { search, province, district, posVersion, subscriptionStatus, paymentStatus, expireMonth, sortField = 'createdAt', sortDirection = 'desc', limit = 50, skip = 0 } = options;
     const results = [];
 
-    // Get from POS v1 (stores collection)
-    if (databases.posV1 && (!posVersion || posVersion === 'v1' || posVersion === 'both')) {
+    // TODO: POS v1 support disabled for now -- will be added via POS v1 API later
+
+    // Get from POS v2 via HTTP API (not direct DB access)
+    if (!posVersion || posVersion === 'v2' || posVersion === 'both') {
         try {
-            const v1Query = { isDeleted: { $ne: true } };
-
-            if (search) {
-                v1Query.$or = [
-                    { name: { $regex: search, $options: 'i' } },
-                    { phone: { $regex: search, $options: 'i' } },
-                    { nameForSearch: { $regex: search, $options: 'i' } },
-                ];
-            }
-            if (paymentStatus) {
-                if (paymentStatus.toLowerCase() !== 'all') {
-                    v1Query.paymentStatus = paymentStatus.toLowerCase();
-                }
-            }
-            if (expireMonth) {
-                const [year, month] = expireMonth.split('-');
-                const startOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, 1, 0, 0, 0, 0));
-                const endOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month), 0, 23, 59, 59, 999));
-
-                v1Query.endDate = {
-                    $gte: startOfMonth,
-                    $lte: endOfMonth
-                };
-            }
-            if (province) {
-                v1Query['address.province'] = { $regex: province, $options: 'i' };
-            }
-            if (district) {
-                v1Query['address.district'] = { $regex: district, $options: 'i' };
-            }
-
-            const v1Stores = await databases.posV1.collection('stores')
-                .find(v1Query)
-                .project({
-                    _id: 1,
-                    name: 1,
-                    phone: 1,
-                    whatsapp: 1,
-                    address: 1,
-                    province: 1,
-                    district: 1,
-                    village: 1,
-                    location: 1,
-                    lat: 1,
-                    lng: 1,
-                    startDate: 1,
-                    endDate: 1,
-                    period: 1,
-                    type: 1,
-                    storeType: 1,
-                    packageLevel: 1,
-                    packageId: 1,
-                    packagePrice: 1,
-                    paymentStatus: 1,
-                    createdAt: 1,
-                })
-                .toArray();
-
-            v1Stores.forEach(store => {
-                results.push({
-                    ...store,
-                    posVersion: 'v1',
-                    restaurantId: store._id.toString(),
-                    province: store.province || store.address?.province,
-                    district: store.district || store.address?.district,
-                    village: store.village || store.address?.village,
-                    latitude: store.location?.lat || store.lat,
-                    longitude: store.location?.lon || store.lng,
-                    storeType: store.storeType || (store.type ? [store.type] : []),
-                });
+            const v2Results = await fetchV2Restaurants({
+                search,
+                paymentStatus,
             });
+            results.push(...v2Results);
         } catch (error) {
-            console.error('Error fetching POS v1 stores:', error.message);
-        }
-    }
-
-    // Get from POS v2 (restaurants collection)
-    if (databases.posV2 && (!posVersion || posVersion === 'v2' || posVersion === 'both')) {
-        try {
-            const v2Query = { isDeleted: { $ne: true } };
-
-            if (search) {
-                v2Query.$or = [
-                    { name: { $regex: search, $options: 'i' } },
-                    { code: { $regex: search, $options: 'i' } },
-                    { 'contactInfo.phone': { $regex: search, $options: 'i' } },
-                ];
-            }
-            if (paymentStatus) {
-                if (paymentStatus.toLowerCase() !== 'all') {
-                    v2Query['packageInfo.paymentStatus'] = paymentStatus.toLowerCase();
-                }
-            }
-            if (expireMonth) {
-                const [year, month] = expireMonth.split('-');
-                const startOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, 1, 0, 0, 0, 0));
-                const endOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month), 0, 23, 59, 59, 999));
-
-                v2Query['packageInfo.endDate'] = {
-                    $gte: startOfMonth,
-                    $lte: endOfMonth
-                };
-            }
-            // Note: POS v2 might have different address structure
-
-            const v2Restaurants = await databases.posV2.collection('restaurants')
-                .find(v2Query)
-                .project({
-                    _id: 1,
-                    name: 1,
-                    code: 1,
-                    contactInfo: 1,
-                    address: 1,
-                    location: 1,
-                    packageInfo: 1,
-                    storeType: 1,
-                    createdAt: 1,
-                })
-                .toArray();
-
-            v2Restaurants.forEach(restaurant => {
-                const daysLeft = restaurant.packageInfo?.endDate
-                    ? Math.ceil((new Date(restaurant.packageInfo.endDate) - new Date()) / (1000 * 60 * 60 * 24))
-                    : null;
-
-                results.push({
-                    ...restaurant,
-                    posVersion: 'v2',
-                    restaurantId: restaurant._id.toString(),
-                    phone: restaurant.contactInfo?.phone,
-                    whatsapp: restaurant.contactInfo?.whatsapp,
-                    startDate: restaurant.packageInfo?.startDate,
-                    endDate: restaurant.packageInfo?.endDate,
-                    paymentStatus: restaurant.packageInfo?.paymentStatus,
-                    packageLevel: restaurant.packageInfo?.level,
-                    daysLeft,
-                    province: restaurant.address?.state,
-                    district: restaurant.address?.city,
-                    village: restaurant.address?.street,
-                    latitude: restaurant.address?.coordinates?.latitude,
-                    longitude: restaurant.address?.coordinates?.longitude,
-                    storeType: restaurant.storeType,
-                });
-            });
-        } catch (error) {
-            console.error('Error fetching POS v2 restaurants:', error.message);
+            console.error('Error fetching POS v2 restaurants via API:', error.message);
         }
     }
 
@@ -368,11 +232,8 @@ async function getRestaurantById(restaurantId, posVersion) {
         });
     }
 
-    if (posVersion === 'v2' && databases.posV2) {
-        const { ObjectId } = require('mongodb');
-        return await databases.posV2.collection('restaurants').findOne({
-            _id: new ObjectId(restaurantId)
-        });
+    if (posVersion === 'v2') {
+        return await fetchV2RestaurantById(restaurantId);
     }
 
     return null;
