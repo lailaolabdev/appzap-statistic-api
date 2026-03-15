@@ -12,6 +12,7 @@ const invoiceController = require('../../../controllers/invoiceController');
 const deviceController = require('../../../controllers/deviceController');
 const whatsappController = require('../../../controllers/whatsappController');
 const excelImportController = require('../../../controllers/excelImportController');
+const promotionController = require('../../../controllers/promotionController');
 
 module.exports = (db) => {
     const router = express.Router();
@@ -189,6 +190,12 @@ module.exports = (db) => {
     // Test send
     router.post('/whatsapp/test', (req, res) =>
         whatsappController.testSend(req, res, db));
+
+    // ==================== PROMOTION ROUTES ====================
+
+    // Get promotions from POS v2
+    router.get('/promotions', (req, res) =>
+        promotionController.getPromotions(req, res));
 
     // ==================== EXCEL IMPORT ROUTES ====================
 
