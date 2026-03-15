@@ -193,9 +193,25 @@ module.exports = (db) => {
 
     // ==================== PROMOTION ROUTES ====================
 
-    // Get promotions from POS v2
+    // List promotions from POS v2
     router.get('/promotions', (req, res) =>
         promotionController.getPromotions(req, res));
+
+    // Get single promotion
+    router.get('/promotions/:id', (req, res) =>
+        promotionController.getPromotionById(req, res));
+
+    // Create promotion for a restaurant
+    router.post('/promotions', (req, res) =>
+        promotionController.createPromotion(req, res));
+
+    // Update promotion
+    router.put('/promotions/:id', (req, res) =>
+        promotionController.updatePromotion(req, res));
+
+    // Delete promotion
+    router.delete('/promotions/:id', (req, res) =>
+        promotionController.deletePromotion(req, res));
 
     // ==================== EXCEL IMPORT ROUTES ====================
 
