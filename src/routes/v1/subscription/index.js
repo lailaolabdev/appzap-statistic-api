@@ -213,6 +213,10 @@ module.exports = (db) => {
     router.delete('/promotions/:id', (req, res) =>
         promotionController.deletePromotion(req, res));
 
+    // Pin / unpin a promotion (proxies to Consumer API)
+    router.patch('/promotions/:id/pin', (req, res) =>
+        promotionController.pinPromotion(req, res));
+
     // ==================== EXCEL IMPORT ROUTES ====================
 
     // Get sample template

@@ -209,49 +209,71 @@ async function getUnifiedRestaurants(options = {}) {
         }
     }
 
-    // Get from POS v2 (restaurants collection)
-    if (databases.posV2 && (!posVersion || posVersion === 'v2' || posVersion === 'both')) {
+    // Get from POS v2 — primary: POS v2 REST API; fallback: direct MongoDB
+    if (!posVersion || posVersion === 'v2' || posVersion === 'both') {
         try {
-            const v2Query = { isDeleted: { $ne: true } };
+            let v2Restaurants = [];
 
-            if (search) {
-                v2Query.$or = [
-                    { name: { $regex: search, $options: 'i' } },
-                    { code: { $regex: search, $options: 'i' } },
-                    { 'contactInfo.phone': { $regex: search, $options: 'i' } },
-                ];
-            }
-            if (paymentStatus) {
-                if (paymentStatus.toLowerCase() !== 'all') {
+            if (process.env.POS_V2_API_URL && process.env.POS_V2_API_TOKEN) {
+                // Primary: fetch from POS v2 REST API
+                const params = new URLSearchParams({ limit: '10000', page: '1' });
+                if (search) params.set('search', search);
+                if (paymentStatus && paymentStatus.toLowerCase() !== 'all') {
+                    params.set('paymentStatus', paymentStatus.toLowerCase());
+                }
+
+                const response = await fetch(
+                    `${process.env.POS_V2_API_URL}/restaurants?${params.toString()}`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${process.env.POS_V2_API_TOKEN}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(`POS v2 API responded with ${response.status}`);
+                }
+
+                const json = await response.json();
+                v2Restaurants = json?.data?.results || [];
+                console.log(`✓ Fetched ${v2Restaurants.length} restaurants from POS v2 API`);
+            } else if (databases.posV2) {
+                // Fallback: direct MongoDB query
+                const v2Query = { isDeleted: { $ne: true } };
+
+                if (search) {
+                    v2Query.$or = [
+                        { name: { $regex: search, $options: 'i' } },
+                        { code: { $regex: search, $options: 'i' } },
+                        { 'contactInfo.phone': { $regex: search, $options: 'i' } },
+                    ];
+                }
+                if (paymentStatus && paymentStatus.toLowerCase() !== 'all') {
                     v2Query['packageInfo.paymentStatus'] = paymentStatus.toLowerCase();
                 }
+
+                v2Restaurants = await databases.posV2.collection('restaurants')
+                    .find(v2Query)
+                    .project({
+                        _id: 1, name: 1, code: 1, contactInfo: 1,
+                        address: 1, location: 1, packageInfo: 1,
+                        storeType: 1, createdAt: 1,
+                    })
+                    .toArray();
             }
+
+            // Apply expireMonth filter (not supported by POS v2 API directly)
             if (expireMonth) {
                 const [year, month] = expireMonth.split('-');
-                const startOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, 1, 0, 0, 0, 0));
+                const startOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, 1));
                 const endOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month), 0, 23, 59, 59, 999));
-
-                v2Query['packageInfo.endDate'] = {
-                    $gte: startOfMonth,
-                    $lte: endOfMonth
-                };
+                v2Restaurants = v2Restaurants.filter(r => {
+                    const end = r.packageInfo?.endDate ? new Date(r.packageInfo.endDate) : null;
+                    return end && end >= startOfMonth && end <= endOfMonth;
+                });
             }
-            // Note: POS v2 might have different address structure
-
-            const v2Restaurants = await databases.posV2.collection('restaurants')
-                .find(v2Query)
-                .project({
-                    _id: 1,
-                    name: 1,
-                    code: 1,
-                    contactInfo: 1,
-                    address: 1,
-                    location: 1,
-                    packageInfo: 1,
-                    storeType: 1,
-                    createdAt: 1,
-                })
-                .toArray();
 
             v2Restaurants.forEach(restaurant => {
                 const daysLeft = restaurant.packageInfo?.endDate
@@ -261,7 +283,7 @@ async function getUnifiedRestaurants(options = {}) {
                 results.push({
                     ...restaurant,
                     posVersion: 'v2',
-                    restaurantId: restaurant._id.toString(),
+                    restaurantId: (restaurant._id || restaurant.id)?.toString(),
                     phone: restaurant.contactInfo?.phone,
                     whatsapp: restaurant.contactInfo?.whatsapp,
                     startDate: restaurant.packageInfo?.startDate,
