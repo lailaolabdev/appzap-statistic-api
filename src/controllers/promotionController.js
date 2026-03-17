@@ -134,26 +134,24 @@ const promotionController = {
     },
 
     /**
-     * Pin/unpin a promotion — proxies to Consumer API
+     * Pin/unpin a promotion — calls POS V2 directly (no circular dependency via Consumer API)
      */
     pinPromotion: async (req, res) => {
         try {
             const { id } = req.params;
             const { isPinned, pinOrder } = req.body;
-            const consumerApiUrl = process.env.CONSUMER_API_URL;
-            const consumerApiToken = process.env.CONSUMER_API_ADMIN_TOKEN;
 
-            if (!consumerApiUrl || !consumerApiToken) {
+            if (!process.env.POS_V2_API_URL || !process.env.POS_V2_API_TOKEN) {
                 return res.status(503).json({
                     success: false,
-                    error: 'Consumer API not configured (CONSUMER_API_URL / CONSUMER_API_ADMIN_TOKEN missing)',
+                    error: 'POS V2 API not configured (POS_V2_API_URL / POS_V2_API_TOKEN missing)',
                 });
             }
 
-            const response = await fetch(`${consumerApiUrl}/api/v1/promotions/${id}/pin`, {
+            const response = await fetch(`${process.env.POS_V2_API_URL}/api/v1/promotions/${id}/pin`, {
                 method: 'PATCH',
                 headers: {
-                    'Authorization': `Bearer ${consumerApiToken}`,
+                    'Authorization': `Bearer ${process.env.POS_V2_API_TOKEN}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ isPinned, pinOrder }),
