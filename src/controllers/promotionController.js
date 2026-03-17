@@ -21,14 +21,6 @@ const promotionController = {
      */
     getPromotions: async (req, res) => {
         try {
-            const posV2Db = getPosV2Db();
-            if (!posV2Db) {
-                return res.status(500).json({
-                    success: false,
-                    error: 'POS v2 database not connected',
-                });
-            }
-
             const {
                 status,
                 businessType,
@@ -44,25 +36,21 @@ const promotionController = {
             const limitNum = Math.max(1, Math.min(100, parseInt(limit)));
             const sortDir = sortOrder === 'asc' ? 1 : -1;
 
+            // The POS v2 REST API is scoped per restaurant — no cross-restaurant endpoint.
+            // Query the POS v2 MongoDB directly so the dashboard sees all restaurants' promotions.
+            const posV2Db = getPosV2Db();
+            if (!posV2Db) {
+                return res.status(500).json({ success: false, error: 'POS v2 database not connected' });
+            }
+
             // Build match stage
             const matchStage = {};
-
-            if (status) {
-                matchStage.status = status;
-            }
-
-            if (businessType) {
-                matchStage.businessType = businessType;
-            }
-
+            if (status) matchStage.status = status;
+            if (businessType) matchStage.businessType = businessType;
             if (restaurantId) {
-                try {
-                    matchStage.restaurantId = new ObjectId(restaurantId);
-                } catch {
-                    matchStage.restaurantId = restaurantId;
-                }
+                try { matchStage.restaurantId = new ObjectId(restaurantId); }
+                catch { matchStage.restaurantId = restaurantId; }
             }
-
             if (search) {
                 matchStage.name = { $regex: escapeRegex(search), $options: 'i' };
             }
@@ -80,10 +68,7 @@ const promotionController = {
                 {
                     $addFields: {
                         restaurantName: {
-                            $ifNull: [
-                                { $arrayElemAt: ['$_restaurant.name', 0] },
-                                'Unknown Restaurant',
-                            ],
+                            $ifNull: [{ $arrayElemAt: ['$_restaurant.name', 0] }, 'Unknown Restaurant'],
                         },
                     },
                 },
@@ -91,21 +76,17 @@ const promotionController = {
                 { $sort: { [sortBy]: sortDir } },
                 {
                     $facet: {
-                        data: [
-                            { $skip: (pageNum - 1) * limitNum },
-                            { $limit: limitNum },
-                        ],
+                        data: [{ $skip: (pageNum - 1) * limitNum }, { $limit: limitNum }],
                         totalCount: [{ $count: 'count' }],
                     },
                 },
             ];
 
             const [result] = await posV2Db.collection('promotions').aggregate(pipeline).toArray();
-
             const promotions = result.data || [];
             const total = result.totalCount[0]?.count || 0;
 
-            res.json({
+            return res.json({
                 success: true,
                 data: {
                     promotions,
@@ -128,43 +109,60 @@ const promotionController = {
      */
     getPromotionById: async (req, res) => {
         try {
-            const posV2Db = getPosV2Db();
-            if (!posV2Db) {
-                return res.status(500).json({ success: false, error: 'POS v2 database not connected' });
-            }
             const { id } = req.params;
-            let promotionId;
-            try {
-                promotionId = new ObjectId(id);
-            } catch {
-                return res.status(400).json({ success: false, error: 'Invalid promotion ID' });
+
+            if (!process.env.POS_V2_API_URL || !process.env.POS_V2_API_TOKEN) {
+                return res.status(503).json({ success: false, error: 'POS v2 API not configured' });
             }
-            const pipeline = [
-                { $match: { _id: promotionId } },
+
+            const response = await fetch(
+                `${process.env.POS_V2_API_URL}/promotions/${id}`,
                 {
-                    $lookup: {
-                        from: 'restaurants',
-                        localField: 'restaurantId',
-                        foreignField: '_id',
-                        as: '_restaurant',
+                    headers: {
+                        'Authorization': `Bearer ${process.env.POS_V2_API_TOKEN}`,
+                        'Content-Type': 'application/json',
                     },
-                },
-                {
-                    $addFields: {
-                        restaurantName: {
-                            $ifNull: [{ $arrayElemAt: ['$_restaurant.name', 0] }, 'Unknown Restaurant'],
-                        },
-                    },
-                },
-                { $project: { _restaurant: 0 } },
-            ];
-            const [promotion] = await posV2Db.collection('promotions').aggregate(pipeline).toArray();
-            if (!promotion) {
-                return res.status(404).json({ success: false, error: 'Promotion not found' });
-            }
-            res.json({ success: true, data: promotion });
+                }
+            );
+            if (!response.ok) throw new Error(`POS v2 API responded with ${response.status}`);
+            const json = await response.json();
+            return res.json({ success: true, data: json.data });
         } catch (error) {
             console.error('[Promotions] Error getting promotion:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    },
+
+    /**
+     * Pin/unpin a promotion — proxies to Consumer API
+     */
+    pinPromotion: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { isPinned, pinOrder } = req.body;
+            const consumerApiUrl = process.env.CONSUMER_API_URL;
+            const consumerApiToken = process.env.CONSUMER_API_ADMIN_TOKEN;
+
+            if (!consumerApiUrl || !consumerApiToken) {
+                return res.status(503).json({
+                    success: false,
+                    error: 'Consumer API not configured (CONSUMER_API_URL / CONSUMER_API_ADMIN_TOKEN missing)',
+                });
+            }
+
+            const response = await fetch(`${consumerApiUrl}/api/v1/promotions/${id}/pin`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${consumerApiToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ isPinned, pinOrder }),
+            });
+
+            const json = await response.json();
+            res.status(response.status).json(json);
+        } catch (error) {
+            console.error('[Promotions] Error pinning promotion:', error);
             res.status(500).json({ success: false, error: error.message });
         }
     },
