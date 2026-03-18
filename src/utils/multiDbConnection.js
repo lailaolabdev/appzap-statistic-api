@@ -13,12 +13,14 @@ let connections = {
     main: null,      // Main stats database
     posV1: null,     // POS v1 database
     posV2: null,     // POS v2 database
+    consumer: null,  // Consumer database
 };
 
 let databases = {
     main: null,
     posV1: null,
     posV2: null,
+    consumer: null,
 };
 
 const connectionOptions = {
@@ -71,6 +73,18 @@ async function connectAllDatabases() {
         }
     }
 
+    // Connect to Consumer database
+    if (process.env.MONGODB_URI_CONSUMER) {
+        try {
+            connections.consumer = await MongoClient.connect(process.env.MONGODB_URI_CONSUMER, connectionOptions);
+            const dbName = process.env.CONSUMER_DB_NAME || 'appzap_consumer_dev';
+            databases.consumer = connections.consumer.db(dbName);
+            console.log(`✓ Consumer DB connected (${dbName})`);
+        } catch (error) {
+            console.error('✗ Consumer DB connection failed:', error.message);
+        }
+    }
+
     return databases;
 }
 
@@ -93,6 +107,13 @@ function getPosV1Db() {
  */
 function getPosV2Db() {
     return databases.posV2;
+}
+
+/**
+ * Get Consumer database
+ */
+function getConsumerDb() {
+    return databases.consumer;
 }
 
 /**
@@ -119,6 +140,10 @@ async function closeAllConnections() {
     if (connections.posV2) {
         await connections.posV2.close();
         console.log('✓ POS v2 DB closed');
+    }
+    if (connections.consumer) {
+        await connections.consumer.close();
+        console.log('✓ Consumer DB closed');
     }
 }
 
@@ -498,6 +523,7 @@ module.exports = {
     getMainDb,
     getPosV1Db,
     getPosV2Db,
+    getConsumerDb,
     getAllDatabases,
     closeAllConnections,
     getUnifiedRestaurants,
