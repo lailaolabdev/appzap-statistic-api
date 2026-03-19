@@ -1,0 +1,692 @@
+{
+	"info": {
+		"_postman_id": "ads-management-api-collection",
+		"name": "AppZap Ads Management API",
+		"description": "Complete API collection for AppZap Advertisement Management System with server-to-server authentication",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "{{ADS_ADMIN_KEY}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "x-admin-key",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5050",
+			"type": "string"
+		},
+		{
+			"key": "ADS_ADMIN_KEY",
+			"value": "your_admin_key_here",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Admin - Advertisement Management",
+			"item": [
+				{
+					"name": "Get All Ads",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-admin-key",
+								"value": "{{ADS_ADMIN_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/ads/admin/all?status=active&limit=20&skip=0",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ads", "admin", "all"],
+							"query": [
+								{
+									"key": "status",
+									"value": "active",
+									"description": "draft, pending_approval, approved, active, paused, ended, rejected"
+								},
+								{
+									"key": "type",
+									"value": "banner",
+									"disabled": true,
+									"description": "banner, popup, interstitial, native, sponsored"
+								},
+								{
+									"key": "placement",
+									"value": "eat_hero_banner",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "skip",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Ad",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-admin-key",
+								"value": "{{ADS_ADMIN_KEY}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Heineken Summer Campaign\",\n  \"description\": \"Summer promotion for Heineken 0.0\",\n  \"type\": \"banner\",\n  \"placement\": \"eat_hero_banner\",\n  \"advertiser\": {\n    \"name\": \"Heineken\",\n    \"companyName\": \"Heineken Laos Co., Ltd\",\n    \"phone\": \"+856 20 1234 5678\",\n    \"email\": \"marketing@heineken.la\"\n  },\n  \"content\": {\n    \"imageUrl\": \"https://cdn.appzap.la/ads/heineken-banner.jpg\",\n    \"imageUrlMobile\": \"https://cdn.appzap.la/ads/heineken-banner-mobile.jpg\",\n    \"title\": \"Heineken 0.0 - Now Available\",\n    \"subtitle\": \"Order now and get 20% off\",\n    \"ctaText\": \"Order Now\",\n    \"ctaUrl\": \"appzap://restaurant/123\"\n  },\n  \"targeting\": {\n    \"provinces\": [\"Vientiane\", \"Luang Prabang\"],\n    \"languages\": [\"en\", \"lo\"],\n    \"nationalities\": [\"US\", \"GB\", \"FR\", \"TH\"],\n    \"userTypes\": [\"new\", \"returning\"],\n    \"devices\": [\"ios\", \"android\"]\n  },\n  \"schedule\": {\n    \"startDate\": \"2026-06-01T00:00:00Z\",\n    \"endDate\": \"2026-08-31T23:59:59Z\",\n    \"timezone\": \"Asia/Vientiane\"\n  },\n  \"budget\": {\n    \"daily\": 500000,\n    \"total\": 15000000,\n    \"currency\": \"LAK\"\n  },\n  \"pricing\": {\n    \"type\": \"cpm\",\n    \"amount\": 50000,\n    \"currency\": \"LAK\"\n  },\n  \"priority\": 90,\n  \"weight\": 80\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ads/admin",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ads", "admin"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Ad",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-admin-key",
+								"value": "{{ADS_ADMIN_KEY}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"priority\": 95,\n  \"weight\": 85,\n  \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ads/admin/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ads", "admin", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "65f1234567890abcdef12345"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Ad Details with Analytics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-admin-key",
+								"value": "{{ADS_ADMIN_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/ads/admin/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ads", "admin", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "65f1234567890abcdef12345"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Ad",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-admin-key",
+								"value": "{{ADS_ADMIN_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/ads/admin/:id/approve",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ads", "admin", ":id", "approve"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "65f1234567890abcdef12345"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Ad",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-admin-key",
+								"value": "{{ADS_ADMIN_KEY}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Image quality does not meet standards\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ads/admin/:id/reject",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ads", "admin", ":id", "reject"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "65f1234567890abcdef12345"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Ad Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-admin-key",
+								"value": "{{ADS_ADMIN_KEY}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ads/admin/:id/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ads", "admin", ":id", "status"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "65f1234567890abcdef12345"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Revenue Summary",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-admin-key",
+								"value": "{{ADS_ADMIN_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/ads/admin/revenue?startDate=2026-03-01&endDate=2026-03-31",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ads", "admin", "revenue"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2026-03-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2026-03-31"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Advertiser Management",
+			"item": [
+				{
+					"name": "Get All Advertisers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-admin-key",
+								"value": "{{ADS_ADMIN_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/advertisers?status=active",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "advertisers"],
+							"query": [
+								{
+									"key": "status",
+									"value": "active",
+									"description": "pending, active, paused, expired, cancelled"
+								},
+								{
+									"key": "category",
+									"value": "beverage_beer",
+									"disabled": true
+								},
+								{
+									"key": "productScope",
+									"value": "eat",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Advertiser",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-admin-key",
+								"value": "{{ADS_ADMIN_KEY}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Heineken\",\n  \"companyName\": \"Heineken Laos Co., Ltd\",\n  \"logo\": \"https://cdn.appzap.la/logos/heineken.png\",\n  \"website\": \"https://heineken.com\",\n  \"category\": \"beverage_beer\",\n  \"contacts\": [\n    {\n      \"name\": \"John Doe\",\n      \"email\": \"john@heineken.la\",\n      \"phone\": \"+856 20 1234 5678\",\n      \"role\": \"Marketing Manager\"\n    }\n  ],\n  \"billingEmail\": \"billing@heineken.la\",\n  \"contract\": {\n    \"startDate\": \"2026-01-01T00:00:00Z\",\n    \"endDate\": \"2026-12-31T23:59:59Z\",\n    \"monthlyBudget\": 50000000,\n    \"totalBudget\": 600000000,\n    \"currency\": \"LAK\",\n    \"productScope\": [\"eat\", \"home\"],\n    \"exclusivePlacements\": [\"eat_hero_banner\", \"eat_deal_card\"]\n  },\n  \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/advertisers",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "advertisers"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Advertiser",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-admin-key",
+								"value": "{{ADS_ADMIN_KEY}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"active\",\n  \"contract\": {\n    \"monthlyBudget\": 60000000\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/advertisers/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "advertisers", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "65f1234567890abcdef12345"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Advertiser Analytics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-admin-key",
+								"value": "{{ADS_ADMIN_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/advertisers/:id/analytics?startDate=2026-03-01&endDate=2026-03-31",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "advertisers", ":id", "analytics"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2026-03-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2026-03-31"
+								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "65f1234567890abcdef12345"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Advertiser Ads",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-admin-key",
+								"value": "{{ADS_ADMIN_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/advertisers/:id/ads",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "advertisers", ":id", "ads"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "65f1234567890abcdef12345"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Placement Exclusivity",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-admin-key",
+								"value": "{{ADS_ADMIN_KEY}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/advertisers/check-exclusivity/:placement",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "advertisers", "check-exclusivity", ":placement"],
+							"variable": [
+								{
+									"key": "placement",
+									"value": "eat_hero_banner"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Public - Ad Delivery & Tracking",
+			"item": [
+				{
+					"name": "Get Ads for Placement",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/ads?placement=eat_hero_banner&province=Vientiane&language=en&limit=3",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ads"],
+							"query": [
+								{
+									"key": "placement",
+									"value": "eat_hero_banner",
+									"description": "Required"
+								},
+								{
+									"key": "province",
+									"value": "Vientiane"
+								},
+								{
+									"key": "language",
+									"value": "en"
+								},
+								{
+									"key": "nationality",
+									"value": "US",
+									"disabled": true
+								},
+								{
+									"key": "userType",
+									"value": "returning",
+									"disabled": true
+								},
+								{
+									"key": "device",
+									"value": "ios",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Track Impression",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sessionId\": \"session_abc123\",\n  \"userId\": \"user_xyz789\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ads/:id/impression",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ads", ":id", "impression"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "65f1234567890abcdef12345"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Track Click",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sessionId\": \"session_abc123\",\n  \"userId\": \"user_xyz789\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ads/:id/click",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ads", ":id", "click"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "65f1234567890abcdef12345"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Track Conversion",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"revenue\": 150000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ads/:id/conversion",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ads", ":id", "conversion"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "65f1234567890abcdef12345"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Ads by Zone",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/ads/delivery?zone=HOME_CAROUSEL&limit=3&device=ios",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ads", "delivery"],
+							"query": [
+								{
+									"key": "zone",
+									"value": "HOME_CAROUSEL",
+									"description": "HOME_CAROUSEL, INTERSTITIAL, SEARCH_SPONSOR, EAT_BETWEEN"
+								},
+								{
+									"key": "limit",
+									"value": "3"
+								},
+								{
+									"key": "device",
+									"value": "ios"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Track Event (Fire-and-Forget)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"adId\": \"65f1234567890abcdef12345\",\n  \"eventType\": \"impression\",\n  \"sessionId\": \"session_abc123\",\n  \"userId\": \"user_xyz789\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ads/track",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "ads", "track"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

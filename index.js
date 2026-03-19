@@ -1,176 +1,215 @@
 // index.js
 
-require('dotenv').config();
-const express = require('express');
-const { MongoClient } = require('mongodb');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
+require("dotenv").config();
+const express = require("express");
+const { MongoClient } = require("mongodb");
+const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 
 // Job queue imports
-const { initializeQueues, closeQueues, getAnalysisQueue, getAnalyticsBuilderQueue } = require('./src/utils/jobQueue');
-const { initializeAnalysisWorker } = require('./src/workers/analysisWorker');
-const { initializeAnalyticsBuilderWorker } = require('./src/workers/analyticsBuilderWorker');
+const {
+  initializeQueues,
+  closeQueues,
+  getAnalysisQueue,
+  getAnalyticsBuilderQueue,
+} = require("./src/utils/jobQueue");
+const { initializeAnalysisWorker } = require("./src/workers/analysisWorker");
+const {
+  initializeAnalyticsBuilderWorker,
+} = require("./src/workers/analyticsBuilderWorker");
 
 // Multi-database connection for subscription management
-const { connectAllDatabases, closeAllConnections } = require('./src/utils/multiDbConnection');
+const {
+  connectAllDatabases,
+  closeAllConnections,
+} = require("./src/utils/multiDbConnection");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 let db;
 
 // Enable trust proxy for AWS ALB/ECS
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 
-// Connect to MongoDB
+// Connect to MongoDB (Native Driver)
 MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 })
-    .then(async client => {
-        // db = client.db('DataBackup'); // specify your DB name
-        db = client.db('AppZap'); // specify your DB name
-        console.log("MongoDB connected");
+  .then(async (client) => {
+    // db = client.db('DataBackup'); // specify your DB name
+    db = client.db("AppZap"); // specify your DB name
+    console.log("MongoDB connected");
 
-        // Connect to additional databases (POS v1, v2) for subscription management
+    // Connect to additional databases (POS v1, v2) for subscription management
+    try {
+      await connectAllDatabases();
+      console.log("Multi-database connections established");
+    } catch (error) {
+      console.error(
+        "Warning: Multi-database connection failed:",
+        error.message,
+      );
+      console.error("Subscription management features may not work properly.");
+    }
+
+    // Initialize job queues (Redis/Bull)
+    try {
+      const queues = initializeQueues();
+      if (queues && queues.analysisQueue) {
+        initializeAnalysisWorker(queues.analysisQueue, db);
+        initializeAnalyticsBuilderWorker(db);
+        console.log("Job queues and workers initialized");
+      } else {
+        console.warn(
+          "Warning: Job queues not initialized. Background workers skipped.",
+        );
+      }
+    } catch (error) {
+      console.error("Warning: Job queue initialization failed:", error.message);
+      console.error(
+        "Background jobs will not be available. Make sure Redis is running.",
+      );
+    }
+
+    // Middleware
+    app.use(
+      cors({
+        origin: "*",
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        allowedHeaders: "*",
+        exposedHeaders: "*",
+        optionsSuccessStatus: 204,
+      }),
+    );
+
+    app.use(
+      helmet({
+        crossOriginResourcePolicy: { policy: "cross-origin" },
+        contentSecurityPolicy: false, // Disable CSP for now if it causes issues, or configure properly
+        referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+      }),
+    );
+    app.use(express.json()); // Parse JSON request bodies
+
+    // Request logging middleware
+    app.use((req, res, next) => {
+      const start = Date.now();
+      console.log(
+        `\n[${new Date().toISOString()}] --> ${req.method} ${req.url}`,
+      );
+      if (req.method === "POST" || req.method === "PUT") {
+        console.log(
+          "Body:",
+          JSON.stringify(req.body, null, 2).substring(0, 500),
+        );
+      }
+
+      // Log response
+      const originalSend = res.send;
+      res.send = function (data) {
+        const duration = Date.now() - start;
+        console.log(
+          `[${new Date().toISOString()}] <-- ${req.method} ${req.url} ${res.statusCode} (${duration}ms)`,
+        );
+        return originalSend.call(this, data);
+      };
+
+      next();
+    });
+
+    // Rate limiting middleware
+    const limiter = rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 1000, // Increased limit for bulk operations
+    });
+    app.use(limiter);
+
+    // Routes
+    const statisticsRouter = require("./src/routes/v1/statistics")(db); // Pass db to routes
+    app.use("/api/v1/statistics", statisticsRouter);
+
+    const restaurantsRouter = require("./src/routes/v1/restaurants")(db); // Pass db to routes
+    app.use("/api/v1/restaurants", restaurantsRouter);
+
+    const menusRouter = require("./src/routes/v1/menus")(db); // Pass db to routes
+    app.use("/api/v1/menus", menusRouter);
+
+    // Master Data Routes (Ingredients Analytics System)
+    const masterRouter = require("./src/routes/v1/master")(db);
+    app.use("/api/v1/master", masterRouter);
+
+    // Subscription Management Routes (Invoices, Devices, WhatsApp)
+    const subscriptionRouter = require("./src/routes/v1/subscription")(db);
+    app.use("/api/v1/subscription", subscriptionRouter);
+
+    // Finance Routes (P&L, Cash Flow, Expenses, Budgets)
+    const financeRouter = require("./src/routes/v1/finance")(db);
+    app.use("/api/v1/finance", financeRouter);
+
+    // Ads Management Routes (Advertisements, Advertisers, Ad Delivery)
+    const advertisementRouter = require("./src/routes/v1/advertisement")(db);
+    app.use("/api/v1/ads", advertisementRouter);
+
+    const advertiserRouter = require("./src/routes/v1/advertiser")(db);
+    app.use("/api/v1/advertisers", advertiserRouter);
+
+    const adsDeliveryRouter = require("./src/routes/v1/adsDelivery")(db);
+    app.use("/api/v1/ads", adsDeliveryRouter);
+
+    // Error handling middleware
+    app.use((err, req, res, next) => {
+      console.error(err.stack);
+      res.status(500).json({ error: "Something went wrong!" });
+    });
+
+    // Start the server
+    const server = app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+    });
+
+    // Graceful shutdown
+    const gracefulShutdown = async (signal) => {
+      console.log(`\n${signal} received. Shutting down gracefully...`);
+
+      server.close(async () => {
+        console.log("HTTP server closed");
+
         try {
-            await connectAllDatabases();
-            console.log("Multi-database connections established");
+          await closeQueues();
+          console.log("Job queues closed");
         } catch (error) {
-            console.error("Warning: Multi-database connection failed:", error.message);
-            console.error("Subscription management features may not work properly.");
+          console.error("Error closing queues:", error);
         }
 
-        // Initialize job queues (Redis/Bull)
         try {
-            const queues = initializeQueues();
-            if (queues && queues.analysisQueue) {
-                initializeAnalysisWorker(queues.analysisQueue, db);
-                initializeAnalyticsBuilderWorker(db);
-                console.log("Job queues and workers initialized");
-            } else {
-                console.warn("Warning: Job queues not initialized. Background workers skipped.");
-            }
+          await client.close();
+          console.log("MongoDB connection closed");
         } catch (error) {
-            console.error("Warning: Job queue initialization failed:", error.message);
-            console.error("Background jobs will not be available. Make sure Redis is running.");
+          console.error("Error closing MongoDB:", error);
         }
 
-        // Middleware
-        app.use(cors({
-            origin: '*',
-            methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-            allowedHeaders: '*',
-            exposedHeaders: '*',
-            optionsSuccessStatus: 204
-        }));
+        try {
+          await closeAllConnections();
+          console.log("Multi-database connections closed");
+        } catch (error) {
+          console.error("Error closing multi-database connections:", error);
+        }
 
-        app.use(helmet({
-            crossOriginResourcePolicy: { policy: "cross-origin" },
-            contentSecurityPolicy: false, // Disable CSP for now if it causes issues, or configure properly
-            referrerPolicy: { policy: "strict-origin-when-cross-origin" },
-        }));
-        app.use(express.json()); // Parse JSON request bodies
+        process.exit(0);
+      });
 
-        // Request logging middleware
-        app.use((req, res, next) => {
-            const start = Date.now();
-            console.log(`\n[${new Date().toISOString()}] --> ${req.method} ${req.url}`);
-            if (req.method === 'POST' || req.method === 'PUT') {
-                console.log('Body:', JSON.stringify(req.body, null, 2).substring(0, 500));
-            }
+      // Force close after 10 seconds
+      setTimeout(() => {
+        console.error(
+          "Could not close connections in time, forcefully shutting down",
+        );
+        process.exit(1);
+      }, 10000);
+    };
 
-            // Log response
-            const originalSend = res.send;
-            res.send = function (data) {
-                const duration = Date.now() - start;
-                console.log(`[${new Date().toISOString()}] <-- ${req.method} ${req.url} ${res.statusCode} (${duration}ms)`);
-                return originalSend.call(this, data);
-            };
-
-            next();
-        });
-
-        // Rate limiting middleware
-        const limiter = rateLimit({
-            windowMs: 15 * 60 * 1000, // 15 minutes
-            max: 1000 // Increased limit for bulk operations
-        });
-        app.use(limiter);
-
-        // Routes
-        const statisticsRouter = require('./src/routes/v1/statistics')(db); // Pass db to routes
-        app.use('/api/v1/statistics', statisticsRouter);
-
-        const restaurantsRouter = require('./src/routes/v1/restaurants')(db); // Pass db to routes
-        app.use('/api/v1/restaurants', restaurantsRouter);
-
-        const menusRouter = require('./src/routes/v1/menus')(db); // Pass db to routes
-        app.use('/api/v1/menus', menusRouter);
-
-        // Master Data Routes (Ingredients Analytics System)
-        const masterRouter = require('./src/routes/v1/master')(db);
-        app.use('/api/v1/master', masterRouter);
-
-        // Subscription Management Routes (Invoices, Devices, WhatsApp)
-        const subscriptionRouter = require('./src/routes/v1/subscription')(db);
-        app.use('/api/v1/subscription', subscriptionRouter);
-
-        // Finance Routes (P&L, Cash Flow, Expenses, Budgets)
-        const financeRouter = require('./src/routes/v1/finance')(db);
-        app.use('/api/v1/finance', financeRouter);
-
-        // Error handling middleware
-        app.use((err, req, res, next) => {
-            console.error(err.stack);
-            res.status(500).json({ error: 'Something went wrong!' });
-        });
-
-        // Start the server
-        const server = app.listen(PORT, () => {
-            console.log(`Server is running on http://localhost:${PORT}`);
-        });
-
-        // Graceful shutdown
-        const gracefulShutdown = async (signal) => {
-            console.log(`\n${signal} received. Shutting down gracefully...`);
-
-            server.close(async () => {
-                console.log('HTTP server closed');
-
-                try {
-                    await closeQueues();
-                    console.log('Job queues closed');
-                } catch (error) {
-                    console.error('Error closing queues:', error);
-                }
-
-                try {
-                    await client.close();
-                    console.log('MongoDB connection closed');
-                } catch (error) {
-                    console.error('Error closing MongoDB:', error);
-                }
-
-                try {
-                    await closeAllConnections();
-                    console.log('Multi-database connections closed');
-                } catch (error) {
-                    console.error('Error closing multi-database connections:', error);
-                }
-
-                process.exit(0);
-            });
-
-            // Force close after 10 seconds
-            setTimeout(() => {
-                console.error('Could not close connections in time, forcefully shutting down');
-                process.exit(1);
-            }, 10000);
-        };
-
-        process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-        process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-    })
-    .catch(err => console.error("MongoDB connection error:", err));
-
+    process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+    process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+  })
+  .catch((err) => console.error("MongoDB connection error:", err));
