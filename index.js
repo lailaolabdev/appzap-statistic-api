@@ -133,6 +133,30 @@ MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
         const discoverRouter = require('./src/routes/v1/discover')(db);
         app.use('/api/v1/discover', discoverRouter);
 
+        // Health / Routes check
+        app.get('/', (req, res) => {
+            res.json({
+                name: 'AppZap Statistic API',
+                version: '1.0.0',
+                status: 'running',
+                environment: process.env.NODE_ENV || 'development',
+                timestamp: new Date().toISOString(),
+                endpoints: {
+                    health: '/',
+                    statistics: '/api/v1/statistics',
+                    restaurants: '/api/v1/restaurants',
+                    menus: '/api/v1/menus',
+                    master: '/api/v1/master',
+                    subscription: '/api/v1/subscription',
+                    finance: '/api/v1/finance',
+                    adsManagement: '/api/v1/ads-management',
+                    bannerManagement: '/api/v1/banner-management',
+                    banners: '/api/v1/banners',
+                    discover: '/api/v1/discover',
+                },
+            });
+        });
+
         // Error handling middleware
         app.use((err, req, res, next) => {
             console.error(err.stack);
