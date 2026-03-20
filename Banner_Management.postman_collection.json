@@ -1,0 +1,394 @@
+{
+  "info": {
+    "name": "Banner Management",
+    "description": "AppZap Banner Management API - Admin CRUD & Consumer endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:9000",
+      "type": "string"
+    },
+    {
+      "key": "adminKey",
+      "value": "your-admin-key-here",
+      "type": "string"
+    },
+    {
+      "key": "bannerId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Admin - Banner Management",
+      "item": [
+        {
+          "name": "Upload Banner Images",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "images",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banner-management/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banner-management", "upload"]
+            }
+          }
+        },
+        {
+          "name": "Create Banner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data._id) {",
+                  "    pm.collectionVariables.set('bannerId', jsonData.data._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Summer Promotion\",\n  \"subtitle\": \"Get 50% off on all orders\",\n  \"description\": \"Limited time offer for summer season\",\n  \"imageUrl\": \"https://example.com/banner.jpg\",\n  \"imageUrlMobile\": \"https://example.com/banner-mobile.jpg\",\n  \"ctaText\": \"Order Now\",\n  \"ctaUrl\": \"appzap://promotions/summer\",\n  \"backgroundColor\": \"#FF6B35\",\n  \"textColor\": \"#FFFFFF\",\n  \"placement\": \"home_top\",\n  \"priority\": 80,\n  \"status\": \"active\",\n  \"schedule\": {\n    \"startDate\": \"2026-03-01T00:00:00.000Z\",\n    \"endDate\": \"2026-06-30T23:59:59.000Z\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banner-management",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banner-management"]
+            }
+          }
+        },
+        {
+          "name": "Create Banner (Eat Section)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data._id) {",
+                  "    pm.collectionVariables.set('bannerId', jsonData.data._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Free Delivery\",\n  \"subtitle\": \"No delivery fee this week\",\n  \"imageUrl\": \"https://example.com/eat-banner.jpg\",\n  \"ctaText\": \"Order Food\",\n  \"ctaUrl\": \"appzap://eats\",\n  \"backgroundColor\": \"#4CAF50\",\n  \"textColor\": \"#FFFFFF\",\n  \"placement\": \"eat_top\",\n  \"priority\": 70,\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banner-management",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banner-management"]
+            }
+          }
+        },
+        {
+          "name": "List All Banners",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banner-management?skip=0&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banner-management"],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Banners by Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banner-management?status=active",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banner-management"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Banners by Placement",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banner-management?placement=home_top",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banner-management"],
+              "query": [
+                {
+                  "key": "placement",
+                  "value": "home_top"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Banner by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banner-management/{{bannerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banner-management", "{{bannerId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Banner",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Summer Promotion\",\n  \"priority\": 90,\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banner-management/{{bannerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banner-management", "{{bannerId}}"]
+            }
+          }
+        },
+        {
+          "name": "Pause Banner",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"paused\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banner-management/{{bannerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banner-management", "{{bannerId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Banner",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banner-management/{{bannerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banner-management", "{{bannerId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Consumer - Flutter App",
+      "item": [
+        {
+          "name": "Get Banners - Home Top",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banners/placement/home_top",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banners", "placement", "home_top"]
+            }
+          }
+        },
+        {
+          "name": "Get Banners - Home Carousel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banners/placement/home_carousel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banners", "placement", "home_carousel"]
+            }
+          }
+        },
+        {
+          "name": "Get Banners - Eat Top",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banners/placement/eat_top",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banners", "placement", "eat_top"]
+            }
+          }
+        },
+        {
+          "name": "Get Banners - Activity Top",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banners/placement/activity_top",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banners", "placement", "activity_top"]
+            }
+          }
+        },
+        {
+          "name": "Get Banners - Stay Top",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banners/placement/stay_top",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banners", "placement", "stay_top"]
+            }
+          }
+        },
+        {
+          "name": "Get Banners - Market Top",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banners/placement/market_top",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banners", "placement", "market_top"]
+            }
+          }
+        },
+        {
+          "name": "Track Impression",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banners/{{bannerId}}/impression",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banners", "{{bannerId}}", "impression"]
+            }
+          }
+        },
+        {
+          "name": "Track Click",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/banners/{{bannerId}}/click",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "banners", "{{bannerId}}", "click"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

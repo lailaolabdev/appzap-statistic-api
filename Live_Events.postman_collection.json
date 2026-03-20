@@ -1,0 +1,309 @@
+{
+  "info": {
+    "name": "Live Events Management",
+    "description": "AppZap Live Events Discovery API - Public feed & Admin management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:9000",
+      "type": "string"
+    },
+    {
+      "key": "adminKey",
+      "value": "your-events-admin-key-here",
+      "type": "string"
+    },
+    {
+      "key": "eventId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Admin - Events Management",
+      "item": [
+        {
+          "name": "Create Event (Draft)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data._id) {",
+                  "    pm.collectionVariables.set('eventId', jsonData.data._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Vientiane Music Festival 2026\",\n  \"description\": \"Annual music festival featuring local and international artists\",\n  \"coverImage\": \"https://example.com/event-cover.jpg\",\n  \"locationName\": \"Chao Anouvong Park, Vientiane\",\n  \"latitude\": 17.9757,\n  \"longitude\": 102.6331,\n  \"startDate\": \"2026-04-15T18:00:00.000Z\",\n  \"endDate\": \"2026-04-16T02:00:00.000Z\",\n  \"tags\": [\"live music\", \"festival\", \"outdoor\"],\n  \"isDraft\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/discover/events/admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "discover", "events", "admin"]
+            }
+          }
+        },
+        {
+          "name": "Create Event (Published)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data._id) {",
+                  "    pm.collectionVariables.set('eventId', jsonData.data._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Friday Night Live Band\",\n  \"description\": \"Live band performance every Friday night\",\n  \"coverImage\": \"https://example.com/live-band.jpg\",\n  \"locationName\": \"Jazz Bar, Vientiane\",\n  \"restaurantId\": \"64a1b2c3d4e5f6a7b8c9d0e1\",\n  \"restaurantName\": \"Jazz Bar & Restaurant\",\n  \"startDate\": \"2026-03-27T19:00:00.000Z\",\n  \"endDate\": \"2026-03-27T23:59:00.000Z\",\n  \"tags\": [\"live music\", \"nightlife\", \"free entry\"],\n  \"isDraft\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/discover/events/admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "discover", "events", "admin"]
+            }
+          }
+        },
+        {
+          "name": "List All Events (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/discover/events/admin?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "discover", "events", "admin"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Draft Events Only",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/discover/events/admin?isDraft=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "discover", "events", "admin"],
+              "query": [
+                {
+                  "key": "isDraft",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Published Events Only",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/discover/events/admin?isDraft=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "discover", "events", "admin"],
+              "query": [
+                {
+                  "key": "isDraft",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Event",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated: Vientiane Music Festival 2026\",\n  \"description\": \"Updated description with more details\",\n  \"tags\": [\"live music\", \"festival\", \"outdoor\", \"food\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/discover/events/admin/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "discover", "events", "admin", "{{eventId}}"]
+            }
+          }
+        },
+        {
+          "name": "Publish Event",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"publish\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/discover/events/admin/{{eventId}}/publish",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "discover", "events", "admin", "{{eventId}}", "publish"]
+            }
+          }
+        },
+        {
+          "name": "Unpublish Event (Move to Draft)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"publish\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/discover/events/admin/{{eventId}}/publish",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "discover", "events", "admin", "{{eventId}}", "publish"]
+            }
+          }
+        },
+        {
+          "name": "Delete Event",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-admin-key",
+                "value": "{{adminKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/discover/events/admin/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "discover", "events", "admin", "{{eventId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Consumer - Flutter App",
+      "item": [
+        {
+          "name": "Get Live Events (Default)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/discover/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "discover", "events"]
+            }
+          }
+        },
+        {
+          "name": "Get Live Events (Custom Limit)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/discover/events?limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "discover", "events"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

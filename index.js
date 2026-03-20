@@ -120,6 +120,19 @@ MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
         const financeRouter = require('./src/routes/v1/finance')(db);
         app.use('/api/v1/finance', financeRouter);
 
+        // Ads Management Routes (proxy to Consumer API)
+        const adsRouter = require('./src/routes/v1/ads')(db);
+        app.use('/api/v1/ads-management', adsRouter);
+
+        // Banner Management Routes (proxy to Consumer API)
+        const bannerRouter = require('./src/routes/v1/banners')(db);
+        app.use('/api/v1/banner-management', bannerRouter.admin);
+        app.use('/api/v1/banners', bannerRouter.consumer);
+
+        // Live Events / Discover Routes (proxy to Consumer API)
+        const discoverRouter = require('./src/routes/v1/discover')(db);
+        app.use('/api/v1/discover', discoverRouter);
+
         // Error handling middleware
         app.use((err, req, res, next) => {
             console.error(err.stack);
