@@ -137,6 +137,10 @@ MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
         const notificationsRouter = require('./src/routes/v1/notifications')(db);
         app.use('/api/v1/notifications', notificationsRouter);
 
+        // Consumer Users Routes (proxy to Consumer API)
+        const usersRouter = require('./src/routes/v1/users')(db);
+        app.use('/api/v1/users', usersRouter);
+
         // Health / Routes check
         app.get('/', (req, res) => {
             res.json({
@@ -158,6 +162,7 @@ MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
                     banners: '/api/v1/banners',
                     discover: '/api/v1/discover',
                     notifications: '/api/v1/notifications',
+                    users: '/api/v1/users',
                 },
             });
         });
