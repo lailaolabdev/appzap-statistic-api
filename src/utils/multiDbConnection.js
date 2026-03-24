@@ -1,150 +1,162 @@
 /**
  * Multi-Database Connection Utility
- * 
+ *
  * Manages connections to multiple MongoDB databases:
  * - Main Stats DB (read-write)
  * - POS v1 DB (read-only for safety)
  * - POS v2 DB (read-only for safety)
  */
 
-const { MongoClient } = require('mongodb');
+const { MongoClient } = require("mongodb");
 
 let connections = {
-    main: null,      // Main stats database
-    posV1: null,     // POS v1 database
-    posV2: null,     // POS v2 database
-    consumer: null,  // Consumer database
+  main: null, // Main stats database
+  posV1: null, // POS v1 database
+  posV2: null, // POS v2 database
+  consumer: null, // Consumer database
 };
 
 let databases = {
-    main: null,
-    posV1: null,
-    posV2: null,
-    consumer: null,
+  main: null,
+  posV1: null,
+  posV2: null,
+  consumer: null,
 };
 
 const connectionOptions = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 30000,
-    connectTimeoutMS: 30000,
-    socketTimeoutMS: 60000,
-    maxPoolSize: 10,
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 30000,
+  connectTimeoutMS: 30000,
+  socketTimeoutMS: 60000,
+  maxPoolSize: 10,
 };
 
 /**
  * Connect to all databases
  */
 async function connectAllDatabases() {
-    console.log('Connecting to multiple databases...');
+  console.log("Connecting to multiple databases...");
 
-    // Connect to main stats database
-    if (process.env.MONGODB_URI_POS_V2) {
-        try {
-            connections.main = await MongoClient.connect(process.env.MONGODB_URI_POS_V2, connectionOptions);
-            databases.main = connections.main.db('AppZap');
-            console.log('✓ Main Stats DB connected');
-        } catch (error) {
-            console.error('✗ Main Stats DB connection failed:', error.message);
-        }
+  // Connect to main stats database
+  if (process.env.MONGODB_URI_POS_V2) {
+    try {
+      connections.main = await MongoClient.connect(
+        process.env.MONGODB_URI_POS_V2,
+        connectionOptions,
+      );
+      databases.main = connections.main.db("AppZap");
+      console.log("✓ Main Stats DB connected");
+    } catch (error) {
+      console.error("✗ Main Stats DB connection failed:", error.message);
     }
+  }
 
-    // Connect to POS v1 database
-    if (process.env.MONGODB_URI_POS_V1) {
-        try {
-            connections.posV1 = await MongoClient.connect(process.env.MONGODB_URI_POS_V1, connectionOptions);
-            const dbName = process.env.POS_V1_DB_NAME || 'AppZap';
-            databases.posV1 = connections.posV1.db(dbName);
-            console.log(`✓ POS v1 DB connected (${dbName})`);
-        } catch (error) {
-            console.error('✗ POS v1 DB connection failed:', error.message);
-        }
+  // Connect to POS v1 database
+  if (process.env.MONGODB_URI_POS_V1) {
+    try {
+      connections.posV1 = await MongoClient.connect(
+        process.env.MONGODB_URI_POS_V1,
+        connectionOptions,
+      );
+      const dbName = process.env.POS_V1_DB_NAME || "AppZap";
+      databases.posV1 = connections.posV1.db(dbName);
+      console.log(`✓ POS v1 DB connected (${dbName})`);
+    } catch (error) {
+      console.error("✗ POS v1 DB connection failed:", error.message);
     }
+  }
 
-    // Connect to POS v2 database
-    if (process.env.MONGODB_URI_POS_V2) {
-        try {
-            connections.posV2 = await MongoClient.connect(process.env.MONGODB_URI_POS_V2, connectionOptions);
-            const dbName = process.env.POS_V2_DB_NAME || 'AppZap';
-            databases.posV2 = connections.posV2.db(dbName);
-            console.log(`✓ POS v2 DB connected (${dbName})`);
-        } catch (error) {
-            console.error('✗ POS v2 DB connection failed:', error.message);
-        }
+  // Connect to POS v2 database
+  if (process.env.MONGODB_URI_POS_V2) {
+    try {
+      connections.posV2 = await MongoClient.connect(
+        process.env.MONGODB_URI_POS_V2,
+        connectionOptions,
+      );
+      const dbName = process.env.POS_V2_DB_NAME || "AppZap";
+      databases.posV2 = connections.posV2.db(dbName);
+      console.log(`✓ POS v2 DB connected (${dbName})`);
+    } catch (error) {
+      console.error("✗ POS v2 DB connection failed:", error.message);
     }
+  }
 
-    // Connect to Consumer database
-    if (process.env.MONGODB_URI_CONSUMER) {
-        try {
-            connections.consumer = await MongoClient.connect(process.env.MONGODB_URI_CONSUMER, connectionOptions);
-            const dbName = process.env.CONSUMER_DB_NAME || 'appzap_consumer_dev';
-            databases.consumer = connections.consumer.db(dbName);
-            console.log(`✓ Consumer DB connected (${dbName})`);
-        } catch (error) {
-            console.error('✗ Consumer DB connection failed:', error.message);
-        }
+  // Connect to Consumer database
+  if (process.env.MONGODB_URI_CONSUMER) {
+    try {
+      connections.consumer = await MongoClient.connect(
+        process.env.MONGODB_URI_CONSUMER,
+        connectionOptions,
+      );
+      const dbName = process.env.CONSUMER_DB_NAME || "appzap_consumer_dev";
+      databases.consumer = connections.consumer.db(dbName);
+      console.log(`✓ Consumer DB connected (${dbName})`);
+    } catch (error) {
+      console.error("✗ Consumer DB connection failed:", error.message);
     }
+  }
 
-    return databases;
+  return databases;
 }
 
 /**
  * Get main database
  */
 function getMainDb() {
-    return databases.main;
+  return databases.main;
 }
 
 /**
  * Get POS v1 database
  */
 function getPosV1Db() {
-    return databases.posV1;
+  return databases.posV1;
 }
 
 /**
  * Get POS v2 database
  */
 function getPosV2Db() {
-    return databases.posV2;
+  return databases.posV2;
 }
 
 /**
  * Get Consumer database
  */
 function getConsumerDb() {
-    return databases.consumer;
+  return databases.consumer;
 }
 
 /**
  * Get all databases
  */
 function getAllDatabases() {
-    return databases;
+  return databases;
 }
 
 /**
  * Close all connections
  */
 async function closeAllConnections() {
-    console.log('Closing all database connections...');
+  console.log("Closing all database connections...");
 
-    if (connections.main) {
-        await connections.main.close();
-        console.log('✓ Main DB closed');
-    }
-    if (connections.posV1) {
-        await connections.posV1.close();
-        console.log('✓ POS v1 DB closed');
-    }
-    if (connections.posV2) {
-        await connections.posV2.close();
-        console.log('✓ POS v2 DB closed');
-    }
-    if (connections.consumer) {
-        await connections.consumer.close();
-        console.log('✓ Consumer DB closed');
-    }
+  if (connections.main) {
+    await connections.main.close();
+    console.log("✓ Main DB closed");
+  }
+  if (connections.posV1) {
+    await connections.posV1.close();
+    console.log("✓ POS v1 DB closed");
+  }
+  if (connections.posV2) {
+    await connections.posV2.close();
+    console.log("✓ POS v2 DB closed");
+  }
+  if (connections.consumer) {
+    await connections.consumer.close();
+    console.log("✓ Consumer DB closed");
+  }
 }
 
 /**
@@ -152,381 +164,492 @@ async function closeAllConnections() {
  * Returns restaurants with subscription info
  */
 async function getUnifiedRestaurants(options = {}) {
-    const { search, province, district, posVersion, subscriptionStatus, paymentStatus, expireMonth, sortField = 'createdAt', sortDirection = 'desc', limit = 50, skip = 0 } = options;
-    const results = [];
+  const {
+    search,
+    province,
+    district,
+    posVersion,
+    subscriptionStatus,
+    paymentStatus,
+    expireMonth,
+    hasLogo,
+    sortField = "createdAt",
+    sortDirection = "desc",
+    limit = 50,
+    skip = 0,
+  } = options;
+  const results = [];
 
-    // Get from POS v1 (stores collection)
-    if (databases.posV1 && (!posVersion || posVersion === 'v1' || posVersion === 'both')) {
-        try {
-            const v1Query = { isDeleted: { $ne: true } };
+  // Get from POS v1 (stores collection)
+  if (
+    databases.posV1 &&
+    (!posVersion || posVersion === "v1" || posVersion === "both")
+  ) {
+    try {
+      const v1Query = { isDeleted: { $ne: true } };
 
-            if (search) {
-                v1Query.$or = [
-                    { name: { $regex: search, $options: 'i' } },
-                    { phone: { $regex: search, $options: 'i' } },
-                    { nameForSearch: { $regex: search, $options: 'i' } },
-                ];
-            }
-            if (paymentStatus) {
-                if (paymentStatus.toLowerCase() !== 'all') {
-                    v1Query.paymentStatus = paymentStatus.toLowerCase();
-                }
-            }
-            if (expireMonth) {
-                const [year, month] = expireMonth.split('-');
-                const startOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, 1, 0, 0, 0, 0));
-                const endOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month), 0, 23, 59, 59, 999));
-
-                v1Query.endDate = {
-                    $gte: startOfMonth,
-                    $lte: endOfMonth
-                };
-            }
-            if (province) {
-                v1Query['address.province'] = { $regex: province, $options: 'i' };
-            }
-            if (district) {
-                v1Query['address.district'] = { $regex: district, $options: 'i' };
-            }
-
-            const v1Stores = await databases.posV1.collection('stores')
-                .find(v1Query)
-                .project({
-                    _id: 1,
-                    name: 1,
-                    phone: 1,
-                    whatsapp: 1,
-                    address: 1,
-                    province: 1,
-                    district: 1,
-                    village: 1,
-                    location: 1,
-                    lat: 1,
-                    lng: 1,
-                    startDate: 1,
-                    endDate: 1,
-                    period: 1,
-                    type: 1,
-                    storeType: 1,
-                    packageLevel: 1,
-                    packageId: 1,
-                    packagePrice: 1,
-                    paymentStatus: 1,
-                    createdAt: 1,
-                })
-                .toArray();
-
-            v1Stores.forEach(store => {
-                results.push({
-                    ...store,
-                    posVersion: 'v1',
-                    restaurantId: store._id.toString(),
-                    province: store.province || store.address?.province,
-                    district: store.district || store.address?.district,
-                    village: store.village || store.address?.village,
-                    latitude: store.location?.lat || store.lat,
-                    longitude: store.location?.lon || store.lng,
-                    storeType: store.storeType || (store.type ? [store.type] : []),
-                });
-            });
-        } catch (error) {
-            console.error('Error fetching POS v1 stores:', error.message);
+      if (search) {
+        v1Query.$or = [
+          { name: { $regex: search, $options: "i" } },
+          { phone: { $regex: search, $options: "i" } },
+          { nameForSearch: { $regex: search, $options: "i" } },
+        ];
+      }
+      if (paymentStatus) {
+        if (paymentStatus.toLowerCase() !== "all") {
+          v1Query.paymentStatus = paymentStatus.toLowerCase();
         }
-    }
+      }
+      if (expireMonth) {
+        const [year, month] = expireMonth.split("-");
+        const startOfMonth = new Date(
+          Date.UTC(parseInt(year), parseInt(month) - 1, 1, 0, 0, 0, 0),
+        );
+        const endOfMonth = new Date(
+          Date.UTC(parseInt(year), parseInt(month), 0, 23, 59, 59, 999),
+        );
 
-    // Get from POS v2 — primary: POS v2 REST API; fallback: direct MongoDB
-    if (!posVersion || posVersion === 'v2' || posVersion === 'both') {
-        try {
-            let v2Restaurants = [];
+        v1Query.endDate = {
+          $gte: startOfMonth,
+          $lte: endOfMonth,
+        };
+      }
+      if (province) {
+        v1Query["address.province"] = { $regex: province, $options: "i" };
+      }
+      if (district) {
+        v1Query["address.district"] = { $regex: district, $options: "i" };
+      }
 
-            if (process.env.POS_V2_API_URL && process.env.POS_V2_API_TOKEN) {
-                // Primary: fetch from POS v2 REST API
-                const params = new URLSearchParams({ limit: '10000', page: '1' });
-                if (search) params.set('search', search);
-                if (paymentStatus && paymentStatus.toLowerCase() !== 'all') {
-                    params.set('paymentStatus', paymentStatus.toLowerCase());
-                }
+      const v1Stores = await databases.posV1
+        .collection("stores")
+        .find(v1Query)
+        .project({
+          image: 1,
+          _id: 1,
+          name: 1,
+          phone: 1,
+          whatsapp: 1,
+          address: 1,
+          province: 1,
+          district: 1,
+          village: 1,
+          location: 1,
+          lat: 1,
+          lng: 1,
+          startDate: 1,
+          endDate: 1,
+          period: 1,
+          type: 1,
+          storeType: 1,
+          packageLevel: 1,
+          packageId: 1,
+          packagePrice: 1,
+          paymentStatus: 1,
+          createdAt: 1,
+        })
+        .toArray();
 
-                const response = await fetch(
-                    `${process.env.POS_V2_API_URL}/restaurants?${params.toString()}`,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${process.env.POS_V2_API_TOKEN}`,
-                            'Content-Type': 'application/json',
-                        },
-                    }
-                );
-
-                if (!response.ok) {
-                    throw new Error(`POS v2 API responded with ${response.status}`);
-                }
-
-                const json = await response.json();
-                v2Restaurants = json?.data?.results || [];
-                console.log(`✓ Fetched ${v2Restaurants.length} restaurants from POS v2 API`);
-            } else if (databases.posV2) {
-                // Fallback: direct MongoDB query
-                const v2Query = { isDeleted: { $ne: true } };
-
-                if (search) {
-                    v2Query.$or = [
-                        { name: { $regex: search, $options: 'i' } },
-                        { code: { $regex: search, $options: 'i' } },
-                        { 'contactInfo.phone': { $regex: search, $options: 'i' } },
-                    ];
-                }
-                if (paymentStatus && paymentStatus.toLowerCase() !== 'all') {
-                    v2Query['packageInfo.paymentStatus'] = paymentStatus.toLowerCase();
-                }
-
-                v2Restaurants = await databases.posV2.collection('restaurants')
-                    .find(v2Query)
-                    .project({
-                        _id: 1, name: 1, code: 1, contactInfo: 1,
-                        address: 1, location: 1, packageInfo: 1,
-                        storeType: 1, createdAt: 1,
-                    })
-                    .toArray();
-            }
-
-            // Apply expireMonth filter (not supported by POS v2 API directly)
-            if (expireMonth) {
-                const [year, month] = expireMonth.split('-');
-                const startOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, 1));
-                const endOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month), 0, 23, 59, 59, 999));
-                v2Restaurants = v2Restaurants.filter(r => {
-                    const end = r.packageInfo?.endDate ? new Date(r.packageInfo.endDate) : null;
-                    return end && end >= startOfMonth && end <= endOfMonth;
-                });
-            }
-
-            v2Restaurants.forEach(restaurant => {
-                const daysLeft = restaurant.packageInfo?.endDate
-                    ? Math.ceil((new Date(restaurant.packageInfo.endDate) - new Date()) / (1000 * 60 * 60 * 24))
-                    : null;
-
-                results.push({
-                    ...restaurant,
-                    posVersion: 'v2',
-                    restaurantId: (restaurant._id || restaurant.id)?.toString(),
-                    phone: restaurant.contactInfo?.phone,
-                    whatsapp: restaurant.contactInfo?.whatsapp,
-                    startDate: restaurant.packageInfo?.startDate,
-                    endDate: restaurant.packageInfo?.endDate,
-                    paymentStatus: restaurant.packageInfo?.paymentStatus,
-                    packageLevel: restaurant.packageInfo?.level,
-                    daysLeft,
-                    province: restaurant.address?.state,
-                    district: restaurant.address?.city,
-                    village: restaurant.address?.street,
-                    latitude: restaurant.address?.coordinates?.latitude,
-                    longitude: restaurant.address?.coordinates?.longitude,
-                    storeType: restaurant.storeType,
-                });
-            });
-        } catch (error) {
-            console.error('Error fetching POS v2 restaurants:', error.message);
-        }
-    }
-
-    // Filter by subscription status if needed
-    let filteredResults = results;
-    if (subscriptionStatus) {
-        const now = new Date();
-        filteredResults = results.filter(r => {
-            if (!r.endDate) return subscriptionStatus === 'no_subscription';
-            const endDate = new Date(r.endDate);
-            const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
-
-            switch (subscriptionStatus) {
-                case 'expired': return daysLeft < 0;
-                case 'expiring_soon': return daysLeft >= 0 && daysLeft <= 30;
-                case 'expiring_3months': return daysLeft > 30 && daysLeft <= 90;
-                case 'active': return daysLeft > 90;
-                case 'has_package': return true;
-                default: return true;
-            }
+      v1Stores.forEach((store) => {
+        results.push({
+          ...store,
+          posVersion: "v1",
+          restaurantId: store._id.toString(),
+          province: store.province || store.address?.province,
+          district: store.district || store.address?.district,
+          village: store.village || store.address?.village,
+          latitude: store.location?.lat || store.lat,
+          longitude: store.location?.lon || store.lng,
+          storeType: store.storeType || (store.type ? [store.type] : []),
+          image: store.image || null,
+          logo: store.logo || store.image || null,
         });
+      });
+
+      // console.log("[MultiDb] POS v1 stores:", results);
+    } catch (error) {
+      console.error("Error fetching POS v1 stores:", error.message);
+    }
+  }
+
+  // Get from POS v2 — primary: POS v2 REST API; fallback: direct MongoDB
+  if (!posVersion || posVersion === "v2" || posVersion === "both") {
+    try {
+      let v2Restaurants = [];
+
+      if (process.env.POS_V2_API_URL && process.env.POS_V2_API_TOKEN) {
+        // Primary: fetch from POS v2 REST API
+        const params = new URLSearchParams({ limit: "10000", page: "1" });
+        if (search) params.set("search", search);
+        if (paymentStatus && paymentStatus.toLowerCase() !== "all") {
+          params.set("paymentStatus", paymentStatus.toLowerCase());
+        }
+
+        const response = await fetch(
+          `${process.env.POS_V2_API_URL}/restaurants?${params.toString()}`,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.POS_V2_API_TOKEN}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error(`POS v2 API responded with ${response.status}`);
+        }
+
+        const json = await response.json();
+        v2Restaurants = json?.data?.results || [];
+        console.log(
+          `✓ Fetched ${v2Restaurants.length} restaurants from POS v2 API`,
+        );
+      } else if (databases.posV2) {
+        // Fallback: direct MongoDB query
+        const v2Query = { isDeleted: { $ne: true } };
+
+        if (search) {
+          v2Query.$or = [
+            { name: { $regex: search, $options: "i" } },
+            { code: { $regex: search, $options: "i" } },
+            { "contactInfo.phone": { $regex: search, $options: "i" } },
+          ];
+        }
+        if (paymentStatus && paymentStatus.toLowerCase() !== "all") {
+          v2Query["packageInfo.paymentStatus"] = paymentStatus.toLowerCase();
+        }
+
+        v2Restaurants = await databases.posV2
+          .collection("restaurants")
+          .find(v2Query)
+          .project({
+            _id: 1,
+            name: 1,
+            code: 1,
+            contactInfo: 1,
+            address: 1,
+            location: 1,
+            packageInfo: 1,
+            storeType: 1,
+            createdAt: 1,
+            logo: 1,
+          })
+          .toArray();
+      }
+
+      // Apply expireMonth filter (not supported by POS v2 API directly)
+      if (expireMonth) {
+        const [year, month] = expireMonth.split("-");
+        const startOfMonth = new Date(
+          Date.UTC(parseInt(year), parseInt(month) - 1, 1),
+        );
+        const endOfMonth = new Date(
+          Date.UTC(parseInt(year), parseInt(month), 0, 23, 59, 59, 999),
+        );
+        v2Restaurants = v2Restaurants.filter((r) => {
+          const end = r.packageInfo?.endDate
+            ? new Date(r.packageInfo.endDate)
+            : null;
+          return end && end >= startOfMonth && end <= endOfMonth;
+        });
+      }
+
+      v2Restaurants.forEach((restaurant) => {
+        const daysLeft = restaurant.packageInfo?.endDate
+          ? Math.ceil(
+              (new Date(restaurant.packageInfo.endDate) - new Date()) /
+                (1000 * 60 * 60 * 24),
+            )
+          : null;
+
+        results.push({
+          ...restaurant,
+          posVersion: "v2",
+          restaurantId: (restaurant._id || restaurant.id)?.toString(),
+          phone: restaurant.contactInfo?.phone,
+          whatsapp: restaurant.contactInfo?.whatsapp,
+          startDate: restaurant.packageInfo?.startDate,
+          endDate: restaurant.packageInfo?.endDate,
+          paymentStatus: restaurant.packageInfo?.paymentStatus,
+          packageLevel: restaurant.packageInfo?.level,
+          daysLeft,
+          province: restaurant.address?.state,
+          district: restaurant.address?.city,
+          village: restaurant.address?.street,
+          latitude: restaurant.address?.coordinates?.latitude,
+          longitude: restaurant.address?.coordinates?.longitude,
+          storeType: restaurant.storeType,
+          logo: restaurant.logo || null,
+        });
+      });
+    } catch (error) {
+      console.error("Error fetching POS v2 restaurants:", error.message);
+    }
+  }
+
+  // Filter by subscription status if needed
+  let filteredResults = results;
+  if (subscriptionStatus) {
+    const now = new Date();
+    filteredResults = results.filter((r) => {
+      if (!r.endDate) return subscriptionStatus === "no_subscription";
+      const endDate = new Date(r.endDate);
+      const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+
+      switch (subscriptionStatus) {
+        case "expired":
+          return daysLeft < 0;
+        case "expiring_soon":
+          return daysLeft >= 0 && daysLeft <= 30;
+        case "expiring_3months":
+          return daysLeft > 30 && daysLeft <= 90;
+        case "active":
+          return daysLeft > 90;
+        case "has_package":
+          return true;
+        default:
+          return true;
+      }
+    });
+  }
+
+  // Filter by logo presence if needed
+  if (hasLogo !== undefined) {
+    const hasLogoBoolean = hasLogo === true || hasLogo === "true";
+    filteredResults = filteredResults.filter((r) => {
+      const hasRestaurantLogo = !!(r.logo || r.image);
+      console.log("hasRestaurantLogo", hasRestaurantLogo);
+      return hasLogoBoolean ? hasRestaurantLogo : !hasRestaurantLogo;
+    });
+  }
+
+  // console.log("hasLogoBoolean", filteredResults);
+
+  // Sort logic
+  filteredResults.sort((a, b) => {
+    let valA = a[sortField];
+    let valB = b[sortField];
+
+    // Handle date fields securely
+    if (
+      sortField === "createdAt" ||
+      sortField === "startDate" ||
+      sortField === "endDate"
+    ) {
+      valA = valA ? new Date(valA).getTime() : 0;
+      valB = valB ? new Date(valB).getTime() : 0;
+    } else if (typeof valA === "string" && typeof valB === "string") {
+      valA = valA.toLowerCase();
+      valB = valB.toLowerCase();
     }
 
-    // Sort logic
-    filteredResults.sort((a, b) => {
-        let valA = a[sortField];
-        let valB = b[sortField];
+    if (valA < valB) return sortDirection === "asc" ? -1 : 1;
+    if (valA > valB) return sortDirection === "asc" ? 1 : -1;
+    return 0;
+  });
 
-        // Handle date fields securely
-        if (sortField === 'createdAt' || sortField === 'startDate' || sortField === 'endDate') {
-            valA = valA ? new Date(valA).getTime() : 0;
-            valB = valB ? new Date(valB).getTime() : 0;
-        } else if (typeof valA === 'string' && typeof valB === 'string') {
-            valA = valA.toLowerCase();
-            valB = valB.toLowerCase();
-        }
+  // Calculate subscription status summary on the FULL filtered dataset
+  const now = new Date();
+  const summary = {
+    total: filteredResults.length,
+    expired: 0,
+    expiringSoon: 0, // < 1 month
+    expiring3Months: 0, // 1-3 months
+    active: 0, // > 3 months
+    noSubscription: 0,
+  };
 
-        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
-        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
-        return 0;
-    });
+  filteredResults.forEach((r) => {
+    if (!r.endDate) {
+      summary.noSubscription++;
+    } else {
+      const endDate = new Date(r.endDate);
+      const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
 
-    // Calculate subscription status summary on the FULL filtered dataset
-    const now = new Date();
-    const summary = {
-        total: filteredResults.length,
-        expired: 0,
-        expiringSoon: 0, // < 1 month
-        expiring3Months: 0, // 1-3 months
-        active: 0, // > 3 months
-        noSubscription: 0,
-    };
+      if (daysLeft < 0) summary.expired++;
+      else if (daysLeft <= 30) summary.expiringSoon++;
+      else if (daysLeft <= 90) summary.expiring3Months++;
+      else summary.active++;
+    }
+  });
 
-    filteredResults.forEach(r => {
-        if (!r.endDate) {
-            summary.noSubscription++;
-        } else {
-            const endDate = new Date(r.endDate);
-            const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+  // Pagination
+  const total = filteredResults.length;
+  const paginatedResults = filteredResults.slice(skip, skip + limit);
 
-            if (daysLeft < 0) summary.expired++;
-            else if (daysLeft <= 30) summary.expiringSoon++;
-            else if (daysLeft <= 90) summary.expiring3Months++;
-            else summary.active++;
-        }
-    });
+  // console.log("RES1234", paginatedResults);
 
-    // Pagination
-    const total = filteredResults.length;
-    const paginatedResults = filteredResults.slice(skip, skip + limit);
-
-    return {
-        data: paginatedResults,
-        summary,
-        pagination: { total, limit, skip },
-    };
+  return {
+    data: paginatedResults,
+    summary,
+    pagination: { total, limit, skip },
+  };
 }
 
 /**
  * Get restaurant by ID from appropriate database
  */
 async function getRestaurantById(restaurantId, posVersion) {
-    if (posVersion === 'v1' && databases.posV1) {
-        const { ObjectId } = require('mongodb');
-        return await databases.posV1.collection('stores').findOne({
-            _id: new ObjectId(restaurantId)
-        });
-    }
+  if (posVersion === "v1" && databases.posV1) {
+    const { ObjectId } = require("mongodb");
+    return await databases.posV1.collection("stores").findOne({
+      _id: new ObjectId(restaurantId),
+    });
+  }
 
-    if (posVersion === 'v2' && databases.posV2) {
-        const { ObjectId } = require('mongodb');
-        return await databases.posV2.collection('restaurants').findOne({
-            _id: new ObjectId(restaurantId)
-        });
-    }
+  if (posVersion === "v2" && databases.posV2) {
+    const { ObjectId } = require("mongodb");
+    return await databases.posV2.collection("restaurants").findOne({
+      _id: new ObjectId(restaurantId),
+    });
+  }
 
-    return null;
+  return null;
 }
 
 /**
  * Update subscription dates for a restaurant (WRITE operation)
  * Use with caution - this modifies the POS databases
  */
-async function updateRestaurantSubscription(restaurantId, posVersion, subscriptionData) {
-    const {
-        startDate, endDate, period,
-        phone, whatsapp,
-        latitude, longitude, village, province, district,
-        storeType, packageLevel, packageId, packagePrice, paymentStatus
-    } = subscriptionData;
-    const { ObjectId } = require('mongodb');
+async function updateRestaurantSubscription(
+  restaurantId,
+  posVersion,
+  subscriptionData,
+) {
+  const {
+    startDate,
+    endDate,
+    period,
+    phone,
+    whatsapp,
+    latitude,
+    longitude,
+    village,
+    province,
+    district,
+    storeType,
+    packageLevel,
+    packageId,
+    packagePrice,
+    paymentStatus,
+  } = subscriptionData;
+  const { ObjectId } = require("mongodb");
 
-    if (posVersion === 'v1' && databases.posV1) {
-        const setObjV1 = {};
-        if (startDate !== undefined) setObjV1.startDate = startDate ? new Date(startDate) : null;
-        if (endDate !== undefined) setObjV1.endDate = endDate ? new Date(endDate) : null;
-        if (period !== undefined) setObjV1.period = period || null;
+  if (posVersion === "v1" && databases.posV1) {
+    const setObjV1 = {};
+    if (startDate !== undefined)
+      setObjV1.startDate = startDate ? new Date(startDate) : null;
+    if (endDate !== undefined)
+      setObjV1.endDate = endDate ? new Date(endDate) : null;
+    if (period !== undefined) setObjV1.period = period || null;
 
-        if (phone !== undefined) setObjV1.phone = phone;
-        if (whatsapp !== undefined) setObjV1.whatsapp = whatsapp;
+    if (phone !== undefined) setObjV1.phone = phone;
+    if (whatsapp !== undefined) setObjV1.whatsapp = whatsapp;
 
-        if (latitude !== undefined) {
-            setObjV1.lat = latitude;
-            setObjV1['location.lat'] = latitude;
-        }
-        if (longitude !== undefined) {
-            setObjV1.lng = longitude;
-            setObjV1['location.lon'] = longitude;
-        }
-        if (village !== undefined) {
-            setObjV1.village = village;
-            setObjV1['address.village'] = village;
-        }
-        if (province !== undefined) {
-            setObjV1.province = province;
-            setObjV1['address.province'] = province;
-        }
-        if (district !== undefined) {
-            setObjV1.district = district;
-            setObjV1['address.district'] = district;
-        }
-        if (storeType !== undefined) {
-            setObjV1.storeType = Array.isArray(storeType) ? storeType :
-                (typeof storeType === 'string' ? storeType.split(',').map(s => s.trim()).filter(Boolean) : []);
-        }
-        if (packageLevel !== undefined) setObjV1.packageLevel = packageLevel;
-        if (packageId !== undefined) setObjV1.packageId = packageId ? new ObjectId(packageId) : null;
-        if (packagePrice !== undefined) setObjV1.packagePrice = Number(packagePrice);
-        if (paymentStatus !== undefined) setObjV1.paymentStatus = paymentStatus;
-        setObjV1.updatedAt = new Date();
-
-        return await databases.posV1.collection('stores').updateOne(
-            { _id: new ObjectId(restaurantId) },
-            { $set: setObjV1 }
-        );
+    if (latitude !== undefined) {
+      setObjV1.lat = latitude;
+      setObjV1["location.lat"] = latitude;
     }
-
-    if (posVersion === 'v2' && databases.posV2) {
-        const setObjV2 = {};
-        if (startDate !== undefined) setObjV2['packageInfo.startDate'] = startDate ? new Date(startDate) : null;
-        if (endDate !== undefined) setObjV2['packageInfo.endDate'] = endDate ? new Date(endDate) : null;
-        // period not heavily used in V2 natively
-
-        if (phone !== undefined) setObjV2['contactInfo.phone'] = phone;
-        if (whatsapp !== undefined) setObjV2['contactInfo.whatsapp'] = whatsapp;
-
-        if (latitude !== undefined) setObjV2['address.coordinates.latitude'] = Number(latitude);
-        if (longitude !== undefined) setObjV2['address.coordinates.longitude'] = Number(longitude);
-
-        if (village !== undefined) setObjV2['address.street'] = village;
-        if (district !== undefined) setObjV2['address.city'] = district;
-        if (province !== undefined) setObjV2['address.state'] = province;
-
-        if (storeType !== undefined) {
-            setObjV2.storeType = Array.isArray(storeType) ? storeType :
-                (typeof storeType === 'string' ? storeType.split(',').map(s => s.trim()).filter(Boolean) : []);
-        }
-        if (packageLevel !== undefined) setObjV2['packageInfo.level'] = packageLevel;
-        if (packageId !== undefined) setObjV2['packageInfo.packageId'] = packageId ? new ObjectId(packageId) : null;
-        if (packagePrice !== undefined) setObjV2['packageInfo.packagePrice'] = Number(packagePrice);
-        if (paymentStatus !== undefined) setObjV2['packageInfo.paymentStatus'] = paymentStatus;
-        setObjV2.updatedAt = new Date();
-
-        return await databases.posV2.collection('restaurants').updateOne(
-            { _id: new ObjectId(restaurantId) },
-            { $set: setObjV2 }
-        );
+    if (longitude !== undefined) {
+      setObjV1.lng = longitude;
+      setObjV1["location.lon"] = longitude;
     }
+    if (village !== undefined) {
+      setObjV1.village = village;
+      setObjV1["address.village"] = village;
+    }
+    if (province !== undefined) {
+      setObjV1.province = province;
+      setObjV1["address.province"] = province;
+    }
+    if (district !== undefined) {
+      setObjV1.district = district;
+      setObjV1["address.district"] = district;
+    }
+    if (storeType !== undefined) {
+      setObjV1.storeType = Array.isArray(storeType)
+        ? storeType
+        : typeof storeType === "string"
+          ? storeType
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : [];
+    }
+    if (packageLevel !== undefined) setObjV1.packageLevel = packageLevel;
+    if (packageId !== undefined)
+      setObjV1.packageId = packageId ? new ObjectId(packageId) : null;
+    if (packagePrice !== undefined)
+      setObjV1.packagePrice = Number(packagePrice);
+    if (paymentStatus !== undefined) setObjV1.paymentStatus = paymentStatus;
+    setObjV1.updatedAt = new Date();
 
-    return { modifiedCount: 0 };
+    return await databases.posV1
+      .collection("stores")
+      .updateOne({ _id: new ObjectId(restaurantId) }, { $set: setObjV1 });
+  }
+
+  if (posVersion === "v2" && databases.posV2) {
+    const setObjV2 = {};
+    if (startDate !== undefined)
+      setObjV2["packageInfo.startDate"] = startDate
+        ? new Date(startDate)
+        : null;
+    if (endDate !== undefined)
+      setObjV2["packageInfo.endDate"] = endDate ? new Date(endDate) : null;
+    // period not heavily used in V2 natively
+
+    if (phone !== undefined) setObjV2["contactInfo.phone"] = phone;
+    if (whatsapp !== undefined) setObjV2["contactInfo.whatsapp"] = whatsapp;
+
+    if (latitude !== undefined)
+      setObjV2["address.coordinates.latitude"] = Number(latitude);
+    if (longitude !== undefined)
+      setObjV2["address.coordinates.longitude"] = Number(longitude);
+
+    if (village !== undefined) setObjV2["address.street"] = village;
+    if (district !== undefined) setObjV2["address.city"] = district;
+    if (province !== undefined) setObjV2["address.state"] = province;
+
+    if (storeType !== undefined) {
+      setObjV2.storeType = Array.isArray(storeType)
+        ? storeType
+        : typeof storeType === "string"
+          ? storeType
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : [];
+    }
+    if (packageLevel !== undefined)
+      setObjV2["packageInfo.level"] = packageLevel;
+    if (packageId !== undefined)
+      setObjV2["packageInfo.packageId"] = packageId
+        ? new ObjectId(packageId)
+        : null;
+    if (packagePrice !== undefined)
+      setObjV2["packageInfo.packagePrice"] = Number(packagePrice);
+    if (paymentStatus !== undefined)
+      setObjV2["packageInfo.paymentStatus"] = paymentStatus;
+    setObjV2.updatedAt = new Date();
+
+    return await databases.posV2
+      .collection("restaurants")
+      .updateOne({ _id: new ObjectId(restaurantId) }, { $set: setObjV2 });
+  }
+
+  return { modifiedCount: 0 };
 }
 
 module.exports = {
-    connectAllDatabases,
-    getMainDb,
-    getPosV1Db,
-    getPosV2Db,
-    getConsumerDb,
-    getAllDatabases,
-    closeAllConnections,
-    getUnifiedRestaurants,
-    getRestaurantById,
-    updateRestaurantSubscription,
+  connectAllDatabases,
+  getMainDb,
+  getPosV1Db,
+  getPosV2Db,
+  getConsumerDb,
+  getAllDatabases,
+  closeAllConnections,
+  getUnifiedRestaurants,
+  getRestaurantById,
+  updateRestaurantSubscription,
 };
