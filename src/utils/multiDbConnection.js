@@ -8,6 +8,7 @@
  */
 
 const { MongoClient } = require("mongodb");
+const { publishRestaurantUpdated, publishRestaurantDeactivated } = require("./redisPublisher");
 
 let connections = {
   main: null, // Main stats database
@@ -517,6 +518,7 @@ async function updateRestaurantSubscription(
   subscriptionData,
 ) {
   const {
+    name,
     startDate,
     endDate,
     period,
@@ -537,6 +539,7 @@ async function updateRestaurantSubscription(
 
   if (posVersion === "v1" && databases.posV1) {
     const setObjV1 = {};
+    if (name !== undefined && name !== "") setObjV1.name = name;
     if (startDate !== undefined)
       setObjV1.startDate = startDate ? new Date(startDate) : null;
     if (endDate !== undefined)
@@ -584,13 +587,20 @@ async function updateRestaurantSubscription(
     if (paymentStatus !== undefined) setObjV1.paymentStatus = paymentStatus;
     setObjV1.updatedAt = new Date();
 
-    return await databases.posV1
+    const resultV1 = await databases.posV1
       .collection("stores")
       .updateOne({ _id: new ObjectId(restaurantId) }, { $set: setObjV1 });
+
+    if (resultV1.modifiedCount > 0) {
+      publishRestaurantUpdated(restaurantId, 'v1', subscriptionData).catch(() => {});
+    }
+
+    return resultV1;
   }
 
   if (posVersion === "v2" && databases.posV2) {
     const setObjV2 = {};
+    if (name !== undefined && name !== "") setObjV2.name = name;
     if (startDate !== undefined)
       setObjV2["packageInfo.startDate"] = startDate
         ? new Date(startDate)
@@ -633,9 +643,15 @@ async function updateRestaurantSubscription(
       setObjV2["packageInfo.paymentStatus"] = paymentStatus;
     setObjV2.updatedAt = new Date();
 
-    return await databases.posV2
+    const resultV2 = await databases.posV2
       .collection("restaurants")
       .updateOne({ _id: new ObjectId(restaurantId) }, { $set: setObjV2 });
+
+    if (resultV2.modifiedCount > 0) {
+      publishRestaurantUpdated(restaurantId, 'v2', subscriptionData).catch(() => {});
+    }
+
+    return resultV2;
   }
 
   return { modifiedCount: 0 };

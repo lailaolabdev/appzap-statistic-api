@@ -65,6 +65,14 @@ module.exports = (db) => {
     router.post('/bulk-update', (req, res) =>
         subscriptionController.bulkUpdateFromExcel(req, res, db));
 
+    // Sync a specific restaurant to Consumer API via Redis
+    router.post('/sync-consumer/:restaurantId/:posVersion', (req, res) =>
+        subscriptionController.syncRestaurantToConsumer(req, res));
+
+    // Sync ALL packaged restaurants to Consumer API (manual trigger)
+    router.post('/sync-all-packaged', (req, res) =>
+        subscriptionController.syncAllPackagedToConsumer(req, res));
+
     // ==================== INVOICE ROUTES ====================
 
     // Get all invoices

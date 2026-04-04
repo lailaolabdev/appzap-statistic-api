@@ -15,6 +15,12 @@ const { initializeAnalyticsBuilderWorker } = require('./src/workers/analyticsBui
 // Multi-database connection for subscription management
 const { connectAllDatabases, closeAllConnections } = require('./src/utils/multiDbConnection');
 
+// Packaged restaurant auto-sync
+const { syncAllPackagedRestaurants } = require('./src/utils/syncPackagedRestaurants');
+
+// Redis publisher for Consumer API sync
+const { initializePublisher, closePublisher } = require('./src/utils/redisPublisher');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 let db;
@@ -39,6 +45,14 @@ MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
         } catch (error) {
             console.error("Warning: Multi-database connection failed:", error.message);
             console.error("Subscription management features may not work properly.");
+        }
+
+        // Initialize Redis publisher for Consumer API restaurant sync
+        try {
+            initializePublisher();
+            console.log("Redis publisher initialized");
+        } catch (error) {
+            console.warn("Warning: Redis publisher initialization failed:", error.message);
         }
 
         // Initialize job queues (Redis/Bull)
@@ -173,9 +187,26 @@ MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
             console.log(`Server is running on http://localhost:${PORT}`);
         });
 
+        // Auto-sync all packaged restaurants to Consumer API every hour.
+        // Also run once 30 seconds after startup to populate restaurant_registry on fresh boot.
+        const SYNC_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
+        setTimeout(() => {
+            syncAllPackagedRestaurants().catch((err) =>
+                console.error('[AutoSync] Initial sync failed:', err.message)
+            );
+        }, 30_000);
+        const syncIntervalId = setInterval(() => {
+            syncAllPackagedRestaurants().catch((err) =>
+                console.error('[AutoSync] Scheduled sync failed:', err.message)
+            );
+        }, SYNC_INTERVAL_MS);
+        console.log('[AutoSync] Packaged restaurant sync scheduled every 1 hour');
+
         // Graceful shutdown
         const gracefulShutdown = async (signal) => {
             console.log(`\n${signal} received. Shutting down gracefully...`);
+
+            clearInterval(syncIntervalId);
 
             server.close(async () => {
                 console.log('HTTP server closed');
@@ -199,6 +230,12 @@ MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
                     console.log('Multi-database connections closed');
                 } catch (error) {
                     console.error('Error closing multi-database connections:', error);
+                }
+
+                try {
+                    await closePublisher();
+                } catch (error) {
+                    console.error('Error closing Redis publisher:', error);
                 }
 
                 process.exit(0);

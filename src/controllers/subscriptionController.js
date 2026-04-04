@@ -13,6 +13,8 @@ const {
   getPosV1Db,
   getPosV2Db,
 } = require("../utils/multiDbConnection");
+const { publishRestaurantUpdated } = require("../utils/redisPublisher");
+const { syncAllPackagedRestaurants } = require("../utils/syncPackagedRestaurants");
 
 const subscriptionController = {
   /**
@@ -207,6 +209,7 @@ const subscriptionController = {
     try {
       const { restaurantId, posVersion } = req.params;
       const {
+        name,
         startDate,
         endDate,
         period,
@@ -237,6 +240,7 @@ const subscriptionController = {
         restaurantId,
         posVersion,
         {
+          name,
           startDate,
           endDate,
           period,
@@ -414,5 +418,47 @@ async function findRestaurantByNameOrPhone(name, phone, preferredVersion) {
 function escapeRegex(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
+
+// ─── Sync helpers ────────────────────────────────────────────────────────────
+
+// Sync ALL packaged restaurants to Consumer API
+subscriptionController.syncAllPackagedToConsumer = async (req, res) => {
+  try {
+    // Respond immediately so the HTTP request doesn't time out on large datasets
+    res.json({ success: true, message: 'Sync started — check server logs for progress' });
+    // Run in background after response
+    syncAllPackagedRestaurants().catch((err) => {
+      console.error('[syncAllPackagedToConsumer] Background sync failed:', err.message);
+    });
+  } catch (err) {
+    console.error('[syncAllPackagedToConsumer] Error:', err.message);
+    res.status(500).json({ success: false, message: 'Sync failed', error: err.message });
+  }
+};
+
+// Attach syncRestaurantToConsumer to the controller object
+// Sync a single restaurant to Consumer API by ID and POS version
+subscriptionController.syncRestaurantToConsumer = async (req, res) => {
+  const { restaurantId, posVersion } = req.params;
+
+  try {
+    const restaurant = await getRestaurantById(restaurantId, posVersion);
+
+    if (!restaurant) {
+      return res.status(404).json({ success: false, message: "Restaurant not found" });
+    }
+
+    await publishRestaurantUpdated(restaurantId, posVersion, restaurant);
+
+    return res.json({
+      success: true,
+      message: `Restaurant synced to Consumer App`,
+      data: { restaurantId, posVersion },
+    });
+  } catch (err) {
+    console.error("[syncRestaurantToConsumer] Error:", err.message);
+    return res.status(500).json({ success: false, message: "Sync failed", error: err.message });
+  }
+};
 
 module.exports = subscriptionController;
