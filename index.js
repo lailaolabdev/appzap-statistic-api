@@ -13,7 +13,7 @@ const { initializeAnalysisWorker } = require('./src/workers/analysisWorker');
 const { initializeAnalyticsBuilderWorker } = require('./src/workers/analyticsBuilderWorker');
 
 // Multi-database connection for subscription management
-const { connectAllDatabases, closeAllConnections } = require('./src/utils/multiDbConnection');
+const { connectAllDatabases, closeAllConnections, getPosV1Db } = require('./src/utils/multiDbConnection');
 
 // Packaged restaurant auto-sync
 const { syncAllPackagedRestaurants } = require('./src/utils/syncPackagedRestaurants');
@@ -59,8 +59,9 @@ MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
         try {
             const queues = initializeQueues();
             if (queues && queues.analysisQueue) {
-                initializeAnalysisWorker(queues.analysisQueue, db);
-                initializeAnalyticsBuilderWorker(db);
+                const posV1Db = getPosV1Db();
+                initializeAnalysisWorker(queues.analysisQueue, posV1Db);
+                initializeAnalyticsBuilderWorker(posV1Db);
                 console.log("Job queues and workers initialized");
             } else {
                 console.warn("Warning: Job queues not initialized. Background workers skipped.");

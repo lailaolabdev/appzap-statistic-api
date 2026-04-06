@@ -1776,7 +1776,148 @@ const orderBasedMappingController = {
                 message: error.message
             });
         }
-    }
+    },
+
+    /**
+     * Bulk analyze all store categories and create categoryMappings suggestions.
+     * Scans the `categories` collection, matches each against `masterCategories`
+     * using text similarity, and bulk-writes suggestions to `categoryMappings`.
+     */
+    analyzeAllCategories: async (req, res, db) => {
+        try {
+            const { threshold = 0.3, batchSize = 5000 } = req.body;
+
+            const { findBestMatches } = require('../../utils/textSimilarity');
+            const now = new Date();
+
+            // Load all store categories
+            const storeCategories = await db.collection('categories')
+                .find({ isDeleted: { $ne: true } })
+                .limit(parseInt(batchSize))
+                .toArray();
+
+            console.log(`[AnalyzeCategories] Found ${storeCategories.length} store categories`);
+
+            // Load all master categories once
+            const masterCategories = await db.collection('masterCategories')
+                .find({ isDeleted: false })
+                .toArray();
+
+            console.log(`[AnalyzeCategories] Loaded ${masterCategories.length} master categories`);
+
+            if (masterCategories.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'No master categories found. Please create master categories first.'
+                });
+            }
+
+            // Pre-load existing approved mappings to skip them
+            const existingApproved = await db.collection('categoryMappings')
+                .find({ mappingStatus: 'approved' })
+                .project({ categoryId: 1 })
+                .toArray();
+
+            const approvedSet = new Set(existingApproved.map(m => m.categoryId.toString()));
+
+            let created = 0, updated = 0, skipped = 0;
+            const bulkOps = [];
+
+            for (const cat of storeCategories) {
+                // Skip already approved mappings
+                if (approvedSet.has(cat._id.toString())) {
+                    skipped++;
+                    continue;
+                }
+
+                const name = (cat.name || '').trim();
+                if (!name) { skipped++; continue; }
+
+                const matches = findBestMatches(name, masterCategories, parseFloat(threshold), 3);
+
+                if (matches.length === 0) {
+                    // No match — still store as 'suggested' with score 0 so the review queue can show it
+                    bulkOps.push({
+                        updateOne: {
+                            filter: { categoryId: cat._id, storeId: cat.storeId },
+                            update: {
+                                $set: {
+                                    categoryId: cat._id,
+                                    storeId: cat.storeId,
+                                    originalName: name,
+                                    mappingStatus: 'suggested',
+                                    confidenceScore: 0,
+                                    mappingMethod: 'auto',
+                                    allSuggestions: [],
+                                    updatedAt: now,
+                                },
+                                $setOnInsert: { createdAt: now }
+                            },
+                            upsert: true
+                        }
+                    });
+                } else {
+                    const best = matches[0];
+                    const score = Math.round(best.score * 100);
+
+                    bulkOps.push({
+                        updateOne: {
+                            filter: { categoryId: cat._id, storeId: cat.storeId },
+                            update: {
+                                $set: {
+                                    categoryId: cat._id,
+                                    storeId: cat.storeId,
+                                    originalName: name,
+                                    masterCategoryCode: best.candidate.code,
+                                    masterCategoryName: best.candidate.name,
+                                    masterCategoryName_en: best.candidate.name_en,
+                                    confidenceScore: score,
+                                    mappingMethod: 'auto',
+                                    mappingStatus: 'suggested',
+                                    allSuggestions: matches.map(m => ({
+                                        masterCategoryCode: m.candidate.code,
+                                        masterCategoryName: m.candidate.name,
+                                        score: Math.round(m.score * 100),
+                                        matchType: m.matchType,
+                                    })),
+                                    updatedAt: now,
+                                },
+                                $setOnInsert: { createdAt: now }
+                            },
+                            upsert: true
+                        }
+                    });
+                }
+            }
+
+            // Execute in batches of 500
+            const BATCH = 500;
+            for (let i = 0; i < bulkOps.length; i += BATCH) {
+                const result = await db.collection('categoryMappings')
+                    .bulkWrite(bulkOps.slice(i, i + BATCH), { ordered: false });
+                created += result.upsertedCount || 0;
+                updated += result.modifiedCount || 0;
+            }
+
+            console.log(`[AnalyzeCategories] Done — created: ${created}, updated: ${updated}, skipped: ${skipped}`);
+
+            return res.json({
+                success: true,
+                message: 'Category analysis complete',
+                results: {
+                    total: storeCategories.length,
+                    created,
+                    updated,
+                    skipped,
+                    masterCategoriesLoaded: masterCategories.length,
+                }
+            });
+
+        } catch (error) {
+            console.error('[AnalyzeCategories] Error:', error);
+            return res.status(500).json({ success: false, error: error.message });
+        }
+    },
 };
 
 module.exports = orderBasedMappingController;

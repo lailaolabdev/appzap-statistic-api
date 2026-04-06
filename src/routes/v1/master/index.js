@@ -20,9 +20,11 @@ const {
 } = require('../../../controllers/master');
 const analyticsBuilderController = require('../../../controllers/analytics/analyticsBuilderController');
 const indexManagementController = require('../../../controllers/admin/indexManagementController');
+const { getPosV1Db } = require('../../../utils/multiDbConnection');
 
 module.exports = (db) => {
     const router = express.Router();
+    const posV1Db = getPosV1Db();
 
     // ============================================
     // MASTER CATEGORIES
@@ -30,35 +32,35 @@ module.exports = (db) => {
 
     // Create master category
     router.post('/categories', (req, res) =>
-        masterCategoryController.create(req, res, db));
+        masterCategoryController.create(req, res, posV1Db));
 
     // Bulk create master categories
     router.post('/categories/bulk', (req, res) =>
-        masterCategoryController.bulkCreate(req, res, db));
+        masterCategoryController.bulkCreate(req, res, posV1Db));
 
     // Find matching categories (for auto-suggestion)
     router.get('/categories/match', (req, res) =>
-        masterCategoryController.findMatches(req, res, db));
+        masterCategoryController.findMatches(req, res, posV1Db));
 
     // Get all master categories
     router.get('/categories', (req, res) =>
-        masterCategoryController.getAll(req, res, db));
+        masterCategoryController.getAll(req, res, posV1Db));
 
     // Get category statistics (linked menus count)
     router.get('/categories/:code/stats', (req, res) =>
-        masterCategoryController.getStats(req, res, db));
+        masterCategoryController.getStats(req, res, posV1Db));
 
     // Get single master category
     router.get('/categories/:code', (req, res) =>
-        masterCategoryController.getByCode(req, res, db));
+        masterCategoryController.getByCode(req, res, posV1Db));
 
     // Update master category
     router.put('/categories/:code', (req, res) =>
-        masterCategoryController.update(req, res, db));
+        masterCategoryController.update(req, res, posV1Db));
 
     // Delete master category
     router.delete('/categories/:code', (req, res) =>
-        masterCategoryController.delete(req, res, db));
+        masterCategoryController.delete(req, res, posV1Db));
 
     // ============================================
     // MASTER MENUS
@@ -66,71 +68,71 @@ module.exports = (db) => {
 
     // Create master menu
     router.post('/menus', (req, res) =>
-        masterMenuController.create(req, res, db));
+        masterMenuController.create(req, res, posV1Db));
 
     // Bulk create master menus
     router.post('/menus/bulk', (req, res) =>
-        masterMenuController.bulkCreate(req, res, db));
+        masterMenuController.bulkCreate(req, res, posV1Db));
 
     // Seed product variants (Heineken, Beer Lao, etc. with sizes)
     router.post('/menus/seed-variants', (req, res) =>
-        masterMenuController.seedProductVariants(req, res, db));
+        masterMenuController.seedProductVariants(req, res, posV1Db));
 
     // Analyze menu name for product/variant detection
     router.post('/menus/analyze-variant', (req, res) =>
-        masterMenuController.analyzeForVariant(req, res, db));
+        masterMenuController.analyzeForVariant(req, res, posV1Db));
 
     // Assign product variants to existing master menus
     router.post('/menus/assign-variants', (req, res) =>
-        masterMenuController.assignProductVariants(req, res, db));
+        masterMenuController.assignProductVariants(req, res, posV1Db));
 
     // Delete product variants (for re-seeding)
     router.post('/menus/delete-variants', (req, res) =>
-        masterMenuController.deleteProductVariants(req, res, db));
+        masterMenuController.deleteProductVariants(req, res, posV1Db));
 
     // Learn keywords from approved mappings (batch training)
     router.post('/menus/learn-keywords', (req, res) =>
-        masterMenuController.learnKeywordsFromMappings(req, res, db));
+        masterMenuController.learnKeywordsFromMappings(req, res, posV1Db));
 
     // Add a single learned keyword to a master menu
     router.post('/menus/add-keyword', (req, res) =>
-        masterMenuController.addLearnedKeyword(req, res, db));
+        masterMenuController.addLearnedKeyword(req, res, posV1Db));
 
     // Get product definitions (for UI)
     router.get('/menus/product-definitions', (req, res) =>
-        masterMenuController.getProductDefinitions(req, res, db));
+        masterMenuController.getProductDefinitions(req, res, posV1Db));
 
     // Get menus by product
     router.get('/menus/by-product/:productId', (req, res) =>
-        masterMenuController.getByProduct(req, res, db));
+        masterMenuController.getByProduct(req, res, posV1Db));
 
     // Find matching menus (for auto-suggestion)
     router.get('/menus/match', (req, res) =>
-        masterMenuController.findMatches(req, res, db));
+        masterMenuController.findMatches(req, res, posV1Db));
 
     // Get menus grouped by category
     router.get('/menus/grouped', (req, res) =>
-        masterMenuController.getGroupedByCategory(req, res, db));
+        masterMenuController.getGroupedByCategory(req, res, posV1Db));
 
     // Get all master menus
     router.get('/menus', (req, res) =>
-        masterMenuController.getAll(req, res, db));
+        masterMenuController.getAll(req, res, posV1Db));
 
     // Get mapping statistics for a master menu
     router.get('/menus/:code/mapping-stats', (req, res) =>
-        masterMenuController.getMappingStats(req, res, db));
+        masterMenuController.getMappingStats(req, res, posV1Db));
 
     // Get single master menu
     router.get('/menus/:code', (req, res) =>
-        masterMenuController.getByCode(req, res, db));
+        masterMenuController.getByCode(req, res, posV1Db));
 
     // Update master menu
     router.put('/menus/:code', (req, res) =>
-        masterMenuController.update(req, res, db));
+        masterMenuController.update(req, res, posV1Db));
 
     // Delete master menu
     router.delete('/menus/:code', (req, res) =>
-        masterMenuController.delete(req, res, db));
+        masterMenuController.delete(req, res, posV1Db));
 
     // ============================================
     // MASTER INGREDIENT CATEGORIES
@@ -371,83 +373,83 @@ module.exports = (db) => {
 
     // Review statistics
     router.get('/reviews/stats', (req, res) =>
-        reviewController.getReviewStats(req, res, db));
+        reviewController.getReviewStats(req, res, posV1Db));
 
     // --- Menu Review Queue ---
 
     // Get menu review queue
     router.get('/reviews/menus', (req, res) =>
-        reviewController.getMenuReviewQueue(req, res, db));
+        reviewController.getMenuReviewQueue(req, res, posV1Db));
 
     // Get single menu mapping for review
     router.get('/reviews/menus/:id', (req, res) =>
-        reviewController.getMenuMappingForReview(req, res, db));
+        reviewController.getMenuMappingForReview(req, res, posV1Db));
 
     // Approve a menu mapping
     router.post('/reviews/menus/:id/approve', (req, res) =>
-        reviewController.approveMenuMapping(req, res, db));
+        reviewController.approveMenuMapping(req, res, posV1Db));
 
     // Reject a menu mapping
     router.post('/reviews/menus/:id/reject', (req, res) =>
-        reviewController.rejectMenuMapping(req, res, db));
+        reviewController.rejectMenuMapping(req, res, posV1Db));
 
     // Manually map a menu to a different master
     router.put('/reviews/menus/:id/manual-map', (req, res) =>
-        reviewController.manualMapMenu(req, res, db));
+        reviewController.manualMapMenu(req, res, posV1Db));
 
     // Mark menu as not applicable
     router.post('/reviews/menus/:id/not-applicable', (req, res) =>
-        reviewController.markMenuNotApplicable(req, res, db));
+        reviewController.markMenuNotApplicable(req, res, posV1Db));
 
     // Bulk approve menu mappings (by IDs)
     router.post('/reviews/menus/bulk/approve', (req, res) =>
-        reviewController.bulkApproveMenuMappings(req, res, db));
+        reviewController.bulkApproveMenuMappings(req, res, posV1Db));
 
     // Bulk approve ALL menus by confidence level (Quick Win feature)
     router.post('/reviews/menus/bulk/approve-by-confidence', (req, res) =>
-        reviewController.bulkApproveMenusByConfidence(req, res, db));
+        reviewController.bulkApproveMenusByConfidence(req, res, posV1Db));
 
     // Bulk reject menu mappings
     router.post('/reviews/menus/bulk/reject', (req, res) =>
-        reviewController.bulkRejectMenuMappings(req, res, db));
+        reviewController.bulkRejectMenuMappings(req, res, posV1Db));
 
     // --- Category Review Queue ---
 
     // Get category review queue
     router.get('/reviews/categories', (req, res) =>
-        reviewController.getCategoryReviewQueue(req, res, db));
+        reviewController.getCategoryReviewQueue(req, res, posV1Db));
 
     // Get single category mapping for review
     router.get('/reviews/categories/:id', (req, res) =>
-        reviewController.getCategoryMappingForReview(req, res, db));
+        reviewController.getCategoryMappingForReview(req, res, posV1Db));
 
     // Approve a category mapping
     router.post('/reviews/categories/:id/approve', (req, res) =>
-        reviewController.approveCategoryMapping(req, res, db));
+        reviewController.approveCategoryMapping(req, res, posV1Db));
 
     // Reject a category mapping
     router.post('/reviews/categories/:id/reject', (req, res) =>
-        reviewController.rejectCategoryMapping(req, res, db));
+        reviewController.rejectCategoryMapping(req, res, posV1Db));
 
     // Manually map a category to a different master
     router.put('/reviews/categories/:id/manual-map', (req, res) =>
-        reviewController.manualMapCategory(req, res, db));
+        reviewController.manualMapCategory(req, res, posV1Db));
 
     // Mark category as not applicable
     router.post('/reviews/categories/:id/not-applicable', (req, res) =>
-        reviewController.markCategoryNotApplicable(req, res, db));
+        reviewController.markCategoryNotApplicable(req, res, posV1Db));
 
     // Bulk approve category mappings (by IDs)
     router.post('/reviews/categories/bulk/approve', (req, res) =>
-        reviewController.bulkApproveCategoryMappings(req, res, db));
+        reviewController.bulkApproveCategoryMappings(req, res, posV1Db));
 
     // Bulk approve ALL categories by confidence level (Quick Win feature)
     router.post('/reviews/categories/bulk/approve-by-confidence', (req, res) =>
-        reviewController.bulkApproveCategoriesByConfidence(req, res, db));
+        reviewController.bulkApproveCategoriesByConfidence(req, res, posV1Db));
 
     // Bulk reject category mappings
     router.post('/reviews/categories/bulk/reject', (req, res) =>
-        reviewController.bulkRejectCategoryMappings(req, res, db));
+        reviewController.bulkRejectCategoryMappings(req, res, posV1Db));
 
     // ============================================
     // ORDER-BASED MAPPING (Smart Mapping Approach)
@@ -455,39 +457,43 @@ module.exports = (db) => {
 
     // Discover menus from orders (prioritized by order count)
     router.get('/order-mapping/discover', (req, res) =>
-        orderBasedMappingController.discoverMenusFromOrders(req, res, db));
+        orderBasedMappingController.discoverMenusFromOrders(req, res, posV1Db));
 
     // Get order-based mapping statistics
     router.get('/order-mapping/stats', (req, res) =>
-        orderBasedMappingController.getOrderBasedStats(req, res, db));
+        orderBasedMappingController.getOrderBasedStats(req, res, posV1Db));
 
     // Get items with no match found
     router.get('/order-mapping/no-match', (req, res) =>
-        orderBasedMappingController.getNoMatchItems(req, res, db));
+        orderBasedMappingController.getNoMatchItems(req, res, posV1Db));
 
     // Approve an order-based mapping
     router.post('/order-mapping/:id/approve', (req, res) =>
-        orderBasedMappingController.approveMapping(req, res, db));
+        orderBasedMappingController.approveMapping(req, res, posV1Db));
 
     // Analyze ordered menus (create/update mapping suggestions)
     router.post('/order-mapping/analyze', (req, res) =>
-        orderBasedMappingController.analyzeOrderedMenus(req, res, db));
+        orderBasedMappingController.analyzeOrderedMenus(req, res, posV1Db));
+
+    // Bulk analyze all store categories → create categoryMappings suggestions
+    router.post('/order-mapping/analyze-categories', (req, res) =>
+        orderBasedMappingController.analyzeAllCategories(req, res, posV1Db));
 
     // Enrich orders with master menu codes
     router.post('/order-mapping/enrich', (req, res) =>
-        orderBasedMappingController.enrichOrders(req, res, db));
+        orderBasedMappingController.enrichOrders(req, res, posV1Db));
 
     // Get top selling items by master menu code
     router.get('/order-mapping/top-selling', (req, res) =>
-        orderBasedMappingController.getTopSellingByMasterMenu(req, res, db));
+        orderBasedMappingController.getTopSellingByMasterMenu(req, res, posV1Db));
 
     // Get top restaurants by revenue (for Restaurant Analytics tab)
     router.get('/order-mapping/top-restaurants', (req, res) =>
-        orderBasedMappingController.getTopRestaurants(req, res, db));
+        orderBasedMappingController.getTopRestaurants(req, res, posV1Db));
 
     // Get store details for a specific master menu item
     router.get('/order-mapping/menu-item/:masterMenuCode/stores', (req, res) =>
-        orderBasedMappingController.getStoreDetailsByMenuItem(req, res, db));
+        orderBasedMappingController.getStoreDetailsByMenuItem(req, res, posV1Db));
 
     // ============================================
     // ANALYTICS BUILDER (Materialized View)
@@ -495,49 +501,49 @@ module.exports = (db) => {
 
     // Start analytics build job (returns jobId immediately - async/background)
     router.post('/analytics/build-job', (req, res) =>
-        analyticsBuilderController.startBuildJob(req, res, db));
+        analyticsBuilderController.startBuildJob(req, res, posV1Db));
 
     // Get analytics build job status
     router.get('/analytics/job/:jobId/status', (req, res) =>
-        analyticsBuilderController.getJobStatusById(req, res, db));
+        analyticsBuilderController.getJobStatusById(req, res, posV1Db));
 
     // Stream analytics build job progress (SSE)
     router.get('/analytics/job/:jobId/stream', (req, res) =>
-        analyticsBuilderController.streamJobProgress(req, res, db));
+        analyticsBuilderController.streamJobProgress(req, res, posV1Db));
 
     // Consolidate duplicate Heineken variants
     router.post('/analytics/consolidate-heineken', (req, res) =>
-        analyticsBuilderController.consolidateHeinekenVariants(req, res, db));
+        analyticsBuilderController.consolidateHeinekenVariants(req, res, posV1Db));
 
     // Fix generic Heineken (map to specific variant)
     router.post('/analytics/fix-generic-heineken', (req, res) =>
-        analyticsBuilderController.fixGenericHeineken(req, res, db));
+        analyticsBuilderController.fixGenericHeineken(req, res, posV1Db));
 
     // Clean failed jobs from queue
     router.post('/analytics/clean-failed', (req, res) =>
-        analyticsBuilderController.cleanFailedJobs(req, res, db));
+        analyticsBuilderController.cleanFailedJobs(req, res, posV1Db));
 
     // Get analytics collection status (record counts, last built time)
     router.get('/analytics/status', (req, res) =>
-        analyticsBuilderController.getAnalyticsStatus(req, res, db));
+        analyticsBuilderController.getAnalyticsStatus(req, res, posV1Db));
 
     // LEGACY: Synchronous build endpoint (kept for backwards compatibility, but not recommended)
     router.post('/analytics/build', (req, res) =>
-        analyticsBuilderController.buildAnalytics(req, res, db));
+        analyticsBuilderController.buildAnalytics(req, res, posV1Db));
 
     // JOB-BASED ANALYSIS (Background Processing with Redis/Bull)
 
     // Start analysis job (returns jobId immediately)
     router.post('/order-mapping/analyze-job', (req, res) =>
-        orderBasedMappingController.startAnalysisJob(req, res, db));
+        orderBasedMappingController.startAnalysisJob(req, res, posV1Db));
 
     // Get job status (for polling)
     router.get('/order-mapping/job/:jobId', (req, res) =>
-        orderBasedMappingController.getJobStatus(req, res, db));
+        orderBasedMappingController.getJobStatus(req, res, posV1Db));
 
     // Stream job progress via SSE (real-time updates)
     router.get('/order-mapping/job/:jobId/progress', (req, res) =>
-        orderBasedMappingController.streamJobProgress(req, res, db));
+        orderBasedMappingController.streamJobProgress(req, res, posV1Db));
 
     // ============================================
     // INDEX MANAGEMENT (Performance Optimization)
