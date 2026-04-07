@@ -299,6 +299,131 @@ const orderBasedMappingController = {
     },
 
     /**
+     * Export ALL discovered menus (no $facet, no pagination) for Excel/PDF
+     */
+    exportDiscoveredMenus: async (req, res, db) => {
+        try {
+            const {
+                startDate,
+                endDate,
+                minOrderCount = 1,
+                storeId,
+                statusFilter = 'all',
+                search = ''
+            } = req.query;
+
+            const end = endDate ? new Date(endDate) : new Date();
+            const start = startDate ? new Date(startDate) : new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+            console.log(`[Export Discover] ${start.toISOString()} to ${end.toISOString()}, status=${statusFilter}`);
+
+            const matchStage = {
+                createdAt: { $gte: start, $lte: end },
+                menuId: { $exists: true, $ne: null }
+            };
+            if (storeId) matchStage.storeId = new ObjectId(storeId);
+
+            const pipeline = [
+                { $match: matchStage },
+                {
+                    $group: {
+                        _id: { menuId: '$menuId', storeId: '$storeId' },
+                        menuName: { $first: '$name' },
+                        totalQuantity: { $sum: '$quantity' },
+                        orderCount: { $sum: 1 },
+                        totalRevenue: { $sum: { $multiply: ['$price', '$quantity'] } },
+                        avgPrice: { $avg: '$price' }
+                    }
+                },
+                { $match: { orderCount: { $gte: parseInt(minOrderCount) } } },
+                {
+                    $lookup: {
+                        from: 'menuMappings',
+                        let: { menuId: '$_id.menuId', storeId: '$_id.storeId' },
+                        pipeline: [
+                            { $match: { $expr: { $and: [{ $eq: ['$menuId', '$$menuId'] }, { $eq: ['$storeId', '$$storeId'] }] } } }
+                        ],
+                        as: 'mapping'
+                    }
+                },
+                { $unwind: { path: '$mapping', preserveNullAndEmptyArrays: true } },
+                {
+                    $lookup: {
+                        from: 'stores',
+                        localField: '_id.storeId',
+                        foreignField: '_id',
+                        as: 'store'
+                    }
+                },
+                { $unwind: { path: '$store', preserveNullAndEmptyArrays: true } },
+                {
+                    $addFields: {
+                        mappingStatus: { $cond: { if: { $eq: ['$mapping', null] }, then: 'not-analyzed', else: '$mapping.mappingStatus' } },
+                        masterMenuCode: '$mapping.masterMenuCode',
+                        masterMenuName: '$mapping.masterMenuName',
+                        confidenceScore: { $ifNull: ['$mapping.confidenceScore', 0] },
+                        storeName: '$store.name',
+                        searchText: { $concat: [{ $ifNull: ['$menuName', ''] }, ' ', { $ifNull: ['$store.name', ''] }] },
+                        displayStatus: {
+                            $switch: {
+                                branches: [
+                                    { case: { $eq: ['$mapping', null] }, then: 'pending' },
+                                    { case: { $eq: ['$mapping.mappingStatus', 'approved'] }, then: 'mapped' },
+                                    { case: { $and: [{ $eq: ['$mapping.mappingStatus', 'suggested'] }, { $gte: [{ $ifNull: ['$mapping.confidenceScore', 0] }, 60] }] }, then: 'suggested' },
+                                    { case: { $eq: ['$mapping.mappingStatus', 'suggested'] }, then: 'no-match' }
+                                ],
+                                default: 'pending'
+                            }
+                        }
+                    }
+                }
+            ];
+
+            if (statusFilter && statusFilter !== 'all') {
+                if (statusFilter === 'mapped') pipeline.push({ $match: { mappingStatus: 'approved' } });
+                else if (statusFilter === 'unmapped') pipeline.push({ $match: { mappingStatus: { $ne: 'approved' } } });
+                else if (statusFilter === 'suggested') pipeline.push({ $match: { mappingStatus: 'suggested', confidenceScore: { $gte: 60 } } });
+                else if (statusFilter === 'pending') pipeline.push({ $match: { $or: [{ mappingStatus: 'not-analyzed' }, { mapping: null }] } });
+                else if (statusFilter === 'no-match') pipeline.push({ $match: { $or: [{ mappingStatus: 'suggested', confidenceScore: { $lt: 60 } }, { mappingStatus: 'suggested', masterMenuCode: null }] } });
+            }
+
+            if (search && search.trim()) {
+                pipeline.push({ $match: { searchText: { $regex: search.trim(), $options: 'i' } } });
+            }
+
+            pipeline.push(
+                { $sort: { orderCount: -1, totalQuantity: -1 } },
+                {
+                    $project: {
+                        menuId: '$_id.menuId',
+                        storeId: '$_id.storeId',
+                        menuName: 1,
+                        storeName: 1,
+                        orderCount: 1,
+                        totalQuantity: 1,
+                        totalRevenue: 1,
+                        avgPrice: { $round: ['$avgPrice', 0] },
+                        mappingStatus: 1,
+                        displayStatus: 1,
+                        masterMenuCode: 1,
+                        masterMenuName: 1,
+                        confidenceScore: 1
+                    }
+                }
+            );
+
+            const items = await db.collection('orders').aggregate(pipeline, { allowDiskUse: true }).toArray();
+
+            console.log(`[Export Discover] Returning ${items.length} rows`);
+            res.status(200).json({ success: true, data: items, total: items.length });
+
+        } catch (error) {
+            console.error('[Export Discover] Error:', error);
+            res.status(500).json({ error: 'Failed to export discovered menus' });
+        }
+    },
+
+    /**
      * Get summary statistics for order-based mapping
      * OPTIMIZED VERSION: Uses caching and single $lookup aggregation
      * 

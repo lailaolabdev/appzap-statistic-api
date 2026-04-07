@@ -225,6 +225,7 @@ const subscriptionController = {
         packageId,
         packagePrice,
         paymentStatus,
+        isHeinekenPartner,
       } = req.body;
 
       // Validate
@@ -256,6 +257,7 @@ const subscriptionController = {
           packageId,
           packagePrice,
           paymentStatus,
+          isHeinekenPartner,
         },
       );
 
