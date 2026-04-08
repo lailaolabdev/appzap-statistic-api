@@ -35,6 +35,8 @@ async function syncV1PackagedRestaurants() {
     .project({
       _id: 1,
       name: 1,
+      name_en: 1,
+      nameForSearch: 1,
       image: 1,
       lat: 1,
       lng: 1,
@@ -49,6 +51,9 @@ async function syncV1PackagedRestaurants() {
       isOpen: 1,
       hasReservation: 1,
       isDelivery: 1,
+      isHeinekenPartner: 1,
+      reviewStar: 1,
+      reviewStarCount: 1,
       startDate: 1,
       endDate: 1,
       period: 1,

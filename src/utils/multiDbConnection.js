@@ -248,6 +248,7 @@ async function getUnifiedRestaurants(options = {}) {
           packagePrice: 1,
           paymentStatus: 1,
           createdAt: 1,
+          isHeinekenPartner: 1,
         })
         .toArray();
 
@@ -264,6 +265,7 @@ async function getUnifiedRestaurants(options = {}) {
           storeType: store.storeType || (store.type ? [store.type] : []),
           image: store.image || null,
           logo: store.logo || store.image || null,
+          isHeinekenPartner: store.isHeinekenPartner || false,
         });
       });
 
@@ -534,6 +536,7 @@ async function updateRestaurantSubscription(
     packageId,
     packagePrice,
     paymentStatus,
+    isHeinekenPartner,
   } = subscriptionData;
   const { ObjectId } = require("mongodb");
 
@@ -585,6 +588,7 @@ async function updateRestaurantSubscription(
     if (packagePrice !== undefined)
       setObjV1.packagePrice = Number(packagePrice);
     if (paymentStatus !== undefined) setObjV1.paymentStatus = paymentStatus;
+    if (isHeinekenPartner !== undefined) setObjV1.isHeinekenPartner = Boolean(isHeinekenPartner);
     setObjV1.updatedAt = new Date();
 
     const resultV1 = await databases.posV1
@@ -592,7 +596,12 @@ async function updateRestaurantSubscription(
       .updateOne({ _id: new ObjectId(restaurantId) }, { $set: setObjV1 });
 
     if (resultV1.modifiedCount > 0) {
-      publishRestaurantUpdated(restaurantId, 'v1', subscriptionData).catch(() => {});
+      // Fetch the full updated document so the registry gets complete data (not just the changed fields)
+      databases.posV1.collection("stores").findOne({ _id: new ObjectId(restaurantId) })
+        .then((fullDoc) => {
+          if (fullDoc) publishRestaurantUpdated(restaurantId, 'v1', fullDoc).catch(() => {});
+        })
+        .catch(() => {});
     }
 
     return resultV1;
@@ -641,6 +650,7 @@ async function updateRestaurantSubscription(
       setObjV2["packageInfo.packagePrice"] = Number(packagePrice);
     if (paymentStatus !== undefined)
       setObjV2["packageInfo.paymentStatus"] = paymentStatus;
+    if (isHeinekenPartner !== undefined) setObjV2.isHeinekenPartner = Boolean(isHeinekenPartner);
     setObjV2.updatedAt = new Date();
 
     const resultV2 = await databases.posV2
@@ -648,7 +658,12 @@ async function updateRestaurantSubscription(
       .updateOne({ _id: new ObjectId(restaurantId) }, { $set: setObjV2 });
 
     if (resultV2.modifiedCount > 0) {
-      publishRestaurantUpdated(restaurantId, 'v2', subscriptionData).catch(() => {});
+      // Fetch the full updated document so the registry gets complete data (not just the changed fields)
+      databases.posV2.collection("restaurants").findOne({ _id: new ObjectId(restaurantId) })
+        .then((fullDoc) => {
+          if (fullDoc) publishRestaurantUpdated(restaurantId, 'v2', fullDoc).catch(() => {});
+        })
+        .catch(() => {});
     }
 
     return resultV2;

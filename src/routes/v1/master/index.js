@@ -459,6 +459,10 @@ module.exports = (db) => {
     router.get('/order-mapping/discover', (req, res) =>
         orderBasedMappingController.discoverMenusFromOrders(req, res, posV1Db));
 
+    // Export all discovered menus (no pagination, for Excel/PDF)
+    router.get('/order-mapping/discover/export', (req, res) =>
+        orderBasedMappingController.exportDiscoveredMenus(req, res, posV1Db));
+
     // Get order-based mapping statistics
     router.get('/order-mapping/stats', (req, res) =>
         orderBasedMappingController.getOrderBasedStats(req, res, posV1Db));
