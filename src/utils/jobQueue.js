@@ -30,9 +30,11 @@ function initializeQueues() {
         return null;
     }
 
+    const isTls = REDIS_URL.startsWith('rediss://');
     const redisOptions = {
         maxRetriesPerRequest: 3,
         enableReadyCheck: false,
+        ...(isTls && { tls: { rejectUnauthorized: false } }),
         retryStrategy: (times) => {
             if (times > 3) {
                 console.error('[JobQueue] Redis connection failed after 3 retries');
