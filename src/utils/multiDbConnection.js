@@ -282,7 +282,11 @@ async function getUnifiedRestaurants(options = {}) {
 
       if (process.env.POS_V2_API_URL && process.env.POS_V2_API_TOKEN) {
         // Primary: fetch from POS v2 REST API
-        const params = new URLSearchParams({ limit: "10000", page: "1" });
+        const params = new URLSearchParams({
+          limit: "10000",
+          page: "1",
+          populate: "subscription",
+        });
         if (search) params.set("search", search);
         if (paymentStatus && paymentStatus.toLowerCase() !== "all") {
           params.set("paymentStatus", paymentStatus.toLowerCase());
@@ -333,6 +337,7 @@ async function getUnifiedRestaurants(options = {}) {
             address: 1,
             location: 1,
             packageInfo: 1,
+            subscriptionId: 1,
             storeType: 1,
             createdAt: 1,
             logo: 1,
@@ -357,6 +362,38 @@ async function getUnifiedRestaurants(options = {}) {
         });
       }
 
+      // Resolve subscription status.
+      // - REST API path: subscriptionId is already populated as { _id, status }.
+      // - Direct MongoDB path: subscriptionId is a raw ObjectId → look it up.
+      const subscriptionStatusMap = {};
+      const idsToLookup = v2Restaurants
+        .map((r) => r.subscriptionId)
+        .filter((sub) => sub && typeof sub !== "object"); // raw ids only
+
+      if (databases.posV2 && idsToLookup.length > 0) {
+        const { ObjectId } = require("mongodb");
+        const subscriptionIds = idsToLookup
+          .map((id) => {
+            try {
+              return new ObjectId(id);
+            } catch {
+              return null;
+            }
+          })
+          .filter(Boolean);
+
+        if (subscriptionIds.length > 0) {
+          const subscriptions = await databases.posV2
+            .collection("subscriptions")
+            .find({ _id: { $in: subscriptionIds } })
+            .project({ _id: 1, status: 1 })
+            .toArray();
+          subscriptions.forEach((sub) => {
+            subscriptionStatusMap[sub._id.toString()] = sub.status;
+          });
+        }
+      }
+
       v2Restaurants.forEach((restaurant) => {
         const daysLeft = restaurant.packageInfo?.endDate
           ? Math.ceil(
@@ -364,6 +401,19 @@ async function getUnifiedRestaurants(options = {}) {
                 (1000 * 60 * 60 * 24),
             )
           : null;
+
+        // subscriptionId may be a populated object ({ _id, status }) or a raw id
+        const sub = restaurant.subscriptionId;
+        const subId =
+          sub && typeof sub === "object"
+            ? sub._id?.toString() || null
+            : sub?.toString() || null;
+        const subStatus =
+          sub && typeof sub === "object"
+            ? sub.status ?? null
+            : subId
+              ? subscriptionStatusMap[subId] || null
+              : null;
 
         results.push({
           ...restaurant,
@@ -375,6 +425,8 @@ async function getUnifiedRestaurants(options = {}) {
           endDate: restaurant.packageInfo?.endDate,
           paymentStatus: restaurant.packageInfo?.paymentStatus,
           packageLevel: restaurant.packageInfo?.level,
+          subscriptionId: subId,
+          subscriptionStatus: subStatus,
           daysLeft,
           province: restaurant.address?.state,
           district: restaurant.address?.city,
@@ -460,10 +512,13 @@ async function getUnifiedRestaurants(options = {}) {
     expiring3Months: 0, // 1-3 months
     active: 0, // > 3 months
     noSubscription: 0,
+    trial: 0, // free trial
   };
 
   filteredResults.forEach((r) => {
-    if (!r.endDate) {
+    if (r.subscriptionStatus === "trial") {
+      summary.trial++;
+    } else if (!r.endDate) {
       summary.noSubscription++;
     } else {
       const endDate = new Date(r.endDate);
