@@ -9,6 +9,7 @@
 
 const { MongoClient } = require("mongodb");
 const { publishRestaurantUpdated, publishRestaurantDeactivated } = require("./redisPublisher");
+const { mapV1ToV2RestaurantShape } = require("./v1ToV2Mapper");
 
 let connections = {
   main: null, // Main stats database
@@ -280,35 +281,10 @@ async function getUnifiedRestaurants(options = {}) {
     try {
       let v2Restaurants = [];
 
-      if (process.env.POS_V2_API_URL && process.env.POS_V2_API_TOKEN) {
-        // Primary: fetch from POS v2 REST API
-        const params = new URLSearchParams({ limit: "10000", page: "1" });
-        if (search) params.set("search", search);
-        if (paymentStatus && paymentStatus.toLowerCase() !== "all") {
-          params.set("paymentStatus", paymentStatus.toLowerCase());
-        }
-
-        const response = await fetch(
-          `${process.env.POS_V2_API_URL}/restaurants?${params.toString()}`,
-          {
-            headers: {
-              Authorization: `Bearer ${process.env.POS_V2_API_TOKEN}`,
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error(`POS v2 API responded with ${response.status}`);
-        }
-
-        const json = await response.json();
-        v2Restaurants = json?.data?.results || [];
-        console.log(
-          `✓ Fetched ${v2Restaurants.length} restaurants from POS v2 API`,
-        );
-      } else if (databases.posV2) {
-        // Fallback: direct MongoDB query
+      // Direct MongoDB query against the connected POS v2 DB.
+      // Used both as the primary source (when no REST API is configured) and
+      // as a fallback when the REST API call fails (e.g. expired token).
+      const queryV2FromDb = async () => {
         const v2Query = { isDeleted: { $ne: true } };
 
         if (search) {
@@ -322,7 +298,7 @@ async function getUnifiedRestaurants(options = {}) {
           v2Query["packageInfo.paymentStatus"] = paymentStatus.toLowerCase();
         }
 
-        v2Restaurants = await databases.posV2
+        return databases.posV2
           .collection("restaurants")
           .find(v2Query)
           .project({
@@ -338,6 +314,54 @@ async function getUnifiedRestaurants(options = {}) {
             logo: 1,
           })
           .toArray();
+      };
+
+      if (process.env.POS_V2_API_URL && process.env.POS_V2_API_TOKEN) {
+        // Primary: fetch from POS v2 REST API
+        try {
+          const params = new URLSearchParams({ limit: "10000", page: "1" });
+          if (search) params.set("search", search);
+          if (paymentStatus && paymentStatus.toLowerCase() !== "all") {
+            params.set("paymentStatus", paymentStatus.toLowerCase());
+          }
+
+          const response = await fetch(
+            `${process.env.POS_V2_API_URL}/restaurants?${params.toString()}`,
+            {
+              headers: {
+                Authorization: `Bearer ${process.env.POS_V2_API_TOKEN}`,
+                "Content-Type": "application/json",
+              },
+            },
+          );
+
+          if (!response.ok) {
+            throw new Error(`POS v2 API responded with ${response.status}`);
+          }
+
+          const json = await response.json();
+          v2Restaurants = json?.data?.results || [];
+          console.log(
+            `✓ Fetched ${v2Restaurants.length} restaurants from POS v2 API`,
+          );
+        } catch (apiError) {
+          // Don't silently return 0 V2 restaurants when the API call fails —
+          // fall back to the connected POS v2 DB if available.
+          console.error(
+            `✗ POS v2 API fetch failed (${apiError.message}); falling back to direct DB query`,
+          );
+          if (databases.posV2) {
+            v2Restaurants = await queryV2FromDb();
+            console.log(
+              `✓ Fetched ${v2Restaurants.length} restaurants from POS v2 DB (fallback)`,
+            );
+          } else {
+            throw apiError;
+          }
+        }
+      } else if (databases.posV2) {
+        // No REST API configured: direct MongoDB query
+        v2Restaurants = await queryV2FromDb();
       }
 
       // Apply expireMonth filter (not supported by POS v2 API directly)
@@ -599,7 +623,25 @@ async function updateRestaurantSubscription(
       // Fetch the full updated document so the registry gets complete data (not just the changed fields)
       databases.posV1.collection("stores").findOne({ _id: new ObjectId(restaurantId) })
         .then((fullDoc) => {
-          if (fullDoc) publishRestaurantUpdated(restaurantId, 'v1', fullDoc).catch(() => {});
+          if (!fullDoc) return;
+          publishRestaurantUpdated(restaurantId, 'v1', fullDoc).catch(() => {});
+          // Mirror V1 store into consumer DB `restaurants` collection (V2 schema shape)
+          if (databases.consumer) {
+            const mirror = mapV1ToV2RestaurantShape(fullDoc);
+            databases.consumer
+              .collection("restaurants")
+              .updateOne(
+                { _id: fullDoc._id },
+                { $set: mirror, $setOnInsert: { createdAt: new Date() } },
+                { upsert: true },
+              )
+              .catch((err) =>
+                console.error(
+                  "[V1Mirror] Failed to upsert into consumer.restaurants:",
+                  err.message,
+                ),
+              );
+          }
         })
         .catch(() => {});
     }
