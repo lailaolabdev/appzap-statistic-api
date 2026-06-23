@@ -4,7 +4,9 @@
       "Bash(node -e 'const s=require\\(\"./package.json\"\\).scripts||{}; Object.entries\\(s\\).filter\\(\\([k]\\)=>/deploy|build|ecs|docker/i.test\\(k\\)\\).forEach\\(\\([k,v]\\)=>console.log\\(k+\": \"+v\\)\\)')",
       "Bash(node -e ' *)",
       "Bash(gh run *)",
-      "Bash(node -e 'const p=require\\(\"./package.json\"\\); console.log\\(\"type:\", p.type||\"commonjs\"\\); console.log\\(\"main:\", p.main\\)')"
+      "Bash(node -e 'const p=require\\(\"./package.json\"\\); console.log\\(\"type:\", p.type||\"commonjs\"\\); console.log\\(\"main:\", p.main\\)')",
+      "Bash(cp /tmp/checkdb.cjs ./checkdb_tmp.cjs)",
+      "Bash(node -r dotenv/config ./checkdb_tmp.cjs)"
     ]
   }
 }

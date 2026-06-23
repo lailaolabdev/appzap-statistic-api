@@ -275,44 +275,12 @@ async function getUnifiedRestaurants(options = {}) {
     }
   }
 
-  // Get from POS v2 — primary: POS v2 REST API; fallback: direct MongoDB
+  // Get from POS v2 — direct MongoDB query
   if (!posVersion || posVersion === "v2" || posVersion === "both") {
     try {
       let v2Restaurants = [];
 
-      if (process.env.POS_V2_API_URL && process.env.POS_V2_API_TOKEN) {
-        // Primary: fetch from POS v2 REST API
-        const params = new URLSearchParams({
-          limit: "10000",
-          page: "1",
-          populate: "subscription",
-        });
-        if (search) params.set("search", search);
-        if (paymentStatus && paymentStatus.toLowerCase() !== "all") {
-          params.set("paymentStatus", paymentStatus.toLowerCase());
-        }
-
-        const response = await fetch(
-          `${process.env.POS_V2_API_URL}/restaurants?${params.toString()}`,
-          {
-            headers: {
-              Authorization: `Bearer ${process.env.POS_V2_API_TOKEN}`,
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error(`POS v2 API responded with ${response.status}`);
-        }
-
-        const json = await response.json();
-        v2Restaurants = json?.data?.results || [];
-        console.log(
-          `✓ Fetched ${v2Restaurants.length} restaurants from POS v2 API`,
-        );
-      } else if (databases.posV2) {
-        // Fallback: direct MongoDB query
+      if (databases.posV2) {
         const v2Query = { isDeleted: { $ne: true } };
 
         if (search) {
