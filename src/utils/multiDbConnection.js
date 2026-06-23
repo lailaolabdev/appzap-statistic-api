@@ -420,6 +420,7 @@ async function getUnifiedRestaurants(options = {}) {
   if (subscriptionStatus) {
     const now = new Date();
     filteredResults = results.filter((r) => {
+      if (subscriptionStatus === "trial") return r.subscriptionStatus === "trial";
       if (!r.endDate) return subscriptionStatus === "no_subscription";
       const endDate = new Date(r.endDate);
       const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
