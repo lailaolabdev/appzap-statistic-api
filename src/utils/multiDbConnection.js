@@ -365,10 +365,16 @@ async function getUnifiedRestaurants(options = {}) {
       // Resolve subscription status.
       // - REST API path: subscriptionId is already populated as { _id, status }.
       // - Direct MongoDB path: subscriptionId is a raw ObjectId → look it up.
+      // NOTE: an ObjectId is `typeof === "object"` but is NOT a populated
+      // subscription. A populated subscription is the only object that carries
+      // a `status` field, so use that to tell them apart.
+      const isPopulatedSub = (sub) =>
+        sub && typeof sub === "object" && "status" in sub;
+
       const subscriptionStatusMap = {};
       const idsToLookup = v2Restaurants
         .map((r) => r.subscriptionId)
-        .filter((sub) => sub && typeof sub !== "object"); // raw ids only
+        .filter((sub) => sub && !isPopulatedSub(sub)); // raw ids (string or ObjectId)
 
       if (databases.posV2 && idsToLookup.length > 0) {
         const { ObjectId } = require("mongodb");
@@ -402,18 +408,17 @@ async function getUnifiedRestaurants(options = {}) {
             )
           : null;
 
-        // subscriptionId may be a populated object ({ _id, status }) or a raw id
+        // subscriptionId may be a populated object ({ _id, status }) or a raw
+        // id (string or ObjectId, from the direct MongoDB path).
         const sub = restaurant.subscriptionId;
-        const subId =
-          sub && typeof sub === "object"
-            ? sub._id?.toString() || null
-            : sub?.toString() || null;
-        const subStatus =
-          sub && typeof sub === "object"
-            ? sub.status ?? null
-            : subId
-              ? subscriptionStatusMap[subId] || null
-              : null;
+        const subId = isPopulatedSub(sub)
+          ? sub._id?.toString() || null
+          : sub?.toString() || null;
+        const subStatus = isPopulatedSub(sub)
+          ? sub.status ?? null
+          : subId
+            ? subscriptionStatusMap[subId] || null
+            : null;
 
         results.push({
           ...restaurant,
