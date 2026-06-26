@@ -579,6 +579,57 @@ async function getTrialUsageStats() {
 }
 
 /**
+ * Per-restaurant completed-order counts for trial restaurants.
+ * Returns a map: { [restaurantId]: { orderCount, lastOrderAt } }.
+ * Only restaurants that HAVE completed orders appear in the map.
+ */
+async function getTrialOrderCounts() {
+  if (!databases.posV2) return {};
+
+  const trialSubs = await databases.posV2
+    .collection("subscriptions")
+    .find({ status: "trial" })
+    .project({ restaurantId: 1 })
+    .toArray();
+
+  const trialRestaurantIds = trialSubs
+    .map((s) => s.restaurantId)
+    .filter(Boolean);
+  if (trialRestaurantIds.length === 0) return {};
+
+  const COMPLETED_STATUSES = ["completed", "payment_completed", "served"];
+  const rows = await databases.posV2
+    .collection("orders")
+    .aggregate([
+      {
+        $match: {
+          restaurantId: { $in: trialRestaurantIds },
+          orderStatus: { $in: COMPLETED_STATUSES },
+        },
+      },
+      {
+        $group: {
+          _id: "$restaurantId",
+          orderCount: { $sum: 1 },
+          revenue: { $sum: { $ifNull: ["$pricing.totalDue.amount", 0] } },
+          lastOrderAt: { $max: "$createdAt" },
+        },
+      },
+    ])
+    .toArray();
+
+  const map = {};
+  rows.forEach((r) => {
+    map[r._id.toString()] = {
+      orderCount: r.orderCount,
+      revenue: r.revenue || 0,
+      lastOrderAt: r.lastOrderAt,
+    };
+  });
+  return map;
+}
+
+/**
  * Update subscription dates for a restaurant (WRITE operation)
  * Use with caution - this modifies the POS databases
  */
@@ -752,4 +803,5 @@ module.exports = {
   getRestaurantById,
   updateRestaurantSubscription,
   getTrialUsageStats,
+  getTrialOrderCounts,
 };

@@ -11,6 +11,7 @@ const {
   getRestaurantById,
   updateRestaurantSubscription,
   getTrialUsageStats,
+  getTrialOrderCounts,
   getPosV1Db,
   getPosV2Db,
 } = require("../utils/multiDbConnection");
@@ -77,6 +78,20 @@ const subscriptionController = {
       res.json({ success: true, data: result });
     } catch (error) {
       console.error("[Subscription] Error getting trial usage:", error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  },
+
+  /**
+   * Get per-restaurant completed-order counts for trial restaurants
+   * Returns a map: { [restaurantId]: { orderCount, lastOrderAt } }
+   */
+  getTrialOrderCounts: async (req, res, db) => {
+    try {
+      const result = await getTrialOrderCounts();
+      res.json({ success: true, data: result });
+    } catch (error) {
+      console.error("[Subscription] Error getting trial order counts:", error);
       res.status(500).json({ success: false, error: error.message });
     }
   },
