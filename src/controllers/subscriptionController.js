@@ -10,6 +10,7 @@ const {
   getUnifiedRestaurants,
   getRestaurantById,
   updateRestaurantSubscription,
+  getTrialUsageStats,
   getPosV1Db,
   getPosV2Db,
 } = require("../utils/multiDbConnection");
@@ -63,6 +64,19 @@ const subscriptionController = {
       });
     } catch (error) {
       console.error("[Subscription] Error getting unified restaurants:", error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  },
+
+  /**
+   * Get trial usage stats: how many trial restaurants actually have completed orders
+   */
+  getTrialUsage: async (req, res, db) => {
+    try {
+      const result = await getTrialUsageStats();
+      res.json({ success: true, data: result });
+    } catch (error) {
+      console.error("[Subscription] Error getting trial usage:", error);
       res.status(500).json({ success: false, error: error.message });
     }
   },

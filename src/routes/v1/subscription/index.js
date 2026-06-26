@@ -53,6 +53,10 @@ module.exports = (db) => {
     router.get('/expiry-stats', (req, res) =>
         subscriptionController.getExpiryStats(req, res, db));
 
+    // Get trial usage stats (how many trials actually have completed orders)
+    router.get('/trial-usage', (req, res) =>
+        subscriptionController.getTrialUsage(req, res, db));
+
     // Get single restaurant detail
     router.get('/restaurants/:restaurantId/:posVersion', (req, res) =>
         subscriptionController.getRestaurantDetail(req, res, db));

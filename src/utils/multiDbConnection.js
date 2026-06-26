@@ -540,6 +540,45 @@ async function getRestaurantById(restaurantId, posVersion) {
 }
 
 /**
+ * Trial usage stats (POS v2 only)
+ * Returns how many trial restaurants have at least one COMPLETED order,
+ * to tell which trials are actually being used.
+ * "Completed" = orderStatus in completed/payment_completed/served.
+ */
+async function getTrialUsageStats() {
+  if (!databases.posV2) {
+    return { trialTotal: 0, trialWithOrders: 0 };
+  }
+
+  // 1. Trial restaurant ids (subscriptions.status === "trial")
+  const trialSubs = await databases.posV2
+    .collection("subscriptions")
+    .find({ status: "trial" })
+    .project({ restaurantId: 1 })
+    .toArray();
+
+  const trialRestaurantIds = trialSubs
+    .map((s) => s.restaurantId)
+    .filter(Boolean);
+  const trialTotal = trialRestaurantIds.length;
+
+  if (trialTotal === 0) {
+    return { trialTotal: 0, trialWithOrders: 0 };
+  }
+
+  // 2. Among those, how many have >= 1 completed order
+  const COMPLETED_STATUSES = ["completed", "payment_completed", "served"];
+  const restaurantIdsWithOrders = await databases.posV2
+    .collection("orders")
+    .distinct("restaurantId", {
+      restaurantId: { $in: trialRestaurantIds },
+      orderStatus: { $in: COMPLETED_STATUSES },
+    });
+
+  return { trialTotal, trialWithOrders: restaurantIdsWithOrders.length };
+}
+
+/**
  * Update subscription dates for a restaurant (WRITE operation)
  * Use with caution - this modifies the POS databases
  */
@@ -712,4 +751,5 @@ module.exports = {
   getUnifiedRestaurants,
   getRestaurantById,
   updateRestaurantSubscription,
+  getTrialUsageStats,
 };
