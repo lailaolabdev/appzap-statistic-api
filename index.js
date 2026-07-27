@@ -152,6 +152,10 @@ MongoClient.connect(process.env.MONGODB_URI_POS_V2, {
         const notificationsRouter = require('./src/routes/v1/notifications')(db);
         app.use('/api/v1/notifications', notificationsRouter);
 
+        // Support / Case Management Routes
+        const supportRouter = require('./src/routes/v1/support')(db);
+        app.use('/api/v1/support', supportRouter);
+
         // Health / Routes check
         app.get('/', (req, res) => {
             res.json({
