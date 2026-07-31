@@ -1,3 +1,6 @@
 node_modules
 .env
 appzap-consumer-firebase-adminsdk-fbsvc-8bb81223a4.json
+
+# Claude code
+CLAUDE.md
