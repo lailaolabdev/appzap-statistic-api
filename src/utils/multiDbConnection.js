@@ -9,6 +9,7 @@
 
 const { MongoClient } = require("mongodb");
 const { publishRestaurantUpdated, publishRestaurantDeactivated } = require("./redisPublisher");
+const { getCachedStats, setCachedStats } = require("./statsCache");
 
 let connections = {
   main: null, // Main stats database
@@ -174,6 +175,9 @@ async function getUnifiedRestaurants(options = {}) {
     paymentStatus,
     expireMonth,
     hasLogo,
+    activityStatus, // "active" | "dormant" | "inactive"
+    activeDays = 7, // how recent an order must be to count as "active"
+    devFilter = "hide", // "hide" | "show" | "only" — staff test restaurants
     sortField = "createdAt",
     sortDirection = "desc",
     limit = 50,
@@ -181,9 +185,13 @@ async function getUnifiedRestaurants(options = {}) {
   } = options;
   const results = [];
 
+  // Real-order activity for every restaurant, independent of subscription state
+  const activity = await getRestaurantActivityMap();
+
   // Get from POS v1 (stores collection)
   if (
     databases.posV1 &&
+    devFilter !== "only" && // only POS v2 carries the isDev flag
     (!posVersion || posVersion === "v1" || posVersion === "both")
   ) {
     try {
@@ -253,10 +261,14 @@ async function getUnifiedRestaurants(options = {}) {
         .toArray();
 
       v1Stores.forEach((store) => {
+        const usage = activity.get(`v1:${store._id.toString()}`);
         results.push({
           ...store,
           posVersion: "v1",
           restaurantId: store._id.toString(),
+          lastOrderAt: usage?.lastOrderAt || null,
+          recentOrderCount: usage?.orderCount || 0,
+          activityStatus: resolveActivityStatus(usage?.lastOrderAt, activeDays),
           province: store.province || store.address?.province,
           district: store.district || store.address?.district,
           village: store.village || store.address?.village,
@@ -282,6 +294,14 @@ async function getUnifiedRestaurants(options = {}) {
 
       if (databases.posV2) {
         const v2Query = { isDeleted: { $ne: true } };
+
+        // Staff test/demo restaurants are hidden from the list unless asked
+        // for. Only POS v2 carries the flag, so "only" yields no v1 rows.
+        if (devFilter === "only") {
+          v2Query.isDev = true;
+        } else if (devFilter !== "show") {
+          v2Query.isDev = { $ne: true };
+        }
 
         if (search) {
           v2Query.$or = [
@@ -309,6 +329,8 @@ async function getUnifiedRestaurants(options = {}) {
             storeType: 1,
             createdAt: 1,
             logo: 1,
+            isDev: 1,
+            isActive: 1,
           })
           .toArray();
       }
@@ -388,9 +410,14 @@ async function getUnifiedRestaurants(options = {}) {
             ? subscriptionStatusMap[subId] || null
             : null;
 
+        const usage = activity.get(`v2:${restaurant._id.toString()}`);
+
         results.push({
           ...restaurant,
           posVersion: "v2",
+          lastOrderAt: usage?.lastOrderAt || null,
+          recentOrderCount: usage?.orderCount || 0,
+          activityStatus: resolveActivityStatus(usage?.lastOrderAt, activeDays),
           restaurantId: (restaurant._id || restaurant.id)?.toString(),
           phone: restaurant.contactInfo?.phone,
           whatsapp: restaurant.contactInfo?.whatsapp,
@@ -442,6 +469,14 @@ async function getUnifiedRestaurants(options = {}) {
     });
   }
 
+  // Filter by real-order activity — deliberately independent of subscription
+  // status, so "paid but not using" stays visible as its own combination.
+  if (activityStatus && activityStatus !== "all") {
+    filteredResults = filteredResults.filter(
+      (r) => r.activityStatus === activityStatus,
+    );
+  }
+
   // Filter by logo presence if needed
   if (hasLogo !== undefined) {
     const hasLogoBoolean = hasLogo === true || hasLogo === "true";
@@ -487,9 +522,17 @@ async function getUnifiedRestaurants(options = {}) {
     active: 0, // > 3 months
     noSubscription: 0,
     trial: 0, // free trial
+    activeNow: 0, // ordered within activeDays — a genuinely operating restaurant
+    dormant: 0, // ordered in the last 90 days, but not recently
+    inactive: 0, // no orders in 90 days — abandoned signups land here
+    activeDays,
   };
 
   filteredResults.forEach((r) => {
+    if (r.activityStatus === "active") summary.activeNow++;
+    else if (r.activityStatus === "dormant") summary.dormant++;
+    else summary.inactive++;
+
     if (r.subscriptionStatus === "trial") {
       summary.trial++;
     } else if (!r.endDate) {
@@ -537,6 +580,133 @@ async function getRestaurantById(restaurantId, posVersion) {
   }
 
   return null;
+}
+
+/**
+ * Real-usage activity per restaurant, across BOTH POS versions.
+ *
+ * v1 reads `bills` (one doc per real transaction) rather than `orders`,
+ * which holds one doc per menu line item and inflates counts ~150x.
+ * v2 reads `orders.timing.orderedAt` — the business date of the order, and
+ * the only date field on that collection with an index. Cancelled and
+ * refunded orders are excluded by name rather than listing the statuses
+ * that count, because live data already carries statuses missing from the
+ * schema enum (partially_served, transferred_out).
+ *
+ * Grouping is date-first with no restaurantId filter, so one index-backed
+ * scan of the window answers for every restaurant at once.
+ *
+ * Returns Map<"v1:<id>"|"v2:<id>", { lastOrderAt, orderCount }>.
+ * Restaurants with no activity inside the window are absent from the map.
+ */
+const ACTIVITY_WINDOW_DAYS = 90;
+const ACTIVITY_CACHE_TTL_MS = 15 * 60 * 1000;
+
+async function getRestaurantActivityMap() {
+  const cacheKey = `restaurant_activity_${ACTIVITY_WINDOW_DAYS}d`;
+  const cached = getCachedStats(cacheKey);
+  if (cached) return cached;
+
+  const since = new Date(
+    Date.now() - ACTIVITY_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+  );
+  const activity = new Map();
+  let degraded = false;
+
+  if (databases.posV1) {
+    try {
+      const rows = await databases.posV1
+        .collection("bills")
+        .aggregate(
+          [
+            {
+              $match: {
+                createdAt: { $gte: since },
+                status: "CHECKOUT",
+                isCheckout: true,
+                storeId: { $ne: null },
+              },
+            },
+            {
+              $group: {
+                _id: "$storeId",
+                lastOrderAt: { $max: "$createdAt" },
+                orderCount: { $sum: 1 },
+              },
+            },
+          ],
+          { allowDiskUse: true },
+        )
+        .toArray();
+
+      rows.forEach((r) => {
+        activity.set(`v1:${r._id.toString()}`, {
+          lastOrderAt: r.lastOrderAt,
+          orderCount: r.orderCount,
+        });
+      });
+    } catch (error) {
+      degraded = true;
+      console.error("[Activity] POS v1 bills aggregation failed:", error.message);
+    }
+  }
+
+  if (databases.posV2) {
+    try {
+      const rows = await databases.posV2
+        .collection("orders")
+        .aggregate(
+          [
+            {
+              $match: {
+                "timing.orderedAt": { $gte: since },
+                orderStatus: { $nin: ["cancelled", "refunded"] },
+                restaurantId: { $ne: null },
+              },
+            },
+            {
+              $group: {
+                _id: "$restaurantId",
+                lastOrderAt: { $max: "$timing.orderedAt" },
+                orderCount: { $sum: 1 },
+              },
+            },
+          ],
+          { allowDiskUse: true },
+        )
+        .toArray();
+
+      rows.forEach((r) => {
+        activity.set(`v2:${r._id.toString()}`, {
+          lastOrderAt: r.lastOrderAt,
+          orderCount: r.orderCount,
+        });
+      });
+    } catch (error) {
+      degraded = true;
+      console.error("[Activity] POS v2 orders aggregation failed:", error.message);
+    }
+  }
+
+  // A half-built map would silently report every restaurant on the failed side
+  // as never-used, so leave it uncached and let the next request retry rather
+  // than serving a wrong answer for the whole TTL.
+  if (!degraded) {
+    setCachedStats(cacheKey, activity, ACTIVITY_CACHE_TTL_MS);
+  }
+  return activity;
+}
+
+/**
+ * Bucket a restaurant by how recently it took a real order.
+ *  active   - ordered within `activeDays`  => a genuinely operating restaurant
+ *  dormant  - ordered inside the 90d window but not within `activeDays`
+ *  inactive - nothing in 90 days, which is where abandoned free signups land
+ */
+function resolveActivityStatus(lastOrderAt, activeDays) {
+  if (!lastOrderAt) return "inactive";
+  const daysSince = (Date.now() - new Date(lastOrderAt).getTime()) / 86400000;
+  return daysSince <= activeDays ? "active" : "dormant";
 }
 
 /**
@@ -804,4 +974,5 @@ module.exports = {
   updateRestaurantSubscription,
   getTrialUsageStats,
   getTrialOrderCounts,
+  getRestaurantActivityMap,
 };

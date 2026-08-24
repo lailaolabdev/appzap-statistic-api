@@ -33,6 +33,9 @@ const subscriptionController = {
         subscriptionStatus, // "expired" | "expiring_soon" | "expiring_3months" | "active" | "no_subscription" | "has_package"
         paymentStatus, // "paid" | "pending" | "overdue"
         expireMonth, // format "YYYY-MM"
+        activityStatus, // "active" | "dormant" | "inactive"
+        activeDays, // days of recency that count as active (default 7)
+        devFilter, // "hide" (default) | "show" | "only" — staff test restaurants
         sortField = "createdAt",
         sortDirection = "desc",
         limit = 50,
@@ -49,6 +52,9 @@ const subscriptionController = {
         subscriptionStatus,
         paymentStatus,
         expireMonth,
+        activityStatus,
+        activeDays: activeDays ? parseInt(activeDays) : undefined,
+        devFilter,
         sortField,
         sortDirection,
         limit: parseInt(limit),
