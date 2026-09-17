@@ -104,6 +104,7 @@ async function syncV2PackagedRestaurants() {
       contactInfo: 1,
       isActive: 1,
       isOpen: 1,
+      isDev: 1,
       packageInfo: 1,
       tags: 1,
     })
