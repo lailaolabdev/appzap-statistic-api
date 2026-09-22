@@ -5,6 +5,7 @@
  * across both POS v1 and v2 databases.
  */
 
+const crypto = require("crypto");
 const { ObjectId } = require("mongodb");
 const {
   getUnifiedRestaurants,
@@ -12,9 +13,24 @@ const {
   updateRestaurantSubscription,
   getTrialUsageStats,
   getTrialOrderCounts,
+  computeRestaurantActivity,
   getPosV1Db,
   getPosV2Db,
 } = require("../utils/multiDbConnection");
+
+/**
+ * Optional shared secret for the activity feed. When ACTIVITY_API_KEY is set,
+ * callers must send it as `x-activity-key`; when unset the endpoint is open
+ * like the rest of this API. Timing-safe compare (same pattern as ADS_ADMIN_KEY).
+ */
+function activityKeyAccepted(req) {
+  const expected = process.env.ACTIVITY_API_KEY || "";
+  if (!expected) return true;
+  const provided = String(req.headers["x-activity-key"] || "");
+  const a = crypto.createHash("sha256").update(provided).digest();
+  const b = crypto.createHash("sha256").update(expected).digest();
+  return crypto.timingSafeEqual(a, b);
+}
 const { publishRestaurantUpdated } = require("../utils/redisPublisher");
 const { syncAllPackagedRestaurants } = require("../utils/syncPackagedRestaurants");
 
@@ -98,6 +114,50 @@ const subscriptionController = {
       res.json({ success: true, data: result });
     } catch (error) {
       console.error("[Subscription] Error getting trial order counts:", error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  },
+
+  /**
+   * Per-restaurant real-order activity across POS v1 + v2 for the consumer-api
+   * listing gate (RestaurantRegistry.activity). Slim rows only — no restaurant
+   * data. 503 when either POS aggregation failed so the caller never writes a
+   * half-empty activity set over its registry.
+   *
+   * GET /api/v1/subscription/activity?days=90  (header x-activity-key when set)
+   */
+  getRestaurantActivity: async (req, res) => {
+    try {
+      if (!activityKeyAccepted(req)) {
+        return res.status(401).json({ success: false, error: "unauthorized" });
+      }
+      const { map, degraded, windowDays } = await computeRestaurantActivity(req.query.days);
+      if (degraded) {
+        return res.status(503).json({
+          success: false,
+          degraded: true,
+          error: "activity data incomplete (one POS aggregation failed)",
+        });
+      }
+      const data = [];
+      for (const [key, v] of map) {
+        const idx = key.indexOf(":");
+        data.push({
+          posVersion: key.slice(0, idx),
+          posId: key.slice(idx + 1),
+          lastOrderAt: v.lastOrderAt,
+          orderCount: v.orderCount,
+        });
+      }
+      res.json({
+        success: true,
+        windowDays,
+        generatedAt: new Date().toISOString(),
+        count: data.length,
+        data,
+      });
+    } catch (error) {
+      console.error("[Subscription] Error getting restaurant activity:", error);
       res.status(500).json({ success: false, error: error.message });
     }
   },

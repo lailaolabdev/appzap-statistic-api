@@ -61,6 +61,11 @@ module.exports = (db) => {
     router.get('/trial-order-counts', (req, res) =>
         subscriptionController.getTrialOrderCounts(req, res, db));
 
+    // Per-restaurant real-order activity (v1 bills + v2 orders) for the
+    // consumer-api listing gate. Optional x-activity-key (ACTIVITY_API_KEY).
+    router.get('/activity', (req, res) =>
+        subscriptionController.getRestaurantActivity(req, res));
+
     // Get single restaurant detail
     router.get('/restaurants/:restaurantId/:posVersion', (req, res) =>
         subscriptionController.getRestaurantDetail(req, res, db));
