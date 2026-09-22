@@ -602,14 +602,28 @@ async function getRestaurantById(restaurantId, posVersion) {
 const ACTIVITY_WINDOW_DAYS = 90;
 const ACTIVITY_CACHE_TTL_MS = 15 * 60 * 1000;
 
-async function getRestaurantActivityMap() {
-  const cacheKey = `restaurant_activity_${ACTIVITY_WINDOW_DAYS}d`;
-  const cached = getCachedStats(cacheKey);
-  if (cached) return cached;
+function clampWindowDays(days) {
+  const n = parseInt(days, 10);
+  if (!Number.isFinite(n)) return ACTIVITY_WINDOW_DAYS;
+  return Math.min(365, Math.max(1, n));
+}
 
-  const since = new Date(
-    Date.now() - ACTIVITY_WINDOW_DAYS * 24 * 60 * 60 * 1000,
-  );
+/**
+ * Same aggregation as getRestaurantActivityMap, but with the window as a
+ * parameter and the `degraded` flag EXPOSED: a half-built map (one POS side
+ * failed) must never be served to the consumer-api activity job, which would
+ * otherwise unlist every restaurant on the failed side. Callers that can't
+ * tolerate that check `degraded` and refuse.
+ *
+ * Returns { map, degraded, windowDays }.
+ */
+async function computeRestaurantActivity(windowDays = ACTIVITY_WINDOW_DAYS) {
+  const days = clampWindowDays(windowDays);
+  const cacheKey = `restaurant_activity_${days}d`;
+  const cached = getCachedStats(cacheKey);
+  if (cached) return { map: cached, degraded: false, windowDays: days };
+
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
   const activity = new Map();
   let degraded = false;
 
@@ -694,7 +708,11 @@ async function getRestaurantActivityMap() {
   if (!degraded) {
     setCachedStats(cacheKey, activity, ACTIVITY_CACHE_TTL_MS);
   }
-  return activity;
+  return { map: activity, degraded, windowDays: days };
+}
+
+async function getRestaurantActivityMap() {
+  return (await computeRestaurantActivity()).map;
 }
 
 /**
@@ -975,4 +993,5 @@ module.exports = {
   getTrialUsageStats,
   getTrialOrderCounts,
   getRestaurantActivityMap,
+  computeRestaurantActivity,
 };
