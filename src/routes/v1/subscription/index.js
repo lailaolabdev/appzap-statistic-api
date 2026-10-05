@@ -66,6 +66,14 @@ module.exports = (db) => {
     router.get('/activity', (req, res) =>
         subscriptionController.getRestaurantActivity(req, res));
 
+    // Active restaurants still missing opening hours / map location (read-only)
+    router.get('/store-info-completeness', (req, res) =>
+        subscriptionController.getStoreInfoCompleteness(req, res));
+
+    // AppZap team fills hours / location for a v1 store or a v2 branch
+    router.put('/store-info/:posVersion/:id', (req, res) =>
+        subscriptionController.updateStoreInfo(req, res));
+
     // Get single restaurant detail
     router.get('/restaurants/:restaurantId/:posVersion', (req, res) =>
         subscriptionController.getRestaurantDetail(req, res, db));

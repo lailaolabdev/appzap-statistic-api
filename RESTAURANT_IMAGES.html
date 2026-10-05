@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurant Images API</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+Lao:wght@400;500;600&family=Noto+Serif+Lao:wght@400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Tokens ─────────────────────────────────────────────────── */
+    :root {
+      --color-paper:       #f5f5f5;
+      --color-paper-2:     #ececec;
+      --color-ink:         #2d3142;
+      --color-muted:       #4f5d75;
+      --color-soft:        #7a8399;
+      --color-rule:        rgba(45,49,66,0.12);
+      --color-rule-solid:  rgba(79,93,117,0.25);
+      --color-accent:      #eb6c36;
+      --color-accent-tint: rgba(235,108,54,0.08);
+      --color-link:        #2e5aa8;
+      --font-sans:   'Geist', 'Noto Sans Lao', system-ui, sans-serif;
+      --font-serif:  'Instrument Serif', 'Noto Serif Lao', 'Times New Roman', serif;
+      --font-mono:   'Geist Mono', ui-monospace, Menlo, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      min-height: 100vh;
+      padding: 3rem 2rem;
+      color: var(--color-ink);
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    .header { margin-bottom: 2.5rem; }
+
+    .header-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.75rem, 3vw + 1rem, 2.5rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--color-ink);
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--color-muted);
+      max-width: 64ch;
+    }
+
+    /* ── Diagram container ────────────────────────────────────────── */
+    .diagram-container {
+      background: transparent;
+      border: none;
+      padding: 0;
+      overflow-x: auto;
+    }
+
+    svg { width: 100%; min-width: 1000px; display: block; }  /* == viewBox width */
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+
+    /* ── Info cards ───────────────────────────────────────────────── */
+    .cards {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    @media (max-width: 900px) {
+      .cards { grid-template-columns: 1fr; }
+    }
+    .card.wide { grid-column: 1 / -1; }
+
+    .card {
+      background: #ffffff;
+      border-radius: 6px;
+      border: 1px solid var(--color-rule);
+      padding: 1.25rem;
+      min-width: 0;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.875rem;
+      padding-bottom: 0.875rem;
+      border-bottom: 1px solid rgba(45,49,66,0.08);
+    }
+
+    .card-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .card-dot.ink    { background: var(--color-ink); }
+    .card-dot.muted  { background: var(--color-muted); }
+    .card-dot.coral  { background: var(--color-accent); }
+    .card-dot.link   { background: var(--color-link); }
+    .card-dot.soft   { background: var(--color-soft); }
+
+    .card h3 {
+      font-family: var(--font-sans);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-ink);
+      letter-spacing: -0.005em;
+    }
+
+    .card ul {
+      list-style: none;
+      color: var(--color-muted);
+      font-size: 0.8125rem;
+      line-height: 1.7;
+    }
+
+    .card li {
+      margin-bottom: 0.4rem;
+      padding-left: 0.875rem;
+      position: relative;
+      overflow-wrap: anywhere;
+    }
+
+    .card li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: rgba(45,49,66,0.25);
+      font-size: 0.75rem;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--color-ink);
+      background: var(--color-paper);
+      border: 1px solid var(--color-rule);
+      border-radius: 3px;
+      padding: 0 0.25rem;
+    }
+
+    pre {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      line-height: 1.6;
+      color: var(--color-ink);
+      background: var(--color-paper);
+      border: 1px solid var(--color-rule);
+      border-radius: 6px;
+      padding: 0.875rem 1rem;
+      overflow-x: auto;
+    }
+    pre .c { color: var(--color-soft); }
+
+    /* ── Footer ─────────────────────────────────────────────────── */
+    .footer {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(45,49,66,0.10);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      color: var(--color-soft);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 2rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <p class="header-eyebrow">Architecture · appzap-statistic-api · 2026-10-05</p>
+      <h1>ການດຶງຮ້ານ ແລະ ຮູບຮ້ານ POS v1 + v2</h1>
+      <p class="subtitle">API ດຽວດຶງຮ້ານຈາກ DB ທັງສອງເວີຊັນ. ຮູບຮ້ານຢູ່ຄົນລະ S3 bucket: v1 ເກັບແຕ່ຊື່ໄຟລ໌ ຕ້ອງຕໍ່ base URL ເອງ, v2 ເກັບເປັນ URL ເຕັມແລ້ວ.</p>
+    </div>
+
+    <!-- Main Diagram -->
+    <div class="diagram-container">
+      <svg viewBox="0 48 1000 404" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="restaurant-images-full-title restaurant-images-full-desc">
+        <title id="restaurant-images-full-title">Restaurant list and image sources, POS v1 and v2</title>
+        <desc id="restaurant-images-full-desc">The statistic API reads restaurants from the POS v1 and POS v2 databases; v1 image filenames resolve against the appzapimglailaolab bucket and v2 logos are full URLs in the appzap-v2-restaurant-menu-images bucket.</desc>
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/>
+          </marker>
+          <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/>
+          </marker>
+          <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/>
+          </marker>
+        </defs>
+
+        <rect x="0" y="48" width="1000" height="404" fill="#f5f5f5"/>
+
+        <!-- ── Zones (bg → zones → arrows → nodes) ─────────────────── -->
+        <rect x="472" y="68" width="216" height="316" rx="8" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+        <rect x="520" y="72" width="120" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="580" y="81" fill="rgba(45,49,66,0.40)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">MONGODB · READ-ONLY</text>
+
+        <rect x="732" y="68" width="240" height="316" rx="8" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+        <rect x="788" y="72" width="128" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="852" y="81" fill="rgba(45,49,66,0.40)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">AWS S3 · AP-SOUTHEAST-1</text>
+
+        <!-- ── Arrows (drawn before nodes) ─────────────────────────── -->
+        <!-- Client → statistic-api -->
+        <line x1="148" y1="230" x2="218" y2="230" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+        <rect x="156" y="208" width="56" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="184" y="217" fill="#2e5aa8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">HTTP GET</text>
+
+        <!-- statistic-api → POS v1 DB -->
+        <path d="M 420 216 H 448 Q 456 216 456 208 V 140 Q 456 132 464 132 H 490"
+              fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+        <!-- statistic-api → POS v2 DB -->
+        <path d="M 420 244 H 448 Q 456 244 456 252 V 320 Q 456 328 464 328 H 490"
+              fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+
+        <!-- POS v1 DB ⇢ v1 bucket -->
+        <line x1="668" y1="132" x2="750" y2="132" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+        <rect x="680" y="112" width="60" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="710" y="121" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">+ BASE URL</text>
+
+        <!-- POS v2 DB ⇢ v2 bucket -->
+        <line x1="668" y1="328" x2="750" y2="328" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+        <rect x="684" y="308" width="52" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="710" y="317" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">AS-IS URL</text>
+
+        <!-- ── Nodes ────────────────────────────────────────────────── -->
+        <!-- Client (external) -->
+        <rect x="28" y="204" width="120" height="52" rx="6" fill="#f5f5f5"/>
+        <rect x="28" y="204" width="120" height="52" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+        <rect x="36" y="210" width="26" height="12" rx="2" fill="transparent" stroke="rgba(122,131,153,0.4)" stroke-width="0.8"/>
+        <text x="49" y="219" fill="#7a8399" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">EXT</text>
+        <text x="88" y="236" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Client</text>
+        <text x="88" y="249" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">web · app · service</text>
+
+        <!-- statistic-api (focal) -->
+        <rect x="220" y="196" width="200" height="68" rx="6" fill="#f5f5f5"/>
+        <rect x="220" y="196" width="200" height="68" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+        <rect x="228" y="202" width="26" height="12" rx="2" fill="transparent" stroke="rgba(235,108,54,0.50)" stroke-width="0.8"/>
+        <text x="241" y="211" fill="#eb6c36" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">API</text>
+        <text x="320" y="228" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">appzap-statistic-api</text>
+        <text x="320" y="243" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/subscription/restaurants</text>
+        <text x="320" y="256" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">?posVersion=both</text>
+
+        <!-- POS v1 DB -->
+        <rect x="492" y="100" width="176" height="64" rx="6" fill="#f5f5f5"/>
+        <rect x="492" y="100" width="176" height="64" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+        <rect x="500" y="106" width="22" height="12" rx="2" fill="transparent" stroke="rgba(79,93,117,0.50)" stroke-width="0.8"/>
+        <text x="511" y="115" fill="#4f5d75" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">DB</text>
+        <text x="580" y="131" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">POS v1</text>
+        <text x="580" y="146" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">stores.image</text>
+        <text x="580" y="158" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">filename only</text>
+
+        <!-- POS v2 DB -->
+        <rect x="492" y="296" width="176" height="64" rx="6" fill="#f5f5f5"/>
+        <rect x="492" y="296" width="176" height="64" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+        <rect x="500" y="302" width="22" height="12" rx="2" fill="transparent" stroke="rgba(79,93,117,0.50)" stroke-width="0.8"/>
+        <text x="511" y="311" fill="#4f5d75" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">DB</text>
+        <text x="580" y="327" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">POS v2</text>
+        <text x="580" y="342" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">restaurants.logo</text>
+        <text x="580" y="354" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">full https URL</text>
+
+        <!-- v1 bucket -->
+        <rect x="752" y="100" width="200" height="64" rx="6" fill="#f5f5f5"/>
+        <rect x="752" y="100" width="200" height="64" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <rect x="760" y="106" width="22" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.22)" stroke-width="0.8"/>
+        <text x="771" y="115" fill="#7a8399" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">S3</text>
+        <text x="852" y="131" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">v1 images</text>
+        <text x="852" y="146" fill="#2e5aa8" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">appzapimglailaolab</text>
+        <text x="852" y="158" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">/resized/small · /medium</text>
+
+        <!-- v2 bucket -->
+        <rect x="752" y="296" width="200" height="64" rx="6" fill="#f5f5f5"/>
+        <rect x="752" y="296" width="200" height="64" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <rect x="760" y="302" width="22" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.22)" stroke-width="0.8"/>
+        <text x="771" y="311" fill="#7a8399" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">S3</text>
+        <text x="852" y="327" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">v2 images</text>
+        <text x="852" y="342" fill="#2e5aa8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">appzap-v2-restaurant-menu-images</text>
+        <text x="852" y="354" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">logo · coverImage</text>
+
+        <!-- ── Legend strip (below all zones) ───────────────────────── -->
+        <text x="28" y="425" fill="#2d3142" font-size="9" font-weight="500" font-family="'Geist Mono', monospace" letter-spacing="0.12em">LEGEND</text>
+
+        <rect x="96" y="416" width="14" height="10" rx="2" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+        <text x="116" y="425" fill="#4f5d75" font-size="9" font-family="'Geist', sans-serif">Entry API</text>
+
+        <rect x="188" y="416" width="14" height="10" rx="2" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+        <text x="208" y="425" fill="#4f5d75" font-size="9" font-family="'Geist', sans-serif">Database</text>
+
+        <rect x="276" y="416" width="14" height="10" rx="2" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+        <text x="296" y="425" fill="#4f5d75" font-size="9" font-family="'Geist', sans-serif">S3 bucket</text>
+
+        <rect x="368" y="416" width="14" height="10" rx="2" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+        <text x="388" y="425" fill="#4f5d75" font-size="9" font-family="'Geist', sans-serif">Caller</text>
+
+        <line x1="440" y1="421" x2="460" y2="421" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+        <text x="468" y="425" fill="#4f5d75" font-size="9" font-family="'Geist', sans-serif">HTTP call</text>
+
+        <line x1="532" y1="421" x2="552" y2="421" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+        <text x="560" y="425" fill="#4f5d75" font-size="9" font-family="'Geist', sans-serif">Unified read (v1 + v2)</text>
+
+        <line x1="676" y1="421" x2="696" y2="421" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+        <text x="704" y="425" fill="#4f5d75" font-size="9" font-family="'Geist', sans-serif">Image field → bucket</text>
+      </svg>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="cards">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-dot coral"></span>
+          <h3>Endpoint ດຶງຮ້ານ</h3>
+        </div>
+        <ul>
+          <li><code>GET /api/v1/subscription/restaurants</code>: ລາຍການຮ້ານ v1 + v2 ລວມກັນ. ແຕ່ລະແຖວມີ <code>posVersion</code> ແລະ <code>logo</code></li>
+          <li>Query: <code>posVersion=v1|v2|both</code>, <code>search</code>, <code>province</code>, <code>limit</code> (ຄ່າເລີ່ມຕົ້ນ 50), <code>skip</code></li>
+          <li><code>GET /api/v1/subscription/restaurants/:id/:posVersion</code>: ລາຍລະອຽດຮ້ານດຽວ</li>
+          <li><code>GET /api/v1/support/restaurants/search?q=</code>: ຄົ້ນຫາແບບສັ້ນ, ສົ່ງ <code>logo</code> ກັບມາດ້ວຍ</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-dot muted"></span>
+          <h3>POS v1: appzapimglailaolab</h3>
+        </div>
+        <ul>
+          <li>Field: <code>image</code> (API ສົ່ງຄ່າດຽວກັນມາໃນ <code>logo</code> ນຳ)</li>
+          <li>ເກັບແຕ່ຊື່ໄຟລ໌, ເຊັ່ນ <code>fb20180f-….jpeg</code></li>
+          <li>ຮູບເຕັມ: <code>https://appzapimglailaolab.s3.ap-southeast-1.amazonaws.com/&lt;image&gt;</code></li>
+          <li>ຮູບຫຍໍ້: <code>…/resized/small/&lt;image&gt;</code> ຫຼື <code>…/resized/medium/&lt;image&gt;</code></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-dot link"></span>
+          <h3>POS v2: appzap-v2-restaurant-menu-images</h3>
+        </div>
+        <ul>
+          <li>Field: <code>logo</code> ເປັນ URL ເຕັມແລ້ວ, ໃຊ້ໄດ້ເລີຍ</li>
+          <li>Base: <code>https://appzap-v2-restaurant-menu-images.s3.ap-southeast-1.amazonaws.com</code></li>
+          <li><code>coverImage</code> ແລະ <code>galleryImages</code> ມີໃນ DB ແຕ່ API ຍັງບໍ່ສົ່ງມາ</li>
+          <li>ຮູບແບບ URL ເຕັມຂອງ v2 ຢືນຢັນຈາກໂຄດເທົ່ານັ້ນ, ຍັງບໍ່ໄດ້ query DB ເບິ່ງ</li>
+        </ul>
+      </div>
+
+      <div class="card wide">
+        <div class="card-header">
+          <span class="card-dot ink"></span>
+          <h3>ຕົວຢ່າງການຕໍ່ URL ຮູບທາງ client</h3>
+        </div>
+<pre>const V1_IMG = "https://appzapimglailaolab.s3.ap-southeast-1.amazonaws.com";
+
+const imageUrl = (r) =&gt; {
+  const img = r.logo || r.image;
+  if (!img) return null;
+  if (img.startsWith("http")) return img;   <span class="c">// v2, or a v1 value that is already a URL</span>
+  return `${V1_IMG}/${img}`;                <span class="c">// v1 filename</span>
+};</pre>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <span>appzap-statistic-api · ຮ້ານ ແລະ ຮູບຮ້ານ v1 + v2 · routes ເຫຼົ່ານີ້ບໍ່ມີ auth</span>
+      <span>2026-10-05</span>
+    </div>
+
+  </div>
+</body>
+</html>
