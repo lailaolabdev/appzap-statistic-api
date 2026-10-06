@@ -49,6 +49,9 @@ async function syncV1PackagedRestaurants() {
       whatsapp: 1,
       isActive: 1,
       isOpen: 1,
+      // The consumer listener admits a V1 store only when hasPOS === true and
+      // soft-deactivates it otherwise, so leaving this out hides paying stores.
+      hasPOS: 1,
       hasReservation: 1,
       isDelivery: 1,
       isHeinekenPartner: 1,
@@ -61,6 +64,9 @@ async function syncV1PackagedRestaurants() {
       packageId: 1,
       packagePrice: 1,
       paymentStatus: 1,
+      openTime: 1,
+      closeTime: 1,
+      openDay: 1,
     })
     .toArray();
 
@@ -107,8 +113,12 @@ async function syncV2PackagedRestaurants() {
       isDev: 1,
       packageInfo: 1,
       tags: 1,
+      enhancedBusinessHours: 1,
+      operatingHours: 1,
     })
     .toArray();
+
+  await attachV2Branches(posV2, restaurants);
 
   let count = 0;
   for (const restaurant of restaurants) {
@@ -122,6 +132,33 @@ async function syncV2PackagedRestaurants() {
   }
 
   return count;
+}
+
+/**
+ * Set `doc.branches` on each v2 restaurant doc before publishing, so the Consumer
+ * API can map per-branch hours / location. One $in query for all restaurants.
+ */
+async function attachV2Branches(posV2, restaurants) {
+  if (!restaurants.length) return restaurants;
+  const branches = await posV2
+    .collection('branches')
+    .find({
+      restaurantId: { $in: restaurants.map((r) => r._id) },
+      isDeleted: { $ne: true },
+    })
+    .project({ _id: 1, restaurantId: 1, name: 1, isActive: 1, address: 1, 'settings.openingHours': 1 })
+    .toArray();
+
+  const byRestaurant = new Map();
+  branches.forEach(({ restaurantId, ...branch }) => {
+    const key = String(restaurantId);
+    if (!byRestaurant.has(key)) byRestaurant.set(key, []);
+    byRestaurant.get(key).push(branch);
+  });
+  restaurants.forEach((r) => {
+    r.branches = byRestaurant.get(String(r._id)) || [];
+  });
+  return restaurants;
 }
 
 /**
@@ -143,4 +180,4 @@ async function syncAllPackagedRestaurants() {
   return { v1, v2, total: v1 + v2 };
 }
 
-module.exports = { syncAllPackagedRestaurants };
+module.exports = { syncAllPackagedRestaurants, attachV2Branches };

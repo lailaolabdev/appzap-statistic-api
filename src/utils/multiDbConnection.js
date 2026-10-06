@@ -269,6 +269,9 @@ async function getUnifiedRestaurants(options = {}) {
           lastOrderAt: usage?.lastOrderAt || null,
           recentOrderCount: usage?.orderCount || 0,
           activityStatus: resolveActivityStatus(usage?.lastOrderAt, activeDays),
+          // A V1 store is one physical location.
+          branchCount: 1,
+          activeBranchCount: resolveActivityStatus(usage?.lastOrderAt, activeDays) === "active" ? 1 : 0,
           province: store.province || store.address?.province,
           district: store.district || store.address?.district,
           village: store.village || store.address?.village,
@@ -304,10 +307,18 @@ async function getUnifiedRestaurants(options = {}) {
         }
 
         if (search) {
+          // Branches often carry the brand people search for (restaurant
+          // "Tomou ເເຄມຂອງ" has branches "ຊີ້ນດາດໂຕໝູ - ..."), so match those too.
+          const branchHits = await databases.posV2
+            .collection("branches")
+            .find({ name: { $regex: search, $options: "i" }, isDeleted: { $ne: true } })
+            .project({ restaurantId: 1 })
+            .toArray();
           v2Query.$or = [
             { name: { $regex: search, $options: "i" } },
             { code: { $regex: search, $options: "i" } },
             { "contactInfo.phone": { $regex: search, $options: "i" } },
+            { _id: { $in: branchHits.map((b) => b.restaurantId).filter(Boolean) } },
           ];
         }
         if (paymentStatus && paymentStatus.toLowerCase() !== "all") {
@@ -390,6 +401,22 @@ async function getUnifiedRestaurants(options = {}) {
         }
       }
 
+      // Every branch of the listed restaurants, so a branch with no orders in the
+      // window still shows up (as inactive) next to the ones that are trading.
+      const branchesByRestaurant = new Map();
+      if (databases.posV2 && v2Restaurants.length > 0) {
+        const branchDocs = await databases.posV2
+          .collection("branches")
+          .find({ restaurantId: { $in: v2Restaurants.map((r) => r._id) }, isDeleted: { $ne: true } })
+          .project({ _id: 1, name: 1, restaurantId: 1, isActive: 1 })
+          .toArray();
+        branchDocs.forEach((b) => {
+          const key = b.restaurantId?.toString();
+          if (!branchesByRestaurant.has(key)) branchesByRestaurant.set(key, []);
+          branchesByRestaurant.get(key).push(b);
+        });
+      }
+
       v2Restaurants.forEach((restaurant) => {
         const daysLeft = restaurant.packageInfo?.endDate
           ? Math.ceil(
@@ -411,6 +438,11 @@ async function getUnifiedRestaurants(options = {}) {
             : null;
 
         const usage = activity.get(`v2:${restaurant._id.toString()}`);
+        const branches = buildBranchActivity(
+          branchesByRestaurant.get(restaurant._id.toString()) || [],
+          usage?.branches || [],
+          activeDays,
+        );
 
         results.push({
           ...restaurant,
@@ -418,6 +450,9 @@ async function getUnifiedRestaurants(options = {}) {
           lastOrderAt: usage?.lastOrderAt || null,
           recentOrderCount: usage?.orderCount || 0,
           activityStatus: resolveActivityStatus(usage?.lastOrderAt, activeDays),
+          branches,
+          branchCount: branches.length,
+          activeBranchCount: branches.filter((b) => b.activityStatus === "active").length,
           restaurantId: (restaurant._id || restaurant.id)?.toString(),
           phone: restaurant.contactInfo?.phone,
           whatsapp: restaurant.contactInfo?.whatsapp,
@@ -523,12 +558,14 @@ async function getUnifiedRestaurants(options = {}) {
     noSubscription: 0,
     trial: 0, // free trial
     activeNow: 0, // ordered within activeDays — a genuinely operating restaurant
+    activeBranches: 0, // activeNow counted per selling point (V1 store / V2 branch)
     dormant: 0, // ordered in the last 90 days, but not recently
     inactive: 0, // no orders in 90 days — abandoned signups land here
     activeDays,
   };
 
   filteredResults.forEach((r) => {
+    summary.activeBranches += r.activeBranchCount || 0;
     if (r.activityStatus === "active") summary.activeNow++;
     else if (r.activityStatus === "dormant") summary.dormant++;
     else summary.inactive++;
@@ -680,9 +717,19 @@ async function computeRestaurantActivity(windowDays = ACTIVITY_WINDOW_DAYS) {
             },
             {
               $group: {
-                _id: "$restaurantId",
+                _id: { restaurantId: "$restaurantId", branchId: "$branchId" },
                 lastOrderAt: { $max: "$timing.orderedAt" },
                 orderCount: { $sum: 1 },
+              },
+            },
+            {
+              $group: {
+                _id: "$_id.restaurantId",
+                lastOrderAt: { $max: "$lastOrderAt" },
+                orderCount: { $sum: "$orderCount" },
+                branches: {
+                  $push: { branchId: "$_id.branchId", lastOrderAt: "$lastOrderAt", orderCount: "$orderCount" },
+                },
               },
             },
           ],
@@ -694,6 +741,9 @@ async function computeRestaurantActivity(windowDays = ACTIVITY_WINDOW_DAYS) {
         activity.set(`v2:${r._id.toString()}`, {
           lastOrderAt: r.lastOrderAt,
           orderCount: r.orderCount,
+          // Per-branch split for the dashboard (a V2 restaurant can have several
+          // physical branches). The /activity feed builds slim rows and ignores it.
+          branches: r.branches,
         });
       });
     } catch (error) {
@@ -721,6 +771,39 @@ async function getRestaurantActivityMap() {
  *  dormant  - ordered inside the 90d window but not within `activeDays`
  *  inactive - nothing in 90 days, which is where abandoned free signups land
  */
+/**
+ * One entry per V2 branch: every known branch of the restaurant (so idle ones
+ * show as inactive) plus any branchId seen only in orders (deleted branch or
+ * orders without a branch). Active branches first, most recent order first.
+ */
+function buildBranchActivity(branchDocs, branchUsage, activeDays) {
+  const usageById = new Map(branchUsage.map((u) => [u.branchId ? u.branchId.toString() : "none", u]));
+  const out = branchDocs.map((b) => {
+    const u = usageById.get(b._id.toString());
+    usageById.delete(b._id.toString());
+    return {
+      branchId: b._id.toString(),
+      name: b.name || null,
+      lastOrderAt: u?.lastOrderAt || null,
+      orderCount: u?.orderCount || 0,
+      activityStatus: resolveActivityStatus(u?.lastOrderAt, activeDays),
+    };
+  });
+  usageById.forEach((u, id) => {
+    out.push({
+      branchId: id === "none" ? null : id,
+      name: null,
+      lastOrderAt: u.lastOrderAt || null,
+      orderCount: u.orderCount || 0,
+      activityStatus: resolveActivityStatus(u.lastOrderAt, activeDays),
+    });
+  });
+  const rank = { active: 0, dormant: 1, inactive: 2 };
+  return out.sort((a, b) =>
+    rank[a.activityStatus] - rank[b.activityStatus] ||
+    new Date(b.lastOrderAt || 0) - new Date(a.lastOrderAt || 0));
+}
+
 function resolveActivityStatus(lastOrderAt, activeDays) {
   if (!lastOrderAt) return "inactive";
   const daysSince = (Date.now() - new Date(lastOrderAt).getTime()) / 86400000;
