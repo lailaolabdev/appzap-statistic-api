@@ -11,9 +11,8 @@
 
 const { getUnifiedRestaurants } = require('../utils/multiDbConnection');
 const { classifyMessage } = require('../utils/claudeSupport');
-const { nextTicketNumber } = require('./supportController');
+const { nextTicketNumber, OPEN_STATUSES } = require('./supportController');
 
-const OPEN_STATUSES = ['open', 'in_progress', 'waiting_restaurant'];
 const WHATSAPP_ACTOR = { userId: null, name: 'ຮ້ານ (WhatsApp)' };
 
 // Reply templates — editable from the dashboard, stored in supportSettings.

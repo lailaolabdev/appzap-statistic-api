@@ -11,10 +11,73 @@ const { ObjectId } = require('mongodb');
 const { getUnifiedRestaurants } = require('../utils/multiDbConnection');
 const { uploadSupportAttachment } = require('../utils/s3Upload');
 
-const OPEN_STATUSES = ['open', 'in_progress', 'waiting_restaurant'];
+// Dev-board workflow. "open" (Backlog) and "resolved" (Done) keep their original
+// stored values so existing tickets and the WhatsApp intake need no migration.
+const OPEN_STATUSES = ['open', 'todo', 'in_progress', 'review', 'waiting_restaurant'];
 const VALID_STATUSES = [...OPEN_STATUSES, 'resolved'];
-const VALID_PRIORITIES = ['urgent', 'normal'];
+const VALID_PRIORITIES = ['urgent', 'high', 'normal', 'low'];
 const VALID_CATEGORIES = ['hardware', 'software', 'billing', 'network', 'question', 'other'];
+// Tickets created before the dev board have no type: they are support tickets.
+const VALID_TYPES = ['support', 'bug', 'feature', 'task'];
+const VALID_PROJECTS = [
+    'pos_web', 'pos_api', 'pos_app', 'dashboard', 'owner_web',
+    'consumer_app', 'consumer_api', 'mobile_order', 'statistic_api', 'other',
+];
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Today as YYYY-MM-DD in Laos time (dates are stored as plain date strings) */
+function todayLao(now = new Date()) {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Vientiane' }).format(now);
+}
+
+/**
+ * Validate the editable dev-board fields of a create/update body.
+ * Returns { fields, error } where fields holds only the keys present in body.
+ */
+function pickTaskFields(body = {}) {
+    const fields = {};
+    if ('type' in body) {
+        if (!VALID_TYPES.includes(body.type)) return { error: 'invalid type' };
+        fields.type = body.type;
+    }
+    if ('project' in body) {
+        if (body.project !== null && !VALID_PROJECTS.includes(body.project)) return { error: 'invalid project' };
+        fields.project = body.project || null;
+    }
+    if ('priority' in body) {
+        if (!VALID_PRIORITIES.includes(body.priority)) return { error: 'invalid priority' };
+        fields.priority = body.priority;
+    }
+    if ('category' in body) {
+        if (body.category !== null && !VALID_CATEGORIES.includes(body.category)) return { error: 'invalid category' };
+        fields.category = body.category || null;
+    }
+    for (const key of ['startDate', 'dueDate']) {
+        if (key in body) {
+            if (body[key] && !DATE_RE.test(body[key])) return { error: `invalid ${key}` };
+            fields[key] = body[key] || null;
+        }
+    }
+    if ('estimateHours' in body) {
+        const raw = body.estimateHours;
+        const n = raw === null || raw === '' ? null : Number(raw);
+        if (n !== null && (!Number.isFinite(n) || n < 0 || n > 1000)) return { error: 'invalid estimateHours' };
+        fields.estimateHours = n;
+    }
+    if ('subject' in body) {
+        if (!String(body.subject || '').trim()) return { error: 'subject is required' };
+        fields.subject = String(body.subject).trim();
+    }
+    if ('description' in body) fields.description = String(body.description || '');
+    return { fields };
+}
+
+/** Field-level diff for the activity log, skipping unchanged values */
+function diffTask(ticket, fields) {
+    return Object.entries(fields)
+        .filter(([k, v]) => (ticket[k] ?? null) !== (v ?? null))
+        .map(([field, to]) => ({ field, from: ticket[field] ?? null, to: to ?? null }));
+}
 
 /**
  * Generate a monthly-sequential ticket number, e.g. SUP-2607-014
@@ -40,18 +103,34 @@ function actorFrom(body) {
     };
 }
 
+/**
+ * Ranks for a manual reorder: the listed tickets reuse their own existing rank slots in
+ * the new order, so tickets hidden by the dashboard's filters keep their place; tickets
+ * with no rank get new slots after maxRank. Returns { [id]: rank }.
+ * Mirrors rankSlots in appzap_v2_dashboard app/utils/devBoard.js (its optimistic update).
+ */
+function rankSlots(ordered, maxRank = 0) {
+    const slots = ordered.map((t) => t.rank).filter((r) => typeof r === 'number').sort((a, b) => a - b);
+    let next = Math.max(maxRank, slots.length ? slots[slots.length - 1] : 0);
+    while (slots.length < ordered.length) {
+        next += 1000;
+        slots.push(next);
+    }
+    return Object.fromEntries(ordered.map((t, i) => [t._id, slots[i]]));
+}
+
 const supportController = {
     // ==================== TICKETS ====================
 
     /**
      * List tickets. Urgent tickets float to the top, then newest first.
-     * Query: status, category, priority, assignedTo (userId), restaurantId,
-     *        search, page, limit
+     * Query: status, category, priority, type, project, assignedTo (userId or
+     *        "none"), restaurantId, search, page, limit
      */
     getTickets: async (req, res, db) => {
         try {
             const {
-                status, category, priority, assignedTo, restaurantId, search,
+                status, category, priority, type, project, assignedTo, restaurantId, search,
                 page = 1, limit = 50,
             } = req.query;
 
@@ -59,30 +138,36 @@ const supportController = {
             if (status && status !== 'all') query.status = status;
             if (category && category !== 'all') query.category = category;
             if (priority && priority !== 'all') query.priority = priority;
-            if (assignedTo) query['assignedTo.userId'] = assignedTo;
+            if (type && type !== 'all') query.type = type === 'support' ? { $in: ['support', null] } : type;
+            if (project && project !== 'all') query.project = project;
+            if (assignedTo === 'none') query['assignedTo.userId'] = null;
+            else if (assignedTo) query['assignedTo.userId'] = assignedTo;
             if (restaurantId) query['restaurant.id'] = restaurantId;
             if (search) {
+                // Literal match: titles use "[Feature name]" prefixes, which are regex syntax
+                const pattern = String(search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 query.$or = [
-                    { ticketNumber: { $regex: search, $options: 'i' } },
-                    { subject: { $regex: search, $options: 'i' } },
-                    { 'restaurant.name': { $regex: search, $options: 'i' } },
+                    { ticketNumber: { $regex: pattern, $options: 'i' } },
+                    { subject: { $regex: pattern, $options: 'i' } },
+                    { 'restaurant.name': { $regex: pattern, $options: 'i' } },
                 ];
             }
 
-            const skip = (parseInt(page) - 1) * parseInt(limit);
+            const pageSize = Math.min(parseInt(limit) || 50, 1000);
+            const skip = (parseInt(page) - 1) * pageSize;
 
             const [tickets, total] = await Promise.all([
                 db.collection('supportTickets').aggregate([
                     { $match: query },
                     {
                         $addFields: {
-                            priorityRank: { $cond: [{ $eq: ['$priority', 'urgent'] }, 0, 1] },
+                            priorityRank: { $indexOfArray: [VALID_PRIORITIES, '$priority'] },
                             statusRank: { $cond: [{ $eq: ['$status', 'resolved'] }, 1, 0] },
                         },
                     },
                     { $sort: { statusRank: 1, priorityRank: 1, createdAt: -1 } },
                     { $skip: skip },
-                    { $limit: parseInt(limit) },
+                    { $limit: pageSize },
                     { $project: { priorityRank: 0, statusRank: 0 } },
                 ]).toArray(),
                 db.collection('supportTickets').countDocuments(query),
@@ -105,7 +190,7 @@ const supportController = {
             const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
             const col = db.collection('supportTickets');
-            const [urgentOpen, totalOpen, over24h, resolvedThisWeek, avgAgg] = await Promise.all([
+            const [urgentOpen, totalOpen, over24h, resolvedThisWeek, avgAgg, overdue, openBugs, untriagedSupport24h] = await Promise.all([
                 col.countDocuments({ status: { $in: OPEN_STATUSES }, priority: 'urgent' }),
                 col.countDocuments({ status: { $in: OPEN_STATUSES } }),
                 col.countDocuments({ status: { $in: OPEN_STATUSES }, createdAt: { $lt: dayAgo } }),
@@ -121,6 +206,10 @@ const supportController = {
                     },
                     { $group: { _id: null, avgMinutes: { $avg: '$minutes' } } },
                 ]).toArray(),
+                col.countDocuments({ status: { $in: OPEN_STATUSES }, dueDate: { $ne: null, $lt: todayLao(now) } }),
+                col.countDocuments({ status: { $in: OPEN_STATUSES }, type: 'bug' }),
+                // Team rule: a restaurant's support ticket must leave "New / Backlog" within 24h
+                col.countDocuments({ status: 'open', type: { $in: ['support', null] }, createdAt: { $lt: dayAgo } }),
             ]);
 
             res.json({
@@ -131,6 +220,9 @@ const supportController = {
                     over24h,
                     resolvedThisWeek,
                     avgResolutionMinutes: avgAgg[0]?.avgMinutes || 0,
+                    overdue,
+                    openBugs,
+                    untriagedSupport24h,
                 },
             });
         } catch (error) {
@@ -158,33 +250,47 @@ const supportController = {
     },
 
     /**
-     * Create a ticket (manual intake).
-     * Body: { restaurant: {id, posVersion, name, phone, whatsapp, province},
-     *         category, priority, subject, description, by: {userId, name} }
+     * Create a ticket (manual intake) or a dev task.
+     * Body: { type, restaurant: {id, posVersion, name, phone, whatsapp, province} | null,
+     *         category, priority, project, subject, description, startDate, dueDate,
+     *         estimateHours, assignedTo: {userId, name, role} | null, by: {userId, name} }
+     * Restaurant and category are required only for support tickets.
      */
     createTicket: async (req, res, db) => {
         try {
-            const { restaurant, category, priority, subject, description, attachments } = req.body;
+            const { restaurant, attachments, assignedTo } = req.body;
+            const { fields, error } = pickTaskFields({
+                type: 'support', priority: 'normal', project: null, category: null,
+                startDate: null, dueDate: null, estimateHours: null, description: '',
+                ...req.body,
+                subject: req.body.subject ?? '',
+            });
+            if (error) return res.status(400).json({ success: false, error });
 
-            if (!restaurant?.id || !restaurant?.name) {
+            const hasRestaurant = Boolean(restaurant?.id && restaurant?.name);
+            if (fields.type === 'support' && !hasRestaurant) {
                 return res.status(400).json({ success: false, error: 'restaurant is required' });
             }
-            if (!subject) {
-                return res.status(400).json({ success: false, error: 'subject is required' });
-            }
-            if (!VALID_CATEGORIES.includes(category)) {
+            if (fields.type === 'support' && !fields.category) {
                 return res.status(400).json({ success: false, error: 'invalid category' });
             }
-            if (!VALID_PRIORITIES.includes(priority)) {
-                return res.status(400).json({ success: false, error: 'invalid priority' });
+            if (fields.startDate && fields.dueDate && fields.startDate > fields.dueDate) {
+                return res.status(400).json({ success: false, error: 'startDate must be before dueDate' });
             }
 
             const by = actorFrom(req.body);
             const now = new Date();
+            const assignee = assignedTo?.name
+                ? { userId: assignedTo.userId || null, name: assignedTo.name, role: assignedTo.role || null }
+                : null;
+            const activity = [{ type: 'created', message: null, by, at: now }];
+            if (assignee) activity.push({ type: 'assign', from: null, to: assignee.name, by, at: now });
+
             const ticket = {
                 ticketNumber: await nextTicketNumber(db),
                 source: 'manual',
-                restaurant: {
+                ...fields,
+                restaurant: hasRestaurant ? {
                     id: String(restaurant.id),
                     posVersion: restaurant.posVersion || 'v2',
                     name: restaurant.name,
@@ -192,11 +298,7 @@ const supportController = {
                     whatsapp: restaurant.whatsapp || null,
                     province: restaurant.province || null,
                     logo: restaurant.logo || null,
-                },
-                category,
-                priority,
-                subject,
-                description: description || '',
+                } : null,
                 attachments: Array.isArray(attachments)
                     ? attachments
                         .filter((a) => a && typeof a.url === 'string')
@@ -207,8 +309,8 @@ const supportController = {
                         }))
                     : [],
                 status: 'open',
-                assignedTo: null,
-                activity: [{ type: 'created', message: null, by, at: now }],
+                assignedTo: assignee,
+                activity,
                 createdBy: by,
                 createdAt: now,
                 updatedAt: now,
@@ -219,6 +321,82 @@ const supportController = {
             res.status(201).json({ success: true, data: { ...ticket, _id: result.insertedId } });
         } catch (error) {
             console.error('[Support] Error creating ticket:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    },
+
+    /**
+     * Edit dev-board fields (type, project, priority, category, dates, estimate,
+     * subject, description). Each changed field is logged in the activity.
+     * Body: { ...fields, by }
+     */
+    updateTicket: async (req, res, db) => {
+        try {
+            const { fields, error } = pickTaskFields(req.body);
+            if (error) return res.status(400).json({ success: false, error });
+
+            const _id = new ObjectId(req.params.id);
+            const ticket = await db.collection('supportTickets').findOne({ _id });
+            if (!ticket) {
+                return res.status(404).json({ success: false, error: 'Ticket not found' });
+            }
+            const startDate = 'startDate' in fields ? fields.startDate : ticket.startDate;
+            const dueDate = 'dueDate' in fields ? fields.dueDate : ticket.dueDate;
+            if (startDate && dueDate && startDate > dueDate) {
+                return res.status(400).json({ success: false, error: 'startDate must be before dueDate' });
+            }
+
+            const changes = diffTask({ type: 'support', ...ticket }, fields);
+            if (changes.length === 0) return res.json({ success: true, data: ticket });
+
+            const by = actorFrom(req.body);
+            const now = new Date();
+            await db.collection('supportTickets').updateOne({ _id }, {
+                $set: { ...fields, updatedAt: now },
+                $push: { activity: { type: 'update', changes, by, at: now } },
+            });
+            const updated = await db.collection('supportTickets').findOne({ _id });
+            res.json({ success: true, data: updated });
+        } catch (error) {
+            console.error('[Support] Error updating ticket:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    },
+
+    /**
+     * Save a manual order (dragging rows in the Table). Body: { ids: [ticketId, ...] in
+     * the new order, by }. Only the listed tickets change; see rankSlots.
+     */
+    reorderTickets: async (req, res, db) => {
+        try {
+            const { ids } = req.body;
+            if (!Array.isArray(ids) || ids.length === 0 || ids.length > 1000
+                || !ids.every((id) => typeof id === 'string' && ObjectId.isValid(id))
+                || new Set(ids).size !== ids.length) {
+                return res.status(400).json({ success: false, error: 'ids must be a list of unique ticket ids' });
+            }
+
+            const col = db.collection('supportTickets');
+            const docs = await col
+                .find({ _id: { $in: ids.map((id) => new ObjectId(id)) } }, { projection: { rank: 1 } })
+                .toArray();
+            if (docs.length !== ids.length) {
+                return res.status(404).json({ success: false, error: 'Ticket not found' });
+            }
+            const rankById = Object.fromEntries(docs.map((d) => [String(d._id), d.rank]));
+            const [top] = await col
+                .find({ rank: { $type: 'number' } }, { projection: { rank: 1 } })
+                .sort({ rank: -1 })
+                .limit(1)
+                .toArray();
+
+            const slots = rankSlots(ids.map((id) => ({ _id: id, rank: rankById[id] })), top?.rank ?? 0);
+            await col.bulkWrite(ids.map((id) => ({
+                updateOne: { filter: { _id: new ObjectId(id) }, update: { $set: { rank: slots[id] } } },
+            })));
+            res.json({ success: true, data: ids.map((id) => ({ _id: id, rank: slots[id] })) });
+        } catch (error) {
+            console.error('[Support] Error reordering tickets:', error);
             res.status(500).json({ success: false, error: error.message });
         }
     },
@@ -423,3 +601,7 @@ const supportController = {
 
 module.exports = supportController;
 module.exports.nextTicketNumber = nextTicketNumber;
+module.exports.pickTaskFields = pickTaskFields;
+module.exports.diffTask = diffTask;
+module.exports.rankSlots = rankSlots;
+module.exports.OPEN_STATUSES = OPEN_STATUSES;

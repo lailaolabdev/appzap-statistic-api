@@ -56,6 +56,11 @@ module.exports = (db) => {
         supportController.getTicketById(req, res, db));
     router.post('/tickets', (req, res) =>
         supportController.createTicket(req, res, db));
+    // Manual order (must be registered before /tickets/:id)
+    router.patch('/tickets/reorder', (req, res) =>
+        supportController.reorderTickets(req, res, db));
+    router.patch('/tickets/:id', (req, res) =>
+        supportController.updateTicket(req, res, db));
     router.patch('/tickets/:id/status', (req, res) =>
         supportController.updateStatus(req, res, db));
     router.patch('/tickets/:id/assign', (req, res) =>
